@@ -1,110 +1,425 @@
-/* =============================================
-   全体
-============================================= */
+/* =========================================
+   VEIL 53
+   Dark / Minimal / Mystery UI
+========================================= */
+
+
+/* =========================================
+   RESET
+========================================= */
 
 * {
     box-sizing: border-box;
 }
 
+html {
+    min-height: 100%;
+}
+
 body {
     margin: 0;
-
     min-height: 100vh;
 
     font-family:
-        Arial,
+        "Segoe UI",
+        "Yu Gothic UI",
         "Yu Gothic",
+        "Meiryo",
         sans-serif;
 
-    background: #f3f4f6;
+    color: #f5f5f8;
 
-    display: flex;
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            #25243a 0%,
+            #12111b 30%,
+            #09090e 58%,
+            #050507 100%
+        );
 
-    justify-content: center;
-
-    align-items: flex-start;
-
-    padding: 30px 12px;
+    background-attachment: fixed;
 }
 
+
+/* =========================================
+   BACKGROUND EFFECT
+========================================= */
+
+body::before {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        42px 42px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.55),
+            transparent 80%
+        );
+}
+
+
+/* =========================================
+   MAIN CONTAINER
+========================================= */
 
 .game-container {
-    width: min(94%, 850px);
+    position: relative;
+    z-index: 1;
 
-    background: white;
+    width:
+        min(
+            1100px,
+            calc(100% - 32px)
+        );
 
-    padding: 32px;
+    margin:
+        0 auto;
 
-    border-radius: 18px;
-
-    box-shadow:
-        0 8px 24px
-        rgba(0, 0, 0, 0.12);
-
-    text-align: center;
+    padding:
+        36px 0 60px;
 }
 
 
-/* =============================================
-   タイトル
-============================================= */
-
-.game-header h1 {
-    margin-top: 0;
-
-    margin-bottom: 8px;
-
-    font-size: 36px;
-}
-
-
-.subtitle {
-    margin-top: 0;
-
-    margin-bottom: 30px;
-
-    font-size: 18px;
-}
-
-
-/* =============================================
-   共通
-============================================= */
-
-.screen {
-    width: 100%;
-}
-
+/* =========================================
+   HIDDEN
+========================================= */
 
 .hidden {
     display: none !important;
 }
 
 
-/* =============================================
-   ルーム画面
-============================================= */
+/* =========================================
+   HEADER
+========================================= */
 
-.panel {
+.game-header {
     display: flex;
+    justify-content: center;
+    align-items: center;
 
-    flex-direction: column;
+    gap: 18px;
 
-    gap: 12px;
+    margin-bottom: 38px;
 
-    width: 100%;
+    padding:
+        20px 10px 26px;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.075);
 }
 
 
-.panel h2 {
-    margin-bottom: 6px;
+.brand-mark {
+    width: 62px;
+    height: 62px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border:
+        1px solid
+        rgba(154, 137, 255, 0.52);
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(134, 111, 255, 0.23),
+            rgba(255, 255, 255, 0.025)
+        );
+
+    box-shadow:
+        0 0 32px
+        rgba(111, 91, 255, 0.18),
+        inset 0 0 22px
+        rgba(255, 255, 255, 0.025);
+
+    color: #d6d0ff;
+
+    font-size: 15px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
 }
 
+
+.brand-text {
+    text-align: left;
+}
+
+
+.game-header h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size:
+        clamp(
+            33px,
+            6vw,
+            54px
+        );
+
+    font-weight: 800;
+
+    letter-spacing: 8px;
+
+    line-height: 1;
+
+    text-shadow:
+        0 0 30px
+        rgba(155, 140, 255, 0.17);
+}
+
+
+.subtitle {
+    margin:
+        9px 0 0;
+
+    color: #858494;
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
+}
+
+
+/* =========================================
+   COMMON PANEL
+========================================= */
+
+.panel,
+.hand-section,
+.status-section,
+.question-section,
+.guess-section,
+.guess-result-section,
+.game-over-section {
+    position: relative;
+
+    overflow: hidden;
+
+    margin-top: 22px;
+
+    padding: 26px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.055),
+            rgba(255, 255, 255, 0.014)
+        );
+
+    backdrop-filter: blur(13px);
+
+    box-shadow:
+        0 20px 55px
+        rgba(0, 0, 0, 0.34);
+}
+
+
+.panel::before,
+.hand-section::before,
+.question-section::before,
+.guess-section::before,
+.guess-result-section::before,
+.game-over-section::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 28px;
+    right: 28px;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(155, 139, 255, 0.72),
+            transparent
+        );
+}
+
+
+/* =========================================
+   SECTION HEADING
+========================================= */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+}
+
+
+.section-number {
+    min-width: 42px;
+
+    margin: 0;
+
+    color: #8277ca;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+.section-heading h2 {
+    margin: 0;
+
+    color: #f7f7fa;
+
+    font-size: 21px;
+    font-weight: 750;
+
+    letter-spacing: 2px;
+}
+
+
+.section-jp {
+    margin:
+        5px 0 0;
+
+    color: #747482;
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+}
+
+
+.panel-description,
+.question-description,
+.guess-description {
+    margin:
+        0 0 22px;
+
+    color: #91919d;
+
+    font-size: 14px;
+
+    line-height: 1.8;
+}
+
+
+/* =========================================
+   ROOM SCREEN
+========================================= */
+
+.room-screen {
+    max-width: 680px;
+
+    margin:
+        0 auto;
+}
+
+
+.room-panel {
+    padding:
+        30px;
+}
+
+
+.separator {
+    position: relative;
+
+    margin:
+        24px 0;
+
+    text-align: center;
+}
+
+
+.separator::before {
+    content: "";
+
+    position: absolute;
+
+    top: 50%;
+    left: 0;
+    right: 0;
+
+    height: 1px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+}
+
+
+.separator span {
+    position: relative;
+
+    display: inline-block;
+
+    padding:
+        0 14px;
+
+    background:
+        #0c0c12;
+
+    color: #51515e;
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
+}
+
+
+/* =========================================
+   INPUTS
+========================================= */
 
 label {
-    font-weight: bold;
+    display: block;
 
-    font-size: 17px;
+    margin-bottom: 8px;
+
+    color: #9998a8;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
 }
 
 
@@ -112,322 +427,503 @@ input,
 select {
     width: 100%;
 
-    padding: 14px;
+    min-height: 50px;
 
-    border: 1px solid #aaa;
+    padding:
+        0 14px;
 
-    border-radius: 8px;
+    border:
+        1px solid
+        #30303a;
 
-    font-size: 20px;
+    border-radius: 10px;
+
+    outline: none;
+
+    background:
+        #0c0c11;
+
+    color:
+        #f3f3f7;
+
+    font-size: 15px;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+
+input::placeholder {
+    color: #565661;
+}
+
+
+input:focus,
+select:focus {
+    border-color:
+        #8575e6;
+
+    background:
+        #111119;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(133, 117, 230, 0.11);
+}
+
+
+input:disabled,
+select:disabled {
+    opacity: 0.38;
+
+    cursor: not-allowed;
+}
+
+
+.room-id-input {
+    text-transform: uppercase;
 
     text-align: center;
 
-    background: white;
+    font-size: 25px;
+
+    font-weight: 800;
+
+    letter-spacing: 8px;
 }
 
 
-#room-id {
-    text-transform: uppercase;
-
-    letter-spacing: 3px;
-
-    font-weight: bold;
-}
-
+/* =========================================
+   BUTTON COMMON
+========================================= */
 
 button {
-    padding: 14px 20px;
+    min-height: 50px;
 
-    border: 0;
+    padding:
+        12px 18px;
 
-    border-radius: 8px;
+    border:
+        1px solid
+        #34343f;
 
-    font-size: 17px;
+    border-radius: 10px;
 
     cursor: pointer;
 
+    background:
+        linear-gradient(
+            180deg,
+            #1d1d26,
+            #121218
+        );
+
+    color:
+        #ededf3;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
     transition:
-        transform 0.1s,
-        opacity 0.1s,
-        box-shadow 0.1s,
-        background 0.1s;
+        transform 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
 }
 
 
-button:hover {
-    opacity: 0.85;
+button:hover:not(:disabled) {
+    transform:
+        translateY(-2px);
+
+    border-color:
+        #7769d0;
+
+    background:
+        linear-gradient(
+            180deg,
+            #29283b,
+            #181720
+        );
+
+    box-shadow:
+        0 10px 28px
+        rgba(93, 76, 205, 0.16);
 }
 
 
-button:active {
-    transform: translateY(1px);
+button:active:not(:disabled) {
+    transform:
+        translateY(0);
 }
 
 
 button:disabled {
+    opacity: 0.34;
+
     cursor: not-allowed;
-
-    opacity: 0.45;
 }
 
 
-.separator {
-    margin: 28px 0;
+/* =========================================
+   PRIMARY BUTTON
+========================================= */
 
-    color: #666;
+.primary-button {
+    width: 100%;
+
+    margin-top: 15px;
+
+    border-color:
+        #6b5bc9;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6552d4,
+            #44339d
+        );
+
+    color: #ffffff;
+
+    box-shadow:
+        0 12px 28px
+        rgba(86, 67, 195, 0.2);
 }
 
 
-/* =============================================
-   ゲーム情報
-============================================= */
+.primary-button:hover:not(:disabled) {
+    border-color:
+        #927fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7662e8,
+            #5340b6
+        );
+
+    box-shadow:
+        0 14px 36px
+        rgba(101, 79, 230, 0.3);
+}
+
+
+/* =========================================
+   GAME INFO
+========================================= */
 
 .game-info {
     display: flex;
+    justify-content: space-between;
 
-    justify-content: center;
+    gap: 12px;
 
-    gap: 24px;
-
-    flex-wrap: wrap;
-
-    margin-bottom: 26px;
-
-    font-weight: bold;
-
-    font-size: 18px;
+    margin-bottom: 18px;
 }
 
 
 .game-info p {
     margin: 0;
 
-    padding: 8px 14px;
+    padding:
+        9px 15px;
 
-    background: #f3f4f6;
+    border:
+        1px solid
+        #292933;
 
-    border-radius: 8px;
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    color: #9796a5;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
 }
 
 
-/* =============================================
-   自分の手札
-============================================= */
-
-.hand-section {
-    margin-top: 10px;
-}
-
-
-.hand-section h2 {
-    margin-bottom: 24px;
-
-    font-size: 26px;
-}
-
-
-.hand-container {
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 18px;
-
-    flex-wrap: wrap;
-
-    min-height: 250px;
-
-    padding: 20px 10px;
-}
-
-
-/* =============================================
-   カード
-============================================= */
-
-.playing-card {
-    position: relative;
-
-    width: 150px;
-
-    height: 215px;
-
-    background: white;
-
-    border: 2px solid #222;
-
-    border-radius: 12px;
-
-    box-shadow:
-        0 6px 14px
-        rgba(0, 0, 0, 0.18);
-
-    user-select: none;
-
-    flex-shrink: 0;
-}
-
-
-.card-corner {
-    position: absolute;
-
-    top: 10px;
-
-    left: 12px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    line-height: 1;
-
-    font-size: 25px;
-
-    font-weight: bold;
-}
-
-
-.card-bottom {
-    top: auto;
-
-    left: auto;
-
-    right: 12px;
-
-    bottom: 10px;
-
-    transform: rotate(180deg);
-}
-
-
-.card-center {
-    position: absolute;
-
-    top: 50%;
-
-    left: 50%;
-
-    transform:
-        translate(-50%, -50%);
-
-    font-size: 62px;
-
-    font-weight: bold;
-}
-
-
-.card-red {
-    color: #d11a2a;
-}
-
-
-.card-black {
-    color: #111;
-}
-
-
-.joker-card {
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    font-size: 30px;
-
-    font-weight: bold;
-
-    letter-spacing: 2px;
-}
-
-
-/* =============================================
-   状態表示
-============================================= */
+/* =========================================
+   STATUS
+========================================= */
 
 .status-section {
-    margin-top: 28px;
+    text-align: center;
 
-    padding: 18px;
+    padding:
+        22px;
+}
 
-    background: #f3f4f6;
 
-    border-radius: 10px;
+.status-label {
+    margin:
+        0 0 9px;
+
+    color:
+        #686875;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        3px;
 }
 
 
 #game-status {
     margin: 0;
 
-    font-size: 20px;
+    color:
+        #dedaff;
 
-    font-weight: bold;
+    font-size:
+        18px;
+
+    font-weight:
+        750;
 }
 
 
-/* =============================================
-   質問エリア
-============================================= */
+/* =========================================
+   HAND
+========================================= */
 
-.question-section {
-    margin-top: 34px;
+.hand-container {
+    display: flex;
 
-    padding: 26px;
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 18px;
+
+    margin-top: 20px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.playing-card {
+    position: relative;
+
+    width: 150px;
+    height: 215px;
+
+    overflow: hidden;
 
     border:
-        2px solid #e1e3e6;
+        1px solid
+        #373741;
 
     border-radius: 14px;
 
-    background: #fafafa;
+    background:
+        linear-gradient(
+            145deg,
+            #f5f5f6,
+            #d6d6db
+        );
+
+    color:
+        #111116;
+
+    box-shadow:
+        0 17px 35px
+        rgba(0, 0, 0, 0.42);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 
-.question-section h2 {
-    margin-top: 0;
+.playing-card::after {
+    content: "";
 
-    margin-bottom: 8px;
+    position: absolute;
 
-    font-size: 27px;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 45%;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        );
 }
 
 
-.question-description {
-    margin-top: 0;
+.playing-card:hover {
+    transform:
+        translateY(-7px);
 
-    margin-bottom: 28px;
-
-    color: #555;
-
-    line-height: 1.6;
+    box-shadow:
+        0 24px 48px
+        rgba(0, 0, 0, 0.52);
 }
 
+
+.card-red {
+    color:
+        #a21f39;
+}
+
+
+.card-black {
+    color:
+        #111116;
+}
+
+
+.card-corner {
+    position: absolute;
+
+    z-index: 2;
+
+    top: 12px;
+    left: 12px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+    font-size: 21px;
+
+    font-weight: 800;
+
+    line-height: 0.95;
+}
+
+
+.card-bottom {
+    top: auto;
+    left: auto;
+
+    right: 12px;
+    bottom: 12px;
+
+    transform:
+        rotate(180deg);
+}
+
+
+.card-center {
+    position: absolute;
+
+    z-index: 2;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 69px;
+}
+
+
+/* =========================================
+   JOKER CARD
+========================================= */
+
+.joker-card {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    border-color:
+        #6e59d0;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #29243f 0%,
+            #161421 48%,
+            #0b0b10 100%
+        );
+
+    color:
+        #cec6ff;
+
+    font-size:
+        27px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        4px;
+
+    text-shadow:
+        0 0 22px
+        rgba(160, 141, 255, 0.52);
+
+    box-shadow:
+        0 18px 45px
+        rgba(75, 58, 160, 0.26);
+}
+
+
+.joker-card::after {
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(172, 153, 255, 0.2),
+            transparent 65%
+        );
+}
+
+
+/* =========================================
+   QUESTION
+========================================= */
 
 .question-group {
-    margin-top: 30px;
-}
-
-
-.question-group:first-of-type {
-    margin-top: 0;
+    margin-top: 28px;
 }
 
 
 .question-group h3 {
-    margin: 0 0 14px;
+    margin:
+        0 0 13px;
 
-    padding-bottom: 7px;
+    color:
+        #777686;
 
-    border-bottom:
-        1px solid #ddd;
+    font-size:
+        10px;
 
-    font-size: 18px;
+    font-weight:
+        800;
 
-    text-align: left;
+    letter-spacing:
+        2px;
 }
 
 
@@ -435,162 +931,70 @@ button:disabled {
     display: grid;
 
     grid-template-columns:
-        repeat(3, 1fr);
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
 
     gap: 12px;
 }
 
 
-/* =============================================
-   質問ボタン
-============================================= */
-
 .question-button {
-    min-height: 62px;
-
-    padding: 12px 10px;
-
-    background: white;
-
-    border: 2px solid #333;
-
-    border-radius: 10px;
-
-    font-size: 16px;
-
-    font-weight: bold;
-
-    line-height: 1.4;
-
-    color: #111;
+    min-height: 58px;
 }
 
-
-.question-button:hover:not(:disabled) {
-    opacity: 1;
-
-    background: #f0f0f0;
-
-    box-shadow:
-        0 3px 8px
-        rgba(0, 0, 0, 0.12);
-}
-
-
-/* =============================================
-   ランク・数字指定質問
-============================================= */
 
 .parameter-question {
     display: grid;
 
     grid-template-columns:
-        180px 1fr;
-
-    gap: 14px;
+        1fr 1fr;
 
     align-items: end;
 
-    margin-bottom: 16px;
+    gap: 12px;
 
-    padding: 16px;
-
-    background: white;
-
-    border:
-        1px solid #ddd;
-
-    border-radius: 10px;
+    margin-top: 14px;
 }
 
 
 .question-input-area {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 7px;
-
-    text-align: left;
-}
-
-
-.question-input-label {
-    font-size: 14px;
-
-    color: #444;
-}
-
-
-.question-value-input {
     width: 100%;
-
-    min-height: 52px;
-
-    padding: 10px 12px;
-
-    border:
-        2px solid #aaa;
-
-    border-radius: 8px;
-
-    background: white;
-
-    font-size: 19px;
-
-    font-weight: bold;
-
-    text-align: center;
-}
-
-
-.question-value-input:focus {
-    outline: none;
-
-    border-color: #333;
-
-    box-shadow:
-        0 0 0 2px
-        rgba(0, 0, 0, 0.08);
-}
-
-
-.number-input {
-    text-align: center;
 }
 
 
 .parameter-button {
-    width: 100%;
-
-    min-height: 52px;
+    margin: 0;
 }
 
 
-.number-help {
-    margin: 8px 0 0;
+.number-help,
+.guess-help {
+    margin:
+        12px 0 0;
 
-    padding: 10px 14px;
+    color:
+        #62616e;
 
-    background: #f0f0f0;
+    font-size:
+        11px;
 
-    border-radius: 8px;
-
-    color: #555;
-
-    font-size: 14px;
-
-    line-height: 1.6;
+    line-height:
+        1.7;
 }
 
 
-/* =============================================
-   スート質問
-============================================= */
+/* =========================================
+   SUIT QUESTIONS
+========================================= */
 
 .suit-grid {
     grid-template-columns:
-        repeat(2, 1fr);
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
 }
 
 
@@ -598,364 +1002,315 @@ button:disabled {
     display: flex;
 
     justify-content: center;
-
     align-items: center;
 
-    gap: 10px;
+    gap: 8px;
 }
 
 
 .question-suit-symbol {
-    font-size: 28px;
-
-    line-height: 1;
+    font-size:
+        23px;
 }
 
 
 .red-suit {
-    color: #d11a2a;
-
-    border-color: #d11a2a;
+    color:
+        #f27487;
 }
 
 
 .black-suit {
-    color: #111;
+    color:
+        #e4e4e9;
 }
 
 
-/* =============================================
-   Joker質問
-============================================= */
-
 .joker-grid {
-    grid-template-columns: 1fr;
+    display: grid;
+
+    grid-template-columns:
+        1fr;
 }
 
 
 .joker-question-button {
-    max-width: 360px;
+    border-color:
+        #6556bb;
 
-    width: 100%;
+    color:
+        #cdc6ff;
 
-    justify-self: center;
-
-    font-size: 18px;
-
-    letter-spacing: 1px;
-
-    border-width: 3px;
+    background:
+        linear-gradient(
+            180deg,
+            #242033,
+            #15131e
+        );
 }
 
 
-/* =============================================
-   カード予想
-============================================= */
+/* =========================================
+   GUESS
+========================================= */
 
 .guess-section {
-    margin-top: 34px;
+    max-width:
+        700px;
 
-    padding: 26px;
+    margin-left:
+        auto;
 
-    border: 2px solid #333;
-
-    border-radius: 14px;
-
-    background: #fafafa;
-}
-
-
-.guess-section h2 {
-    margin-top: 0;
-
-    margin-bottom: 8px;
-
-    font-size: 27px;
-}
-
-
-.guess-description {
-    margin-top: 0;
-
-    margin-bottom: 22px;
-
-    color: #555;
-
-    line-height: 1.6;
-}
-
-
-.found-count {
-    margin: 0 0 24px;
-
-    padding: 12px;
-
-    border-radius: 10px;
-
-    background: #eceff1;
-
-    font-size: 20px;
-
-    font-weight: bold;
+    margin-right:
+        auto;
 }
 
 
 .guess-input-group {
-    max-width: 430px;
-
-    margin: 0 auto 18px;
-
-    text-align: left;
+    margin-top:
+        18px;
 }
 
 
-.guess-label {
-    display: block;
+.found-count {
+    margin:
+        18px 0;
 
-    margin-bottom: 8px;
+    padding:
+        13px;
 
-    font-size: 16px;
+    border:
+        1px solid
+        #2d2c38;
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    color:
+        #c8c4e6;
+
+    text-align:
+        center;
+
+    font-weight:
+        750;
 }
 
 
-.guess-select {
-    width: 100%;
-
-    min-height: 54px;
-
-    padding: 10px 14px;
-
-    border: 2px solid #888;
-
-    border-radius: 9px;
-
-    background: white;
-
-    font-size: 19px;
-
-    font-weight: bold;
-
-    text-align: center;
-}
-
-
-.guess-select:focus {
-    outline: none;
-
-    border-color: #222;
-}
-
-
-.guess-select:disabled {
-    background: #ddd;
-
-    color: #777;
-
-    cursor: not-allowed;
-}
-
-
-.guess-help {
-    max-width: 430px;
-
-    margin: 8px auto 20px;
-
-    padding: 10px;
-
-    background: #eee;
-
-    border-radius: 8px;
-
-    color: #555;
-
-    font-size: 14px;
-}
-
-
-.guess-card-button {
-    width: min(100%, 430px);
-
-    min-height: 58px;
-
-    margin-top: 6px;
-
-    background: #222;
-
-    color: white;
-
-    font-weight: bold;
-
-    font-size: 18px;
-}
-
-
-.guess-card-button:hover:not(:disabled) {
-    opacity: 1;
-
-    background: #444;
-}
-
-
-/* =============================================
-   予想結果
-============================================= */
+/* =========================================
+   RESULT
+========================================= */
 
 .guess-result-section {
-    margin-top: 34px;
+    max-width:
+        700px;
 
-    padding: 28px;
+    margin-left:
+        auto;
 
-    border: 2px solid #333;
+    margin-right:
+        auto;
 
-    border-radius: 14px;
-
-    background: #fafafa;
+    text-align:
+        center;
 }
 
 
 .guess-result-section h2 {
-    margin-top: 0;
+    margin:
+        0 0 24px;
 
-    margin-bottom: 10px;
+    color:
+        #f1f0f8;
 
-    font-size: 27px;
+    font-size:
+        23px;
+
+    letter-spacing:
+        3px;
 }
 
 
 .guess-result-text {
-    margin: 24px 0;
+    margin:
+        20px 0;
 
-    font-size: 28px;
+    color:
+        #e9e6ff;
 
-    font-weight: bold;
+    font-size:
+        25px;
 
-    white-space: pre-line;
+    font-weight:
+        800;
 
-    line-height: 1.6;
+    line-height:
+        1.6;
+
+    white-space:
+        pre-line;
 }
 
 
 .guess-result-count {
-    max-width: 430px;
+    color:
+        #9a98aa;
 
-    margin: 20px auto;
-
-    padding: 12px;
-
-    border-radius: 10px;
-
-    background: #eceff1;
-
-    font-size: 20px;
-
-    font-weight: bold;
+    font-size:
+        14px;
 }
 
 
-.next-turn-button {
-    width: min(100%, 430px);
-
-    min-height: 58px;
-
-    margin-top: 10px;
-
-    background: #222;
-
-    color: white;
-
-    font-size: 18px;
-
-    font-weight: bold;
-}
-
-
-.next-turn-button:hover:not(:disabled) {
-    opacity: 1;
-
-    background: #444;
-}
-
-
-/* =============================================
-   ゲーム終了画面
-============================================= */
+/* =========================================
+   GAME OVER
+========================================= */
 
 .game-over-section {
-    margin-top: 34px;
+    text-align:
+        center;
 
-    padding: 30px;
-
-    border: 3px solid #222;
-
-    border-radius: 16px;
-
-    background: #fafafa;
-
-    box-shadow:
-        0 8px 20px
-        rgba(0, 0, 0, 0.08);
+    border-color:
+        rgba(
+            117,
+            95,
+            213,
+            0.42
+        );
 }
 
 
 .game-over-title {
-    margin: 0 0 12px;
+    margin:
+        5px 0 8px;
 
-    font-size: 36px;
+    color:
+        #e4e0ff;
 
-    font-weight: bold;
+    font-size:
+        clamp(
+            35px,
+            7vw,
+            50px
+        );
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        7px;
+
+    text-shadow:
+        0 0 32px
+        rgba(134, 110, 255, 0.32);
 }
 
 
 .game-over-message {
-    margin: 0 0 30px;
+    margin:
+        0 0 32px;
 
-    font-size: 22px;
+    color:
+        #aaa7bb;
 
-    font-weight: bold;
-
-    line-height: 1.6;
+    font-size:
+        19px;
 }
 
-
-/* =============================================
-   公開されたPlayer手札
-============================================= */
 
 .revealed-player {
-    margin-top: 30px;
+    margin-top:
+        26px;
 
-    padding: 20px;
-
-    background: white;
+    padding:
+        20px;
 
     border:
-        1px solid #ddd;
+        1px solid
+        #292933;
 
-    border-radius: 12px;
+    border-radius:
+        14px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.018
+        );
 }
 
 
-.revealed-player h3 {
-    margin-top: 0;
+.revealed-player-title {
+    display: flex;
 
-    margin-bottom: 18px;
+    justify-content: center;
+    align-items: center;
 
-    font-size: 22px;
+    gap: 10px;
+
+    margin-bottom:
+        8px;
+}
+
+
+.revealed-player-title h3 {
+    margin: 0;
+
+    color:
+        #aaa8b8;
+
+    font-size:
+        13px;
+
+    letter-spacing:
+        2px;
+}
+
+
+.player-chip {
+    display: inline-flex;
+
+    justify-content: center;
+    align-items: center;
+
+    width: 32px;
+    height: 24px;
+
+    border:
+        1px solid
+        #554b92;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(
+            103,
+            82,
+            203,
+            0.12
+        );
+
+    color:
+        #bcb3ff;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
 }
 
 
 .revealed-hand {
-    min-height: 230px;
-
-    padding-top: 10px;
-
-    padding-bottom: 10px;
+    min-height:
+        215px;
 }
 
-
-/* =============================================
-   ゲーム終了ボタン
-============================================= */
 
 .game-over-buttons {
     display: flex;
@@ -964,360 +1319,418 @@ button:disabled {
 
     gap: 14px;
 
-    margin-top: 30px;
-
-    flex-wrap: wrap;
+    margin-top:
+        30px;
 }
 
 
-.rematch-button,
-.leave-game-button {
-    width: 220px;
-
-    min-height: 56px;
-
-    font-size: 18px;
-
-    font-weight: bold;
+.game-over-buttons button {
+    width:
+        220px;
 }
 
 
 .rematch-button {
-    background: #222;
-
-    color: white;
-}
-
-
-.rematch-button:hover:not(:disabled) {
-    opacity: 1;
-
-    background: #444;
+    margin-top: 0;
 }
 
 
 .leave-game-button {
-    background: #ddd;
+    border-color:
+        #3f3f49;
 
-    color: #111;
+    background:
+        #141419;
+
+    color:
+        #aaaab3;
 }
 
 
 .leave-game-button:hover:not(:disabled) {
-    opacity: 1;
+    border-color:
+        #696977;
 
-    background: #ccc;
+    background:
+        #1c1c22;
 }
 
 
-/* =============================================
-   メッセージ
-============================================= */
+/* =========================================
+   SYSTEM MESSAGE
+========================================= */
 
-#message {
-    margin-top: 28px;
+.system-message {
+    max-width:
+        760px;
 
-    min-height: 24px;
+    margin:
+        26px auto 0;
 
-    padding: 8px;
+    padding:
+        14px 16px;
 
-    white-space: pre-line;
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.04
+        );
 
-    font-size: 16px;
+    border-radius:
+        10px;
 
-    line-height: 1.7;
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.012
+        );
+
+    color:
+        #858491;
+
+    text-align:
+        center;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.7;
+
+    white-space:
+        pre-line;
 }
 
 
-/* =============================================
-   スマホ・小さい画面
-============================================= */
+/* =========================================
+   FOOTER
+========================================= */
 
-@media (max-width: 600px) {
+.game-footer {
+    display: flex;
 
-    body {
-        padding: 14px 8px;
+    justify-content: center;
+    align-items: center;
+
+    gap: 9px;
+
+    margin-top:
+        38px;
+
+    color:
+        #3f3f49;
+
+    font-size:
+        9px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        2px;
+}
+
+
+.footer-dot {
+    color:
+        #675ab0;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (
+    max-width: 700px
+) {
+
+    .game-container {
+        width:
+            calc(100% - 20px);
+
+        padding:
+            18px 0 42px;
     }
 
 
-    .game-container {
-        width: 100%;
+    /* HEADER */
 
-        padding: 22px 12px;
+    .game-header {
+        justify-content:
+            flex-start;
 
-        border-radius: 14px;
+        gap:
+            12px;
+
+        margin-bottom:
+            24px;
+
+        padding:
+            15px 6px 20px;
+    }
+
+
+    .brand-mark {
+        width:
+            48px;
+
+        height:
+            48px;
+
+        border-radius:
+            12px;
+
+        font-size:
+            12px;
     }
 
 
     .game-header h1 {
-        font-size: 30px;
+        font-size:
+            29px;
+
+        letter-spacing:
+            5px;
     }
 
 
     .subtitle {
-        margin-bottom: 22px;
+        margin-top:
+            7px;
 
-        font-size: 16px;
+        font-size:
+            8px;
+
+        letter-spacing:
+            1.7px;
     }
 
 
-    /* =========================================
-       ゲーム情報
-    ========================================= */
+    /* PANELS */
 
-    .game-info {
-        gap: 8px;
-
-        font-size: 15px;
-    }
-
-
-    /* =========================================
-       手札
-    ========================================= */
-
-    .hand-section h2 {
-        font-size: 22px;
-    }
-
-
-    .hand-container {
-        gap: 8px;
-
-        padding: 12px 0;
-
-        min-height: 190px;
-
-        flex-wrap: nowrap;
-    }
-
-
-    /* =========================================
-       カード
-    ========================================= */
-
-    .playing-card {
-        width: 100px;
-
-        height: 145px;
-
-        border-radius: 9px;
-    }
-
-
-    .card-corner {
-        top: 7px;
-
-        left: 8px;
-
-        font-size: 18px;
-    }
-
-
-    .card-bottom {
-        top: auto;
-
-        left: auto;
-
-        right: 8px;
-
-        bottom: 7px;
-    }
-
-
-    .card-center {
-        font-size: 40px;
-    }
-
-
-    .joker-card {
-        font-size: 20px;
-    }
-
-
-    /* =========================================
-       各ゲームパネル
-    ========================================= */
-
+    .panel,
+    .hand-section,
+    .status-section,
     .question-section,
     .guess-section,
     .guess-result-section,
     .game-over-section {
-        margin-top: 24px;
+        padding:
+            18px;
 
-        padding: 20px 12px;
+        border-radius:
+            14px;
     }
 
 
-    .question-section h2,
-    .guess-section h2,
-    .guess-result-section h2 {
-        font-size: 23px;
+    .room-panel {
+        padding:
+            21px 18px;
     }
 
 
-    /* =========================================
-       質問
-    ========================================= */
+    /* INFO */
 
-    .question-grid {
-        grid-template-columns: 1fr;
+    .game-info {
+        flex-direction:
+            column;
+
+        gap:
+            8px;
     }
 
 
+    .game-info p {
+        text-align:
+            center;
+    }
+
+
+    /* QUESTION */
+
+    .question-grid,
     .suit-grid {
         grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-
-    .question-button {
-        min-height: 56px;
-
-        font-size: 15px;
-    }
-
-
-    .question-suit-symbol {
-        font-size: 24px;
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
     }
 
 
     .parameter-question {
-        grid-template-columns: 1fr;
-
-        gap: 10px;
-
-        padding: 14px;
+        grid-template-columns:
+            1fr;
     }
 
 
-    .question-input-area {
-        text-align: center;
-    }
+    /* CARDS */
 
-
-    .question-value-input {
-        min-height: 48px;
-
-        font-size: 18px;
-    }
-
-
-    .parameter-button {
-        min-height: 52px;
-    }
-
-
-    /* =========================================
-       予想
-    ========================================= */
-
-    .guess-input-group {
-        width: 100%;
-    }
-
-
-    .guess-card-button,
-    .next-turn-button {
-        width: 100%;
-    }
-
-
-    .guess-result-text {
-        font-size: 24px;
-    }
-
-
-    /* =========================================
-       勝敗画面
-    ========================================= */
-
-    .game-over-title {
-        font-size: 30px;
-    }
-
-
-    .game-over-message {
-        font-size: 19px;
-    }
-
-
-    .revealed-player {
-        margin-top: 20px;
-
-        padding: 14px 6px;
-    }
-
-
-    .revealed-player h3 {
-        font-size: 19px;
-    }
-
-
-    .revealed-hand {
-        min-height: 170px;
-    }
-
-
-    .game-over-buttons {
-        flex-direction: column;
-    }
-
-
-    .rematch-button,
-    .leave-game-button {
-        width: 100%;
-    }
-
-
-    #message {
-        font-size: 14px;
-    }
-}
-
-
-/* =============================================
-   かなり小さいスマホ
-============================================= */
-
-@media (max-width: 380px) {
-
-    .game-container {
-        padding-left: 8px;
-
-        padding-right: 8px;
+    .hand-container {
+        gap:
+            10px;
     }
 
 
     .playing-card {
-        width: 90px;
+        width:
+            100px;
 
-        height: 132px;
+        height:
+            145px;
+
+        border-radius:
+            10px;
     }
 
 
     .card-center {
-        font-size: 36px;
+        font-size:
+            46px;
     }
 
 
     .card-corner {
-        font-size: 16px;
+        top:
+            8px;
+
+        left:
+            8px;
+
+        font-size:
+            15px;
     }
 
 
-    .question-section,
-    .guess-section,
-    .guess-result-section,
-    .game-over-section {
-        padding-left: 8px;
+    .card-bottom {
+        top:
+            auto;
 
-        padding-right: 8px;
+        left:
+            auto;
+
+        right:
+            8px;
+
+        bottom:
+            8px;
     }
 
 
+    .joker-card {
+        font-size:
+            17px;
+
+        letter-spacing:
+            2px;
+    }
+
+
+    /* GAME OVER */
+
+    .revealed-hand {
+        min-height:
+            145px;
+    }
+
+
+    .game-over-buttons {
+        flex-direction:
+            column;
+    }
+
+
+    .game-over-buttons button {
+        width:
+            100%;
+    }
+
+
+    .rematch-button {
+        margin-top:
+            0;
+    }
+
+
+    /* FOOTER */
+
+    .game-footer {
+        flex-wrap:
+            wrap;
+
+        padding:
+            0 10px;
+
+        text-align:
+            center;
+
+        line-height:
+            1.8;
+    }
+
+}
+
+
+/* =========================================
+   VERY SMALL MOBILE
+========================================= */
+
+@media (
+    max-width: 390px
+) {
+
+    .game-header h1 {
+        font-size:
+            25px;
+
+        letter-spacing:
+            4px;
+    }
+
+
+    .brand-mark {
+        width:
+            43px;
+
+        height:
+            43px;
+    }
+
+
+    .question-grid,
     .suit-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
+
+
+    .playing-card {
+        width:
+            90px;
+
+        height:
+            132px;
+    }
+
+
+    .card-center {
+        font-size:
+            40px;
+    }
+
+
+    .room-id-input {
+        font-size:
+            22px;
+
+        letter-spacing:
+            6px;
+    }
+
 }

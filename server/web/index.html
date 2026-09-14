@@ -9,6 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
+    <meta
+        name="theme-color"
+        content="#07070b"
+    >
+
     <title>VEIL 53</title>
 
     <link
@@ -22,39 +27,73 @@
     <main class="game-container">
 
         <!-- =====================================
-             タイトル
+             HEADER
         ====================================== -->
 
         <header class="game-header">
 
-            <h1>
-                VEIL 53
-            </h1>
+            <div class="brand-mark">
+                V53
+            </div>
 
-            <p class="subtitle">
-                オンライン対戦
-            </p>
+            <div class="brand-text">
+
+                <h1>
+                    VEIL 53
+                </h1>
+
+                <p class="subtitle">
+                    READ THE HAND. BREAK THE VEIL.
+                </p>
+
+            </div>
 
         </header>
 
 
         <!-- =====================================
-             ルーム画面
+             ROOM SCREEN
         ====================================== -->
 
         <section
             id="room-screen"
-            class="screen"
+            class="screen room-screen"
         >
 
-            <section class="panel">
+            <!-- CREATE ROOM -->
 
-                <h2>
-                    新しいルーム
-                </h2>
+            <section class="panel room-panel">
+
+                <div class="section-heading">
+
+                    <p class="section-number">
+                        01
+                    </p>
+
+                    <div>
+
+                        <h2>
+                            CREATE ROOM
+                        </h2>
+
+                        <p class="section-jp">
+                            新しいルームを作成
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <p class="panel-description">
+                    新しい対戦ルームを作成して、
+                    ルームIDを相手に共有します。
+                </p>
+
 
                 <button
                     id="create-room-button"
+                    class="primary-button"
                     type="button"
                 >
                     ルームを作る
@@ -64,30 +103,67 @@
 
 
             <div class="separator">
-                または
+
+                <span>
+                    OR
+                </span>
+
             </div>
 
 
-            <section class="panel">
+            <!-- JOIN ROOM -->
 
-                <h2>
-                    既存ルームに参加
-                </h2>
+            <section class="panel room-panel">
 
-                <label for="room-id">
-                    ルームID
-                </label>
+                <div class="section-heading">
 
-                <input
-                    id="room-id"
-                    type="text"
-                    maxlength="4"
-                    placeholder="K7P4"
-                    autocomplete="off"
-                >
+                    <p class="section-number">
+                        02
+                    </p>
+
+                    <div>
+
+                        <h2>
+                            JOIN ROOM
+                        </h2>
+
+                        <p class="section-jp">
+                            既存のルームに参加
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <p class="panel-description">
+                    相手から受け取った
+                    4文字のルームIDを入力してください。
+                </p>
+
+
+                <div class="room-input-area">
+
+                    <label for="room-id">
+                        ROOM ID
+                    </label>
+
+                    <input
+                        id="room-id"
+                        class="room-id-input"
+                        type="text"
+                        maxlength="4"
+                        placeholder="AB53"
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+
+                </div>
+
 
                 <button
                     id="join-room-button"
+                    class="primary-button"
                     type="button"
                 >
                     ルームに参加
@@ -99,7 +175,7 @@
 
 
         <!-- =====================================
-             ゲーム画面
+             GAME SCREEN
         ====================================== -->
 
         <section
@@ -108,7 +184,7 @@
         >
 
             <!-- =================================
-                 ルーム・プレイヤー情報
+                 ROOM INFO
             ================================== -->
 
             <div class="game-info">
@@ -125,7 +201,7 @@
 
 
             <!-- =================================
-                 自分の手札
+                 HAND
             ================================== -->
 
             <section
@@ -133,9 +209,26 @@
                 class="hand-section"
             >
 
-                <h2>
-                    あなたのカード
-                </h2>
+                <div class="section-heading">
+
+                    <p class="section-number">
+                        HAND
+                    </p>
+
+                    <div>
+
+                        <h2>
+                            YOUR CARDS
+                        </h2>
+
+                        <p class="section-jp">
+                            あなたの手札
+                        </p>
+
+                    </div>
+
+                </div>
+
 
                 <div
                     id="hand-container"
@@ -147,13 +240,17 @@
 
 
             <!-- =================================
-                 状態表示
+                 STATUS
             ================================== -->
 
             <section
                 id="status-section"
                 class="status-section"
             >
+
+                <p class="status-label">
+                    CURRENT STATUS
+                </p>
 
                 <p id="game-status">
                     相手を待っています...
@@ -163,32 +260,47 @@
 
 
             <!-- =================================
-                 質問エリア
+                 QUESTION
             ================================== -->
 
             <section
                 id="question-section"
-                class="question-section"
+                class="question-section hidden"
             >
 
-                <h2>
-                    質問を選ぶ
-                </h2>
+                <div class="section-heading">
+
+                    <p class="section-number">
+                        Q
+                    </p>
+
+                    <div>
+
+                        <h2>
+                            QUESTION
+                        </h2>
+
+                        <p class="section-jp">
+                            相手のカードを絞り込む
+                        </p>
+
+                    </div>
+
+                </div>
+
 
                 <p class="question-description">
-                    相手のまだ見つけていないカードについて
-                    1つ質問します
+                    相手のまだ見つけていないカードについて、
+                    質問を1つ選択してください。
                 </p>
 
 
-                <!-- =============================
-                     数字・種類
-                ============================== -->
+                <!-- 数字・種類 -->
 
                 <div class="question-group">
 
                     <h3>
-                        数字・種類
+                        VALUE / TYPE
                     </h3>
 
                     <div class="question-grid">
@@ -222,28 +334,21 @@
                 </div>
 
 
-                <!-- =============================
-                     ランク・数字指定
-                ============================== -->
+                <!-- ランク指定 -->
 
                 <div class="question-group">
 
                     <h3>
-                        ランク・数字指定
+                        RANK
                     </h3>
 
-
-                    <!-- ランク -->
 
                     <div class="parameter-question">
 
                         <div class="question-input-area">
 
-                            <label
-                                for="rank-question-value"
-                                class="question-input-label"
-                            >
-                                調べたいランク
+                            <label for="rank-question-value">
+                                ランク
                             </label>
 
                             <select
@@ -277,6 +382,7 @@
 
                         </div>
 
+
                         <button
                             id="question-rank"
                             class="question-button parameter-button"
@@ -294,10 +400,7 @@
 
                         <div class="question-input-area">
 
-                            <label
-                                for="more-than-value"
-                                class="question-input-label"
-                            >
+                            <label for="more-than-value">
                                 基準の数字
                             </label>
 
@@ -312,6 +415,7 @@
                             >
 
                         </div>
+
 
                         <button
                             id="question-more-than"
@@ -330,10 +434,7 @@
 
                         <div class="question-input-area">
 
-                            <label
-                                for="less-than-value"
-                                class="question-input-label"
-                            >
+                            <label for="less-than-value">
                                 基準の数字
                             </label>
 
@@ -349,6 +450,7 @@
 
                         </div>
 
+
                         <button
                             id="question-less-than"
                             class="question-button parameter-button"
@@ -361,24 +463,18 @@
 
 
                     <p class="number-help">
-                        A = 1、
-                        J = 11、
-                        Q = 12、
-                        K = 13
-                        として扱います。
+                        A = 1 / J = 11 / Q = 12 / K = 13
                     </p>
 
                 </div>
 
 
-                <!-- =============================
-                     スート
-                ============================== -->
+                <!-- スート -->
 
                 <div class="question-group">
 
                     <h3>
-                        スート
+                        SUIT
                     </h3>
 
                     <div class="question-grid suit-grid">
@@ -392,7 +488,9 @@
                                 ♠
                             </span>
 
-                            スペードはある？
+                            <span>
+                                スペード
+                            </span>
                         </button>
 
 
@@ -405,7 +503,9 @@
                                 ♥
                             </span>
 
-                            ハートはある？
+                            <span>
+                                ハート
+                            </span>
                         </button>
 
 
@@ -418,7 +518,9 @@
                                 ♦
                             </span>
 
-                            ダイヤはある？
+                            <span>
+                                ダイヤ
+                            </span>
                         </button>
 
 
@@ -431,7 +533,9 @@
                                 ♣
                             </span>
 
-                            クラブはある？
+                            <span>
+                                クラブ
+                            </span>
                         </button>
 
                     </div>
@@ -439,17 +543,15 @@
                 </div>
 
 
-                <!-- =============================
-                     JOKER
-                ============================== -->
+                <!-- JOKER -->
 
                 <div class="question-group">
 
                     <h3>
-                        Joker
+                        JOKER
                     </h3>
 
-                    <div class="question-grid joker-grid">
+                    <div class="joker-grid">
 
                         <button
                             id="question-joker"
@@ -467,7 +569,7 @@
 
 
             <!-- =================================
-                 カード予想
+                 GUESS
             ================================== -->
 
             <section
@@ -475,12 +577,29 @@
                 class="guess-section hidden"
             >
 
-                <h2>
-                    相手のカードを予想
-                </h2>
+                <div class="section-heading">
+
+                    <p class="section-number">
+                        G
+                    </p>
+
+                    <div>
+
+                        <h2>
+                            GUESS
+                        </h2>
+
+                        <p class="section-jp">
+                            相手のカードを予想
+                        </p>
+
+                    </div>
+
+                </div>
+
 
                 <p class="guess-description">
-                    スートとランクを選んで
+                    スートとランクを選んで、
                     相手のカードを1枚予想してください。
                 </p>
 
@@ -497,11 +616,8 @@
 
                 <div class="guess-input-group">
 
-                    <label
-                        for="guess-suit"
-                        class="guess-label"
-                    >
-                        スート
+                    <label for="guess-suit">
+                        SUIT
                     </label>
 
                     <select
@@ -546,11 +662,8 @@
 
                 <div class="guess-input-group">
 
-                    <label
-                        for="guess-rank"
-                        class="guess-label"
-                    >
-                        ランク
+                    <label for="guess-rank">
+                        RANK
                     </label>
 
                     <select
@@ -586,14 +699,14 @@
 
 
                 <p class="guess-help">
-                    JOKERを選んだ場合、
-                    ランクは使用しません。
+                    JOKERを選択した場合、
+                    ランクの指定は必要ありません。
                 </p>
 
 
                 <button
                     id="guess-card-button"
-                    class="guess-card-button"
+                    class="primary-button guess-card-button"
                     type="button"
                 >
                     このカードで予想する
@@ -603,7 +716,7 @@
 
 
             <!-- =================================
-                 予想結果
+                 RESULT
             ================================== -->
 
             <section
@@ -611,8 +724,12 @@
                 class="guess-result-section hidden"
             >
 
+                <p class="status-label">
+                    GUESS RESULT
+                </p>
+
                 <h2>
-                    予想結果
+                    RESULT
                 </h2>
 
 
@@ -633,7 +750,7 @@
 
                 <button
                     id="next-turn-button"
-                    class="next-turn-button"
+                    class="primary-button next-turn-button"
                     type="button"
                 >
                     次へ
@@ -643,7 +760,7 @@
 
 
             <!-- =================================
-                 ゲーム終了画面
+                 GAME OVER
             ================================== -->
 
             <section
@@ -651,11 +768,16 @@
                 class="game-over-section hidden"
             >
 
+                <p class="status-label">
+                    MATCH COMPLETE
+                </p>
+
+
                 <h2
                     id="game-over-title"
                     class="game-over-title"
                 >
-                    ゲーム終了
+                    GAME OVER
                 </h2>
 
 
@@ -666,15 +788,22 @@
                 </p>
 
 
-                <!-- =============================
-                     Player 1 の手札
-                ============================== -->
+                <!-- PLAYER 1 -->
 
                 <div class="revealed-player">
 
-                    <h3>
-                        Player 1 の手札
-                    </h3>
+                    <div class="revealed-player-title">
+
+                        <span class="player-chip">
+                            P1
+                        </span>
+
+                        <h3>
+                            PLAYER 1
+                        </h3>
+
+                    </div>
+
 
                     <div
                         id="player1-revealed-hand"
@@ -685,15 +814,22 @@
                 </div>
 
 
-                <!-- =============================
-                     Player 2 の手札
-                ============================== -->
+                <!-- PLAYER 2 -->
 
                 <div class="revealed-player">
 
-                    <h3>
-                        Player 2 の手札
-                    </h3>
+                    <div class="revealed-player-title">
+
+                        <span class="player-chip">
+                            P2
+                        </span>
+
+                        <h3>
+                            PLAYER 2
+                        </h3>
+
+                    </div>
+
 
                     <div
                         id="player2-revealed-hand"
@@ -704,15 +840,11 @@
                 </div>
 
 
-                <!-- =============================
-                     再戦 / 終了
-                ============================== -->
-
                 <div class="game-over-buttons">
 
                     <button
                         id="rematch-button"
-                        class="rematch-button"
+                        class="primary-button rematch-button"
                         type="button"
                     >
                         もう一度遊ぶ
@@ -735,12 +867,36 @@
 
 
         <!-- =====================================
-             共通メッセージ
+             MESSAGE
         ====================================== -->
 
-        <p id="message">
-            Web版
+        <p
+            id="message"
+            class="system-message"
+        >
+            VEIL 53 ONLINE
         </p>
+
+
+        <!-- =====================================
+             FOOTER
+        ====================================== -->
+
+        <footer class="game-footer">
+
+            <span>
+                VEIL 53
+            </span>
+
+            <span class="footer-dot">
+                ·
+            </span>
+
+            <span>
+                ONLINE DEDUCTION CARD GAME
+            </span>
+
+        </footer>
 
     </main>
 
