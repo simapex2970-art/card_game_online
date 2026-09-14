@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>カード推理ゲーム</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+    <main class="game-container">
+
+        <!-- =====================================
+             タイトル
+        ====================================== -->
+
+        <header class="game-header">
+
+            <h1>
+                カード推理ゲーム
+            </h1>
+
+            <p class="subtitle">
+                オンライン対戦
+            </p>
+
+        </header>
+
+
+        <!-- =====================================
+             ルーム画面
+        ====================================== -->
+
+        <section
+            id="room-screen"
+            class="screen"
+        >
+
+            <section class="panel">
+
+                <h2>
+                    新しいルーム
+                </h2>
+
+                <button
+                    id="create-room-button"
+                    type="button"
+                >
+                    ルームを作る
+                </button>
+
+            </section>
+
+
+            <div class="separator">
+                または
+            </div>
+
+
+            <section class="panel">
+
+                <h2>
+                    既存ルームに参加
+                </h2>
+
+                <label for="room-id">
+                    ルームID
+                </label>
+
+                <input
+                    id="room-id"
+                    type="text"
+                    maxlength="4"
+                    placeholder="K7P4"
+                    autocomplete="off"
+                >
+
+                <button
+                    id="join-room-button"
+                    type="button"
+                >
+                    ルームに参加
+                </button>
+
+            </section>
+
+        </section>
+
+
+        <!-- =====================================
+             ゲーム画面
+        ====================================== -->
+
+        <section
+            id="game-screen"
+            class="screen hidden"
+        >
+
+            <!-- =================================
+                 ルーム・プレイヤー情報
+            ================================== -->
+
+            <div class="game-info">
+
+                <p id="room-info">
+                    Room ----
+                </p>
+
+                <p id="player-info">
+                    Player -
+                </p>
+
+            </div>
+
+
+            <!-- =================================
+                 自分の手札
+            ================================== -->
+
+            <section
+                id="hand-section"
+                class="hand-section"
+            >
+
+                <h2>
+                    あなたのカード
+                </h2>
+
+                <div
+                    id="hand-container"
+                    class="hand-container"
+                >
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 状態表示
+            ================================== -->
+
+            <section
+                id="status-section"
+                class="status-section"
+            >
+
+                <p id="game-status">
+                    相手を待っています...
+                </p>
+
+            </section>
+
+
+            <!-- =================================
+                 質問エリア
+            ================================== -->
+
+            <section
+                id="question-section"
+                class="question-section"
+            >
+
+                <h2>
+                    質問を選ぶ
+                </h2>
+
+                <p class="question-description">
+                    相手のまだ見つけていないカードについて
+                    1つ質問します
+                </p>
+
+
+                <!-- =============================
+                     数字・種類
+                ============================== -->
+
+                <div class="question-group">
+
+                    <h3>
+                        数字・種類
+                    </h3>
+
+                    <div class="question-grid">
+
+                        <button
+                            id="question-even"
+                            class="question-button"
+                            type="button"
+                        >
+                            偶数はある？
+                        </button>
+
+                        <button
+                            id="question-odd"
+                            class="question-button"
+                            type="button"
+                        >
+                            奇数はある？
+                        </button>
+
+                        <button
+                            id="question-face"
+                            class="question-button"
+                            type="button"
+                        >
+                            絵札はある？
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     ランク・数字指定
+                ============================== -->
+
+                <div class="question-group">
+
+                    <h3>
+                        ランク・数字指定
+                    </h3>
+
+
+                    <!-- ランク -->
+
+                    <div class="parameter-question">
+
+                        <div class="question-input-area">
+
+                            <label
+                                for="rank-question-value"
+                                class="question-input-label"
+                            >
+                                調べたいランク
+                            </label>
+
+                            <select
+                                id="rank-question-value"
+                                class="question-value-input"
+                            >
+
+                                <option
+                                    value=""
+                                    selected
+                                    disabled
+                                >
+                                    ランクを選択
+                                </option>
+
+                                <option value="A">A</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="J">J</option>
+                                <option value="Q">Q</option>
+                                <option value="K">K</option>
+
+                            </select>
+
+                        </div>
+
+                        <button
+                            id="question-rank"
+                            class="question-button parameter-button"
+                            type="button"
+                        >
+                            このランクはある？
+                        </button>
+
+                    </div>
+
+
+                    <!-- 以上 -->
+
+                    <div class="parameter-question">
+
+                        <div class="question-input-area">
+
+                            <label
+                                for="more-than-value"
+                                class="question-input-label"
+                            >
+                                基準の数字
+                            </label>
+
+                            <input
+                                id="more-than-value"
+                                class="question-value-input number-input"
+                                type="number"
+                                min="1"
+                                max="13"
+                                step="1"
+                                placeholder="1〜13"
+                            >
+
+                        </div>
+
+                        <button
+                            id="question-more-than"
+                            class="question-button parameter-button"
+                            type="button"
+                        >
+                            この数字以上はある？
+                        </button>
+
+                    </div>
+
+
+                    <!-- 以下 -->
+
+                    <div class="parameter-question">
+
+                        <div class="question-input-area">
+
+                            <label
+                                for="less-than-value"
+                                class="question-input-label"
+                            >
+                                基準の数字
+                            </label>
+
+                            <input
+                                id="less-than-value"
+                                class="question-value-input number-input"
+                                type="number"
+                                min="1"
+                                max="13"
+                                step="1"
+                                placeholder="1〜13"
+                            >
+
+                        </div>
+
+                        <button
+                            id="question-less-than"
+                            class="question-button parameter-button"
+                            type="button"
+                        >
+                            この数字以下はある？
+                        </button>
+
+                    </div>
+
+
+                    <p class="number-help">
+                        A = 1、
+                        J = 11、
+                        Q = 12、
+                        K = 13
+                        として扱います。
+                    </p>
+
+                </div>
+
+
+                <!-- =============================
+                     スート
+                ============================== -->
+
+                <div class="question-group">
+
+                    <h3>
+                        スート
+                    </h3>
+
+                    <div class="question-grid suit-grid">
+
+                        <button
+                            id="question-spade"
+                            class="question-button suit-button black-suit"
+                            type="button"
+                        >
+                            <span class="question-suit-symbol">
+                                ♠
+                            </span>
+
+                            スペードはある？
+                        </button>
+
+
+                        <button
+                            id="question-heart"
+                            class="question-button suit-button red-suit"
+                            type="button"
+                        >
+                            <span class="question-suit-symbol">
+                                ♥
+                            </span>
+
+                            ハートはある？
+                        </button>
+
+
+                        <button
+                            id="question-diamond"
+                            class="question-button suit-button red-suit"
+                            type="button"
+                        >
+                            <span class="question-suit-symbol">
+                                ♦
+                            </span>
+
+                            ダイヤはある？
+                        </button>
+
+
+                        <button
+                            id="question-club"
+                            class="question-button suit-button black-suit"
+                            type="button"
+                        >
+                            <span class="question-suit-symbol">
+                                ♣
+                            </span>
+
+                            クラブはある？
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     JOKER
+                ============================== -->
+
+                <div class="question-group">
+
+                    <h3>
+                        Joker
+                    </h3>
+
+                    <div class="question-grid joker-grid">
+
+                        <button
+                            id="question-joker"
+                            class="question-button joker-question-button"
+                            type="button"
+                        >
+                            JOKERはある？
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 カード予想
+            ================================== -->
+
+            <section
+                id="guess-section"
+                class="guess-section hidden"
+            >
+
+                <h2>
+                    相手のカードを予想
+                </h2>
+
+                <p class="guess-description">
+                    スートとランクを選んで
+                    相手のカードを1枚予想してください。
+                </p>
+
+
+                <p
+                    id="found-count"
+                    class="found-count"
+                >
+                    現在 0 / 3 枚正解
+                </p>
+
+
+                <!-- スート -->
+
+                <div class="guess-input-group">
+
+                    <label
+                        for="guess-suit"
+                        class="guess-label"
+                    >
+                        スート
+                    </label>
+
+                    <select
+                        id="guess-suit"
+                        class="guess-select"
+                    >
+
+                        <option
+                            value=""
+                            selected
+                            disabled
+                        >
+                            スートを選択
+                        </option>
+
+                        <option value="スペード">
+                            ♠ スペード
+                        </option>
+
+                        <option value="ハート">
+                            ♥ ハート
+                        </option>
+
+                        <option value="ダイヤ">
+                            ♦ ダイヤ
+                        </option>
+
+                        <option value="クラブ">
+                            ♣ クラブ
+                        </option>
+
+                        <option value="JOKER">
+                            JOKER
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ランク -->
+
+                <div class="guess-input-group">
+
+                    <label
+                        for="guess-rank"
+                        class="guess-label"
+                    >
+                        ランク
+                    </label>
+
+                    <select
+                        id="guess-rank"
+                        class="guess-select"
+                    >
+
+                        <option
+                            value=""
+                            selected
+                            disabled
+                        >
+                            ランクを選択
+                        </option>
+
+                        <option value="A">A</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="J">J</option>
+                        <option value="Q">Q</option>
+                        <option value="K">K</option>
+
+                    </select>
+
+                </div>
+
+
+                <p class="guess-help">
+                    JOKERを選んだ場合、
+                    ランクは使用しません。
+                </p>
+
+
+                <button
+                    id="guess-card-button"
+                    class="guess-card-button"
+                    type="button"
+                >
+                    このカードで予想する
+                </button>
+
+            </section>
+
+
+            <!-- =================================
+                 予想結果
+            ================================== -->
+
+            <section
+                id="guess-result-section"
+                class="guess-result-section hidden"
+            >
+
+                <h2>
+                    予想結果
+                </h2>
+
+
+                <p
+                    id="guess-result-text"
+                    class="guess-result-text"
+                >
+                </p>
+
+
+                <p
+                    id="guess-result-count"
+                    class="guess-result-count"
+                >
+                    現在 0 / 3 枚正解
+                </p>
+
+
+                <button
+                    id="next-turn-button"
+                    class="next-turn-button"
+                    type="button"
+                >
+                    次へ
+                </button>
+
+            </section>
+
+
+            <!-- =================================
+                 ゲーム終了画面
+            ================================== -->
+
+            <section
+                id="game-over-section"
+                class="game-over-section hidden"
+            >
+
+                <h2
+                    id="game-over-title"
+                    class="game-over-title"
+                >
+                    ゲーム終了
+                </h2>
+
+
+                <p
+                    id="game-over-message"
+                    class="game-over-message"
+                >
+                </p>
+
+
+                <!-- =============================
+                     Player 1 の手札
+                ============================== -->
+
+                <div class="revealed-player">
+
+                    <h3>
+                        Player 1 の手札
+                    </h3>
+
+                    <div
+                        id="player1-revealed-hand"
+                        class="hand-container revealed-hand"
+                    >
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     Player 2 の手札
+                ============================== -->
+
+                <div class="revealed-player">
+
+                    <h3>
+                        Player 2 の手札
+                    </h3>
+
+                    <div
+                        id="player2-revealed-hand"
+                        class="hand-container revealed-hand"
+                    >
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     再戦 / 終了
+                ============================== -->
+
+                <div class="game-over-buttons">
+
+                    <button
+                        id="rematch-button"
+                        class="rematch-button"
+                        type="button"
+                    >
+                        もう一度遊ぶ
+                    </button>
+
+
+                    <button
+                        id="leave-game-button"
+                        class="leave-game-button"
+                        type="button"
+                    >
+                        ゲームを終了
+                    </button>
+
+                </div>
+
+            </section>
+
+        </section>
+
+
+        <!-- =====================================
+             共通メッセージ
+        ====================================== -->
+
+        <p id="message">
+            Web版
+        </p>
+
+    </main>
+
+
+    <script src="/static/app.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,1323 @@
+/* =============================================
+   全体
+============================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    min-height: 100vh;
+
+    font-family:
+        Arial,
+        "Yu Gothic",
+        sans-serif;
+
+    background: #f3f4f6;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: flex-start;
+
+    padding: 30px 12px;
+}
+
+
+.game-container {
+    width: min(94%, 850px);
+
+    background: white;
+
+    padding: 32px;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 24px
+        rgba(0, 0, 0, 0.12);
+
+    text-align: center;
+}
+
+
+/* =============================================
+   タイトル
+============================================= */
+
+.game-header h1 {
+    margin-top: 0;
+
+    margin-bottom: 8px;
+
+    font-size: 36px;
+}
+
+
+.subtitle {
+    margin-top: 0;
+
+    margin-bottom: 30px;
+
+    font-size: 18px;
+}
+
+
+/* =============================================
+   共通
+============================================= */
+
+.screen {
+    width: 100%;
+}
+
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =============================================
+   ルーム画面
+============================================= */
+
+.panel {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    width: 100%;
+}
+
+
+.panel h2 {
+    margin-bottom: 6px;
+}
+
+
+label {
+    font-weight: bold;
+
+    font-size: 17px;
+}
+
+
+input,
+select {
+    width: 100%;
+
+    padding: 14px;
+
+    border: 1px solid #aaa;
+
+    border-radius: 8px;
+
+    font-size: 20px;
+
+    text-align: center;
+
+    background: white;
+}
+
+
+#room-id {
+    text-transform: uppercase;
+
+    letter-spacing: 3px;
+
+    font-weight: bold;
+}
+
+
+button {
+    padding: 14px 20px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.1s,
+        opacity 0.1s,
+        box-shadow 0.1s,
+        background 0.1s;
+}
+
+
+button:hover {
+    opacity: 0.85;
+}
+
+
+button:active {
+    transform: translateY(1px);
+}
+
+
+button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.45;
+}
+
+
+.separator {
+    margin: 28px 0;
+
+    color: #666;
+}
+
+
+/* =============================================
+   ゲーム情報
+============================================= */
+
+.game-info {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 24px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 26px;
+
+    font-weight: bold;
+
+    font-size: 18px;
+}
+
+
+.game-info p {
+    margin: 0;
+
+    padding: 8px 14px;
+
+    background: #f3f4f6;
+
+    border-radius: 8px;
+}
+
+
+/* =============================================
+   自分の手札
+============================================= */
+
+.hand-section {
+    margin-top: 10px;
+}
+
+
+.hand-section h2 {
+    margin-bottom: 24px;
+
+    font-size: 26px;
+}
+
+
+.hand-container {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 18px;
+
+    flex-wrap: wrap;
+
+    min-height: 250px;
+
+    padding: 20px 10px;
+}
+
+
+/* =============================================
+   カード
+============================================= */
+
+.playing-card {
+    position: relative;
+
+    width: 150px;
+
+    height: 215px;
+
+    background: white;
+
+    border: 2px solid #222;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 6px 14px
+        rgba(0, 0, 0, 0.18);
+
+    user-select: none;
+
+    flex-shrink: 0;
+}
+
+
+.card-corner {
+    position: absolute;
+
+    top: 10px;
+
+    left: 12px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    line-height: 1;
+
+    font-size: 25px;
+
+    font-weight: bold;
+}
+
+
+.card-bottom {
+    top: auto;
+
+    left: auto;
+
+    right: 12px;
+
+    bottom: 10px;
+
+    transform: rotate(180deg);
+}
+
+
+.card-center {
+    position: absolute;
+
+    top: 50%;
+
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    font-size: 62px;
+
+    font-weight: bold;
+}
+
+
+.card-red {
+    color: #d11a2a;
+}
+
+
+.card-black {
+    color: #111;
+}
+
+
+.joker-card {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 30px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+
+/* =============================================
+   状態表示
+============================================= */
+
+.status-section {
+    margin-top: 28px;
+
+    padding: 18px;
+
+    background: #f3f4f6;
+
+    border-radius: 10px;
+}
+
+
+#game-status {
+    margin: 0;
+
+    font-size: 20px;
+
+    font-weight: bold;
+}
+
+
+/* =============================================
+   質問エリア
+============================================= */
+
+.question-section {
+    margin-top: 34px;
+
+    padding: 26px;
+
+    border:
+        2px solid #e1e3e6;
+
+    border-radius: 14px;
+
+    background: #fafafa;
+}
+
+
+.question-section h2 {
+    margin-top: 0;
+
+    margin-bottom: 8px;
+
+    font-size: 27px;
+}
+
+
+.question-description {
+    margin-top: 0;
+
+    margin-bottom: 28px;
+
+    color: #555;
+
+    line-height: 1.6;
+}
+
+
+.question-group {
+    margin-top: 30px;
+}
+
+
+.question-group:first-of-type {
+    margin-top: 0;
+}
+
+
+.question-group h3 {
+    margin: 0 0 14px;
+
+    padding-bottom: 7px;
+
+    border-bottom:
+        1px solid #ddd;
+
+    font-size: 18px;
+
+    text-align: left;
+}
+
+
+.question-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 12px;
+}
+
+
+/* =============================================
+   質問ボタン
+============================================= */
+
+.question-button {
+    min-height: 62px;
+
+    padding: 12px 10px;
+
+    background: white;
+
+    border: 2px solid #333;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    line-height: 1.4;
+
+    color: #111;
+}
+
+
+.question-button:hover:not(:disabled) {
+    opacity: 1;
+
+    background: #f0f0f0;
+
+    box-shadow:
+        0 3px 8px
+        rgba(0, 0, 0, 0.12);
+}
+
+
+/* =============================================
+   ランク・数字指定質問
+============================================= */
+
+.parameter-question {
+    display: grid;
+
+    grid-template-columns:
+        180px 1fr;
+
+    gap: 14px;
+
+    align-items: end;
+
+    margin-bottom: 16px;
+
+    padding: 16px;
+
+    background: white;
+
+    border:
+        1px solid #ddd;
+
+    border-radius: 10px;
+}
+
+
+.question-input-area {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    text-align: left;
+}
+
+
+.question-input-label {
+    font-size: 14px;
+
+    color: #444;
+}
+
+
+.question-value-input {
+    width: 100%;
+
+    min-height: 52px;
+
+    padding: 10px 12px;
+
+    border:
+        2px solid #aaa;
+
+    border-radius: 8px;
+
+    background: white;
+
+    font-size: 19px;
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+.question-value-input:focus {
+    outline: none;
+
+    border-color: #333;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(0, 0, 0, 0.08);
+}
+
+
+.number-input {
+    text-align: center;
+}
+
+
+.parameter-button {
+    width: 100%;
+
+    min-height: 52px;
+}
+
+
+.number-help {
+    margin: 8px 0 0;
+
+    padding: 10px 14px;
+
+    background: #f0f0f0;
+
+    border-radius: 8px;
+
+    color: #555;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =============================================
+   スート質問
+============================================= */
+
+.suit-grid {
+    grid-template-columns:
+        repeat(2, 1fr);
+}
+
+
+.suit-button {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.question-suit-symbol {
+    font-size: 28px;
+
+    line-height: 1;
+}
+
+
+.red-suit {
+    color: #d11a2a;
+
+    border-color: #d11a2a;
+}
+
+
+.black-suit {
+    color: #111;
+}
+
+
+/* =============================================
+   Joker質問
+============================================= */
+
+.joker-grid {
+    grid-template-columns: 1fr;
+}
+
+
+.joker-question-button {
+    max-width: 360px;
+
+    width: 100%;
+
+    justify-self: center;
+
+    font-size: 18px;
+
+    letter-spacing: 1px;
+
+    border-width: 3px;
+}
+
+
+/* =============================================
+   カード予想
+============================================= */
+
+.guess-section {
+    margin-top: 34px;
+
+    padding: 26px;
+
+    border: 2px solid #333;
+
+    border-radius: 14px;
+
+    background: #fafafa;
+}
+
+
+.guess-section h2 {
+    margin-top: 0;
+
+    margin-bottom: 8px;
+
+    font-size: 27px;
+}
+
+
+.guess-description {
+    margin-top: 0;
+
+    margin-bottom: 22px;
+
+    color: #555;
+
+    line-height: 1.6;
+}
+
+
+.found-count {
+    margin: 0 0 24px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background: #eceff1;
+
+    font-size: 20px;
+
+    font-weight: bold;
+}
+
+
+.guess-input-group {
+    max-width: 430px;
+
+    margin: 0 auto 18px;
+
+    text-align: left;
+}
+
+
+.guess-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 16px;
+}
+
+
+.guess-select {
+    width: 100%;
+
+    min-height: 54px;
+
+    padding: 10px 14px;
+
+    border: 2px solid #888;
+
+    border-radius: 9px;
+
+    background: white;
+
+    font-size: 19px;
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+.guess-select:focus {
+    outline: none;
+
+    border-color: #222;
+}
+
+
+.guess-select:disabled {
+    background: #ddd;
+
+    color: #777;
+
+    cursor: not-allowed;
+}
+
+
+.guess-help {
+    max-width: 430px;
+
+    margin: 8px auto 20px;
+
+    padding: 10px;
+
+    background: #eee;
+
+    border-radius: 8px;
+
+    color: #555;
+
+    font-size: 14px;
+}
+
+
+.guess-card-button {
+    width: min(100%, 430px);
+
+    min-height: 58px;
+
+    margin-top: 6px;
+
+    background: #222;
+
+    color: white;
+
+    font-weight: bold;
+
+    font-size: 18px;
+}
+
+
+.guess-card-button:hover:not(:disabled) {
+    opacity: 1;
+
+    background: #444;
+}
+
+
+/* =============================================
+   予想結果
+============================================= */
+
+.guess-result-section {
+    margin-top: 34px;
+
+    padding: 28px;
+
+    border: 2px solid #333;
+
+    border-radius: 14px;
+
+    background: #fafafa;
+}
+
+
+.guess-result-section h2 {
+    margin-top: 0;
+
+    margin-bottom: 10px;
+
+    font-size: 27px;
+}
+
+
+.guess-result-text {
+    margin: 24px 0;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    white-space: pre-line;
+
+    line-height: 1.6;
+}
+
+
+.guess-result-count {
+    max-width: 430px;
+
+    margin: 20px auto;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background: #eceff1;
+
+    font-size: 20px;
+
+    font-weight: bold;
+}
+
+
+.next-turn-button {
+    width: min(100%, 430px);
+
+    min-height: 58px;
+
+    margin-top: 10px;
+
+    background: #222;
+
+    color: white;
+
+    font-size: 18px;
+
+    font-weight: bold;
+}
+
+
+.next-turn-button:hover:not(:disabled) {
+    opacity: 1;
+
+    background: #444;
+}
+
+
+/* =============================================
+   ゲーム終了画面
+============================================= */
+
+.game-over-section {
+    margin-top: 34px;
+
+    padding: 30px;
+
+    border: 3px solid #222;
+
+    border-radius: 16px;
+
+    background: #fafafa;
+
+    box-shadow:
+        0 8px 20px
+        rgba(0, 0, 0, 0.08);
+}
+
+
+.game-over-title {
+    margin: 0 0 12px;
+
+    font-size: 36px;
+
+    font-weight: bold;
+}
+
+
+.game-over-message {
+    margin: 0 0 30px;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    line-height: 1.6;
+}
+
+
+/* =============================================
+   公開されたPlayer手札
+============================================= */
+
+.revealed-player {
+    margin-top: 30px;
+
+    padding: 20px;
+
+    background: white;
+
+    border:
+        1px solid #ddd;
+
+    border-radius: 12px;
+}
+
+
+.revealed-player h3 {
+    margin-top: 0;
+
+    margin-bottom: 18px;
+
+    font-size: 22px;
+}
+
+
+.revealed-hand {
+    min-height: 230px;
+
+    padding-top: 10px;
+
+    padding-bottom: 10px;
+}
+
+
+/* =============================================
+   ゲーム終了ボタン
+============================================= */
+
+.game-over-buttons {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    margin-top: 30px;
+
+    flex-wrap: wrap;
+}
+
+
+.rematch-button,
+.leave-game-button {
+    width: 220px;
+
+    min-height: 56px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+}
+
+
+.rematch-button {
+    background: #222;
+
+    color: white;
+}
+
+
+.rematch-button:hover:not(:disabled) {
+    opacity: 1;
+
+    background: #444;
+}
+
+
+.leave-game-button {
+    background: #ddd;
+
+    color: #111;
+}
+
+
+.leave-game-button:hover:not(:disabled) {
+    opacity: 1;
+
+    background: #ccc;
+}
+
+
+/* =============================================
+   メッセージ
+============================================= */
+
+#message {
+    margin-top: 28px;
+
+    min-height: 24px;
+
+    padding: 8px;
+
+    white-space: pre-line;
+
+    font-size: 16px;
+
+    line-height: 1.7;
+}
+
+
+/* =============================================
+   スマホ・小さい画面
+============================================= */
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 14px 8px;
+    }
+
+
+    .game-container {
+        width: 100%;
+
+        padding: 22px 12px;
+
+        border-radius: 14px;
+    }
+
+
+    .game-header h1 {
+        font-size: 30px;
+    }
+
+
+    .subtitle {
+        margin-bottom: 22px;
+
+        font-size: 16px;
+    }
+
+
+    /* =========================================
+       ゲーム情報
+    ========================================= */
+
+    .game-info {
+        gap: 8px;
+
+        font-size: 15px;
+    }
+
+
+    /* =========================================
+       手札
+    ========================================= */
+
+    .hand-section h2 {
+        font-size: 22px;
+    }
+
+
+    .hand-container {
+        gap: 8px;
+
+        padding: 12px 0;
+
+        min-height: 190px;
+
+        flex-wrap: nowrap;
+    }
+
+
+    /* =========================================
+       カード
+    ========================================= */
+
+    .playing-card {
+        width: 100px;
+
+        height: 145px;
+
+        border-radius: 9px;
+    }
+
+
+    .card-corner {
+        top: 7px;
+
+        left: 8px;
+
+        font-size: 18px;
+    }
+
+
+    .card-bottom {
+        top: auto;
+
+        left: auto;
+
+        right: 8px;
+
+        bottom: 7px;
+    }
+
+
+    .card-center {
+        font-size: 40px;
+    }
+
+
+    .joker-card {
+        font-size: 20px;
+    }
+
+
+    /* =========================================
+       各ゲームパネル
+    ========================================= */
+
+    .question-section,
+    .guess-section,
+    .guess-result-section,
+    .game-over-section {
+        margin-top: 24px;
+
+        padding: 20px 12px;
+    }
+
+
+    .question-section h2,
+    .guess-section h2,
+    .guess-result-section h2 {
+        font-size: 23px;
+    }
+
+
+    /* =========================================
+       質問
+    ========================================= */
+
+    .question-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .suit-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .question-button {
+        min-height: 56px;
+
+        font-size: 15px;
+    }
+
+
+    .question-suit-symbol {
+        font-size: 24px;
+    }
+
+
+    .parameter-question {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+
+        padding: 14px;
+    }
+
+
+    .question-input-area {
+        text-align: center;
+    }
+
+
+    .question-value-input {
+        min-height: 48px;
+
+        font-size: 18px;
+    }
+
+
+    .parameter-button {
+        min-height: 52px;
+    }
+
+
+    /* =========================================
+       予想
+    ========================================= */
+
+    .guess-input-group {
+        width: 100%;
+    }
+
+
+    .guess-card-button,
+    .next-turn-button {
+        width: 100%;
+    }
+
+
+    .guess-result-text {
+        font-size: 24px;
+    }
+
+
+    /* =========================================
+       勝敗画面
+    ========================================= */
+
+    .game-over-title {
+        font-size: 30px;
+    }
+
+
+    .game-over-message {
+        font-size: 19px;
+    }
+
+
+    .revealed-player {
+        margin-top: 20px;
+
+        padding: 14px 6px;
+    }
+
+
+    .revealed-player h3 {
+        font-size: 19px;
+    }
+
+
+    .revealed-hand {
+        min-height: 170px;
+    }
+
+
+    .game-over-buttons {
+        flex-direction: column;
+    }
+
+
+    .rematch-button,
+    .leave-game-button {
+        width: 100%;
+    }
+
+
+    #message {
+        font-size: 14px;
+    }
+}
+
+
+/* =============================================
+   かなり小さいスマホ
+============================================= */
+
+@media (max-width: 380px) {
+
+    .game-container {
+        padding-left: 8px;
+
+        padding-right: 8px;
+    }
+
+
+    .playing-card {
+        width: 90px;
+
+        height: 132px;
+    }
+
+
+    .card-center {
+        font-size: 36px;
+    }
+
+
+    .card-corner {
+        font-size: 16px;
+    }
+
+
+    .question-section,
+    .guess-section,
+    .guess-result-section,
+    .game-over-section {
+        padding-left: 8px;
+
+        padding-right: 8px;
+    }
+
+
+    .suit-grid {
+        grid-template-columns: 1fr;
+    }
+}
