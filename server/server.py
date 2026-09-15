@@ -165,6 +165,17 @@ def get_cpu_name(
 rooms = {}
 
 
+# =============================================
+# QUICK MATCH
+# =============================================
+
+# 現在対戦相手を待っているルーム
+waiting_room_id = None
+
+# 同時に複数人がマッチングを押したときの保護
+matchmaking_lock = asyncio.Lock()
+
+
 def create_room(
     mode="pvp",
     cpu_level=None
@@ -262,6 +273,66 @@ async def create_pvp_room():
         "room_id": room_id,
         "mode": "pvp"
     }
+
+
+# =============================================
+# QUICK MATCH
+# =============================================
+
+@app.post("/matchmaking")
+async def matchmaking():
+
+    global waiting_room_id
+
+    async with matchmaking_lock:
+
+        if waiting_room_id is not None:
+
+            waiting_room = rooms.get(
+                waiting_room_id
+            )
+
+            if (
+                waiting_room is not None
+                and
+                waiting_room["mode"] == "pvp"
+                and
+                len(
+                    waiting_room["players"]
+                ) < 2
+            ):
+
+                room_id = waiting_room_id
+
+                waiting_room_id = None
+
+                return {
+                    "room_id": room_id,
+                    "mode": "pvp",
+                    "matched": True
+                }
+
+            waiting_room_id = None
+
+
+        room_id = generate_room_id()
+
+
+        rooms[
+            room_id
+        ] = create_room(
+            mode="pvp"
+        )
+
+
+        waiting_room_id = room_id
+
+
+        return {
+            "room_id": room_id,
+            "mode": "pvp",
+            "matched": False
+        }
 
 
 # =============================================
