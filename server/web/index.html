@@ -99,7 +99,7 @@
                         </h2>
 
                         <p class="section-jp">
-                            新しいルームを作成
+                            オンライン対戦ルームを作成
                         </p>
 
                     </div>
@@ -152,7 +152,7 @@
                         </h2>
 
                         <p class="section-jp">
-                            既存のルームに参加
+                            オンライン対戦に参加
                         </p>
 
                     </div>
@@ -196,6 +196,59 @@
             </section>
 
 
+            <div class="separator">
+
+                <span>
+                    OR
+                </span>
+
+            </div>
+
+
+            <!-- =================================
+                 CPU BATTLE
+            ================================== -->
+
+            <section class="panel room-panel">
+
+                <div class="section-heading">
+
+                    <p class="section-number">
+                        CPU
+                    </p>
+
+                    <div>
+
+                        <h2>
+                            CPU BATTLE
+                        </h2>
+
+                        <p class="section-jp">
+                            CPUと1人で対戦
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <p class="panel-description">
+                    ランダムに質問と予想をする
+                    CPU Lv.1と対戦します。
+                </p>
+
+
+                <button
+                    id="cpu-game-button"
+                    class="primary-button"
+                    type="button"
+                >
+                    CPUと対戦する
+                </button>
+
+            </section>
+
+
             <!-- =================================
                  HOW TO PLAY
             ================================== -->
@@ -232,8 +285,6 @@
                     </p>
 
 
-                    <!-- RULE 01 -->
-
                     <div class="rule-item">
 
                         <span class="rule-number">
@@ -256,8 +307,6 @@
 
                     </div>
 
-
-                    <!-- RULE 02 -->
 
                     <div class="rule-item">
 
@@ -283,8 +332,6 @@
                     </div>
 
 
-                    <!-- RULE 03 -->
-
                     <div class="rule-item">
 
                         <span class="rule-number">
@@ -307,8 +354,6 @@
 
                     </div>
 
-
-                    <!-- RULE 04 -->
 
                     <div class="rule-item">
 
@@ -333,8 +378,6 @@
                     </div>
 
 
-                    <!-- RULE 05 -->
-
                     <div class="rule-item">
 
                         <span class="rule-number">
@@ -358,8 +401,6 @@
                     </div>
 
 
-                    <!-- RULE 06 -->
-
                     <div class="rule-item">
 
                         <span class="rule-number">
@@ -382,8 +423,6 @@
                     </div>
 
 
-                    <!-- MEMORY -->
-
                     <div class="rules-note">
 
                         <strong>
@@ -398,8 +437,6 @@
 
                     </div>
 
-
-                    <!-- JOKER -->
 
                     <div class="rules-note joker-rule-note">
 
@@ -431,9 +468,7 @@
             class="screen hidden"
         >
 
-            <!-- =================================
-                 ROOM INFO
-            ================================== -->
+            <!-- ROOM INFO -->
 
             <div class="game-info">
 
@@ -508,6 +543,28 @@
 
 
             <!-- =================================
+                 CPU ACTION
+            ================================== -->
+
+            <section
+                id="cpu-action-section"
+                class="panel hidden"
+            >
+
+                <p class="status-label">
+                    CPU ACTION
+                </p>
+
+                <p
+                    id="cpu-action-text"
+                    class="guess-result-text"
+                >
+                </p>
+
+            </section>
+
+
+            <!-- =================================
                  QUESTION
             ================================== -->
 
@@ -543,9 +600,7 @@
                 </p>
 
 
-                <!-- =================================
-                     VALUE / TYPE
-                ================================== -->
+                <!-- VALUE / TYPE -->
 
                 <div class="question-group">
 
@@ -584,9 +639,7 @@
                 </div>
 
 
-                <!-- =================================
-                     RANK
-                ================================== -->
+                <!-- RANK -->
 
                 <div class="question-group">
 
@@ -646,8 +699,6 @@
                     </div>
 
 
-                    <!-- 以上 -->
-
                     <div class="parameter-question">
 
                         <div class="question-input-area">
@@ -679,8 +730,6 @@
 
                     </div>
 
-
-                    <!-- 以下 -->
 
                     <div class="parameter-question">
 
@@ -721,9 +770,7 @@
                 </div>
 
 
-                <!-- =================================
-                     SUIT
-                ================================== -->
+                <!-- SUIT -->
 
                 <div class="question-group">
 
@@ -805,9 +852,7 @@
                 </div>
 
 
-                <!-- =================================
-                     JOKER
-                ================================== -->
+                <!-- JOKER -->
 
                 <div class="question-group">
 
@@ -876,8 +921,6 @@
                 </p>
 
 
-                <!-- SUIT -->
-
                 <div class="guess-input-group">
 
                     <label for="guess-suit">
@@ -921,8 +964,6 @@
 
                 </div>
 
-
-                <!-- RANK -->
 
                 <div class="guess-input-group">
 
@@ -1052,8 +1093,6 @@
                 </p>
 
 
-                <!-- PLAYER 1 -->
-
                 <div class="revealed-player">
 
                     <div class="revealed-player-title">
@@ -1078,8 +1117,6 @@
                 </div>
 
 
-                <!-- PLAYER 2 -->
-
                 <div class="revealed-player">
 
                     <div class="revealed-player-title">
@@ -1088,7 +1125,7 @@
                             P2
                         </span>
 
-                        <h3>
+                        <h3 id="player2-title">
                             PLAYER 2
                         </h3>
 

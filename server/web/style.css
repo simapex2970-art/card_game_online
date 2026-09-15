@@ -65,8 +65,7 @@ body::before {
             transparent 1px
         );
 
-    background-size:
-        42px 42px;
+    background-size: 42px 42px;
 
     mask-image:
         linear-gradient(
@@ -78,7 +77,7 @@ body::before {
 
 
 /* =========================================
-   MAIN CONTAINER
+   MAIN
 ========================================= */
 
 .game-container {
@@ -91,8 +90,7 @@ body::before {
             calc(100% - 32px)
         );
 
-    margin:
-        0 auto;
+    margin: 0 auto;
 
     padding:
         36px 0 60px;
@@ -210,7 +208,7 @@ body::before {
 
 
 /* =========================================
-   COMMON PANEL
+   COMMON PANELS
 ========================================= */
 
 .panel,
@@ -348,22 +346,19 @@ body::before {
 .room-screen {
     max-width: 680px;
 
-    margin:
-        0 auto;
+    margin: 0 auto;
 }
 
 
 .room-panel {
-    padding:
-        30px;
+    padding: 30px;
 }
 
 
 .separator {
     position: relative;
 
-    margin:
-        24px 0;
+    margin: 24px 0;
 
     text-align: center;
 }
@@ -390,11 +385,9 @@ body::before {
 
     display: inline-block;
 
-    padding:
-        0 14px;
+    padding: 0 14px;
 
-    background:
-        #0c0c12;
+    background: #0c0c12;
 
     color: #51515e;
 
@@ -405,7 +398,7 @@ body::before {
 
 
 /* =========================================
-   INPUTS
+   INPUT
 ========================================= */
 
 label {
@@ -429,8 +422,7 @@ select {
 
     min-height: 50px;
 
-    padding:
-        0 14px;
+    padding: 0 14px;
 
     border:
         1px solid
@@ -440,11 +432,9 @@ select {
 
     outline: none;
 
-    background:
-        #0c0c11;
+    background: #0c0c11;
 
-    color:
-        #f3f3f7;
+    color: #f3f3f7;
 
     font-size: 15px;
 
@@ -462,11 +452,9 @@ input::placeholder {
 
 input:focus,
 select:focus {
-    border-color:
-        #8575e6;
+    border-color: #8575e6;
 
-    background:
-        #111119;
+    background: #111119;
 
     box-shadow:
         0 0 0 3px
@@ -496,14 +484,13 @@ select:disabled {
 
 
 /* =========================================
-   BUTTON COMMON
+   BUTTON
 ========================================= */
 
 button {
     min-height: 50px;
 
-    padding:
-        12px 18px;
+    padding: 12px 18px;
 
     border:
         1px solid
@@ -520,8 +507,7 @@ button {
             #121218
         );
 
-    color:
-        #ededf3;
+    color: #ededf3;
 
     font-family: inherit;
 
@@ -539,11 +525,9 @@ button {
 
 
 button:hover:not(:disabled) {
-    transform:
-        translateY(-2px);
+    transform: translateY(-2px);
 
-    border-color:
-        #7769d0;
+    border-color: #7769d0;
 
     background:
         linear-gradient(
@@ -559,8 +543,7 @@ button:hover:not(:disabled) {
 
 
 button:active:not(:disabled) {
-    transform:
-        translateY(0);
+    transform: translateY(0);
 }
 
 
@@ -580,8 +563,7 @@ button:disabled {
 
     margin-top: 15px;
 
-    border-color:
-        #6b5bc9;
+    border-color: #6b5bc9;
 
     background:
         linear-gradient(
@@ -599,8 +581,7 @@ button:disabled {
 
 
 .primary-button:hover:not(:disabled) {
-    border-color:
-        #927fff;
+    border-color: #927fff;
 
     background:
         linear-gradient(
@@ -616,921 +597,31 @@ button:disabled {
 
 
 /* =========================================
-   GAME INFO
+   CPU BATTLE BUTTON
 ========================================= */
 
-.game-info {
-    display: flex;
-    justify-content: space-between;
-
-    gap: 12px;
-
-    margin-bottom: 18px;
-}
-
-
-.game-info p {
-    margin: 0;
-
-    padding:
-        9px 15px;
-
-    border:
-        1px solid
-        #292933;
-
-    border-radius: 999px;
-
-    background:
-        rgba(255, 255, 255, 0.025);
-
-    color: #9796a5;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-}
-
-
-/* =========================================
-   STATUS
-========================================= */
-
-.status-section {
-    text-align: center;
-
-    padding:
-        22px;
-}
-
-
-.status-label {
-    margin:
-        0 0 9px;
-
-    color:
-        #686875;
-
-    font-size:
-        9px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        3px;
-}
-
-
-#game-status {
-    margin: 0;
-
-    color:
-        #dedaff;
-
-    font-size:
-        18px;
-
-    font-weight:
-        750;
-}
-
-
-/* =========================================
-   HAND
-========================================= */
-
-.hand-container {
-    display: flex;
-
-    justify-content: center;
-
-    flex-wrap: wrap;
-
-    gap: 18px;
-
-    margin-top: 20px;
-}
-
-
-/* =========================================
-   CARD
-========================================= */
-
-.playing-card {
-    position: relative;
-
-    width: 150px;
-    height: 215px;
-
-    overflow: hidden;
-
-    border:
-        1px solid
-        #373741;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #f5f5f6,
-            #d6d6db
-        );
-
-    color:
-        #111116;
-
-    box-shadow:
-        0 17px 35px
-        rgba(0, 0, 0, 0.42);
-
-    transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease;
-}
-
-
-.playing-card::after {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    left: 0;
-    right: 0;
-
-    height: 45%;
-
-    pointer-events: none;
-
-    background:
-        linear-gradient(
-            to bottom,
-            rgba(255, 255, 255, 0.3),
-            transparent
-        );
-}
-
-
-.playing-card:hover {
-    transform:
-        translateY(-7px);
-
-    box-shadow:
-        0 24px 48px
-        rgba(0, 0, 0, 0.52);
-}
-
-
-.card-red {
-    color:
-        #a21f39;
-}
-
-
-.card-black {
-    color:
-        #111116;
-}
-
-
-.card-corner {
-    position: absolute;
-
-    z-index: 2;
-
-    top: 12px;
-    left: 12px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 2px;
-
-    font-size: 21px;
-
-    font-weight: 800;
-
-    line-height: 0.95;
-}
-
-
-.card-bottom {
-    top: auto;
-    left: auto;
-
-    right: 12px;
-    bottom: 12px;
-
-    transform:
-        rotate(180deg);
-}
-
-
-.card-center {
-    position: absolute;
-
-    z-index: 2;
-
-    inset: 0;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: 69px;
-}
-
-
-/* =========================================
-   JOKER CARD
-========================================= */
-
-.joker-card {
-    display: flex;
-
-    justify-content: center;
-    align-items: center;
-
+#cpu-game-button {
     border-color:
-        #6e59d0;
-
-    background:
-        radial-gradient(
-            circle at center,
-            #29243f 0%,
-            #161421 48%,
-            #0b0b10 100%
-        );
-
-    color:
-        #cec6ff;
-
-    font-size:
-        27px;
-
-    font-weight:
-        900;
-
-    letter-spacing:
-        4px;
-
-    text-shadow:
-        0 0 22px
-        rgba(160, 141, 255, 0.52);
-
-    box-shadow:
-        0 18px 45px
-        rgba(75, 58, 160, 0.26);
-}
-
-
-.joker-card::after {
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(172, 153, 255, 0.2),
-            transparent 65%
-        );
-}
-
-
-/* =========================================
-   QUESTION
-========================================= */
-
-.question-group {
-    margin-top: 28px;
-}
-
-
-.question-group h3 {
-    margin:
-        0 0 13px;
-
-    color:
-        #777686;
-
-    font-size:
-        10px;/* =========================================
-   VEIL 53
-   Dark / Minimal / Mystery UI
-========================================= */
-
-
-/* =========================================
-   RESET
-========================================= */
-
-* {
-    box-sizing: border-box;
-}
-
-html {
-    min-height: 100%;
-}
-
-body {
-    margin: 0;
-    min-height: 100vh;
-
-    font-family:
-        "Segoe UI",
-        "Yu Gothic UI",
-        "Yu Gothic",
-        "Meiryo",
-        sans-serif;
-
-    color: #f5f5f8;
-
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            #25243a 0%,
-            #12111b 30%,
-            #09090e 58%,
-            #050507 100%
-        );
-
-    background-attachment: fixed;
-}
-
-
-/* =========================================
-   BACKGROUND EFFECT
-========================================= */
-
-body::before {
-    content: "";
-
-    position: fixed;
-    inset: 0;
-
-    pointer-events: none;
-
-    background:
-        linear-gradient(
-            rgba(255, 255, 255, 0.012) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.012) 1px,
-            transparent 1px
-        );
-
-    background-size:
-        42px 42px;
-
-    mask-image:
-        linear-gradient(
-            to bottom,
-            rgba(0, 0, 0, 0.55),
-            transparent 80%
-        );
-}
-
-
-/* =========================================
-   MAIN CONTAINER
-========================================= */
-
-.game-container {
-    position: relative;
-    z-index: 1;
-
-    width:
-        min(
-            1100px,
-            calc(100% - 32px)
-        );
-
-    margin:
-        0 auto;
-
-    padding:
-        36px 0 60px;
-}
-
-
-/* =========================================
-   HIDDEN
-========================================= */
-
-.hidden {
-    display: none !important;
-}
-
-
-/* =========================================
-   HEADER
-========================================= */
-
-.game-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    gap: 18px;
-
-    margin-bottom: 38px;
-
-    padding:
-        20px 10px 26px;
-
-    border-bottom:
-        1px solid
-        rgba(255, 255, 255, 0.075);
-}
-
-
-.brand-mark {
-    width: 62px;
-    height: 62px;
-
-    flex-shrink: 0;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    border:
-        1px solid
-        rgba(154, 137, 255, 0.52);
-
-    border-radius: 15px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(134, 111, 255, 0.23),
-            rgba(255, 255, 255, 0.025)
-        );
-
-    box-shadow:
-        0 0 32px
-        rgba(111, 91, 255, 0.18),
-        inset 0 0 22px
-        rgba(255, 255, 255, 0.025);
-
-    color: #d6d0ff;
-
-    font-size: 15px;
-    font-weight: 800;
-
-    letter-spacing: 2px;
-}
-
-
-.brand-text {
-    text-align: left;
-}
-
-
-.game-header h1 {
-    margin: 0;
-
-    color: #ffffff;
-
-    font-size:
-        clamp(
-            33px,
-            6vw,
-            54px
-        );
-
-    font-weight: 800;
-
-    letter-spacing: 8px;
-
-    line-height: 1;
-
-    text-shadow:
-        0 0 30px
-        rgba(155, 140, 255, 0.17);
-}
-
-
-.subtitle {
-    margin:
-        9px 0 0;
-
-    color: #858494;
-
-    font-size: 10px;
-
-    letter-spacing: 3px;
-}
-
-
-/* =========================================
-   COMMON PANEL
-========================================= */
-
-.panel,
-.hand-section,
-.status-section,
-.question-section,
-.guess-section,
-.guess-result-section,
-.game-over-section {
-    position: relative;
-
-    overflow: hidden;
-
-    margin-top: 22px;
-
-    padding: 26px;
-
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.08);
-
-    border-radius: 18px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255, 255, 255, 0.055),
-            rgba(255, 255, 255, 0.014)
-        );
-
-    backdrop-filter: blur(13px);
-
-    box-shadow:
-        0 20px 55px
-        rgba(0, 0, 0, 0.34);
-}
-
-
-.panel::before,
-.hand-section::before,
-.question-section::before,
-.guess-section::before,
-.guess-result-section::before,
-.game-over-section::before {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    left: 28px;
-    right: 28px;
-
-    height: 1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(155, 139, 255, 0.72),
-            transparent
-        );
-}
-
-
-/* =========================================
-   SECTION HEADING
-========================================= */
-
-.section-heading {
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-
-    margin-bottom: 20px;
-}
-
-
-.section-number {
-    min-width: 42px;
-
-    margin: 0;
-
-    color: #8277ca;
-
-    font-size: 11px;
-    font-weight: 800;
-
-    letter-spacing: 2px;
-}
-
-
-.section-heading h2 {
-    margin: 0;
-
-    color: #f7f7fa;
-
-    font-size: 21px;
-    font-weight: 750;
-
-    letter-spacing: 2px;
-}
-
-
-.section-jp {
-    margin:
-        5px 0 0;
-
-    color: #747482;
-
-    font-size: 11px;
-
-    letter-spacing: 1px;
-}
-
-
-.panel-description,
-.question-description,
-.guess-description {
-    margin:
-        0 0 22px;
-
-    color: #91919d;
-
-    font-size: 14px;
-
-    line-height: 1.8;
-}
-
-
-/* =========================================
-   ROOM SCREEN
-========================================= */
-
-.room-screen {
-    max-width: 680px;
-
-    margin:
-        0 auto;
-}
-
-
-.room-panel {
-    padding:
-        30px;
-}
-
-
-.separator {
-    position: relative;
-
-    margin:
-        24px 0;
-
-    text-align: center;
-}
-
-
-.separator::before {
-    content: "";
-
-    position: absolute;
-
-    top: 50%;
-    left: 0;
-    right: 0;
-
-    height: 1px;
-
-    background:
-        rgba(255, 255, 255, 0.055);
-}
-
-
-.separator span {
-    position: relative;
-
-    display: inline-block;
-
-    padding:
-        0 14px;
-
-    background:
-        #0c0c12;
-
-    color: #51515e;
-
-    font-size: 10px;
-
-    letter-spacing: 3px;
-}
-
-
-/* =========================================
-   INPUTS
-========================================= */
-
-label {
-    display: block;
-
-    margin-bottom: 8px;
-
-    color: #9998a8;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    letter-spacing: 1.5px;
-}
-
-
-input,
-select {
-    width: 100%;
-
-    min-height: 50px;
-
-    padding:
-        0 14px;
-
-    border:
-        1px solid
-        #30303a;
-
-    border-radius: 10px;
-
-    outline: none;
-
-    background:
-        #0c0c11;
-
-    color:
-        #f3f3f7;
-
-    font-size: 15px;
-
-    transition:
-        border-color 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease;
-}
-
-
-input::placeholder {
-    color: #565661;
-}
-
-
-input:focus,
-select:focus {
-    border-color:
-        #8575e6;
-
-    background:
-        #111119;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(133, 117, 230, 0.11);
-}
-
-
-input:disabled,
-select:disabled {
-    opacity: 0.38;
-
-    cursor: not-allowed;
-}
-
-
-.room-id-input {
-    text-transform: uppercase;
-
-    text-align: center;
-
-    font-size: 25px;
-
-    font-weight: 800;
-
-    letter-spacing: 8px;
-}
-
-
-/* =========================================
-   BUTTON COMMON
-========================================= */
-
-button {
-    min-height: 50px;
-
-    padding:
-        12px 18px;
-
-    border:
-        1px solid
-        #34343f;
-
-    border-radius: 10px;
-
-    cursor: pointer;
-
-    background:
-        linear-gradient(
-            180deg,
-            #1d1d26,
-            #121218
-        );
-
-    color:
-        #ededf3;
-
-    font-family: inherit;
-
-    font-size: 14px;
-
-    font-weight: 700;
-
-    transition:
-        transform 0.15s ease,
-        border-color 0.15s ease,
-        background 0.15s ease,
-        box-shadow 0.15s ease,
-        opacity 0.15s ease;
-}
-
-
-button:hover:not(:disabled) {
-    transform:
-        translateY(-2px);
-
-    border-color:
-        #7769d0;
-
-    background:
-        linear-gradient(
-            180deg,
-            #29283b,
-            #181720
-        );
-
-    box-shadow:
-        0 10px 28px
-        rgba(93, 76, 205, 0.16);
-}
-
-
-button:active:not(:disabled) {
-    transform:
-        translateY(0);
-}
-
-
-button:disabled {
-    opacity: 0.34;
-
-    cursor: not-allowed;
-}
-
-
-/* =========================================
-   PRIMARY BUTTON
-========================================= */
-
-.primary-button {
-    width: 100%;
-
-    margin-top: 15px;
-
-    border-color:
-        #6b5bc9;
+        rgba(151, 125, 255, 0.75);
 
     background:
         linear-gradient(
             135deg,
-            #6552d4,
-            #44339d
+            #765de4,
+            #4931a4
         );
-
-    color: #ffffff;
-
-    box-shadow:
-        0 12px 28px
-        rgba(86, 67, 195, 0.2);
 }
 
 
-.primary-button:hover:not(:disabled) {
-    border-color:
-        #927fff;
+#cpu-game-button:hover:not(:disabled) {
+    border-color: #ac9aff;
 
     background:
         linear-gradient(
             135deg,
-            #7662e8,
-            #5340b6
+            #8975f0,
+            #5b43bb
         );
-
-    box-shadow:
-        0 14px 36px
-        rgba(101, 79, 230, 0.3);
 }
 
 
@@ -1572,8 +663,7 @@ button:disabled {
 
     gap: 16px;
 
-    padding:
-        20px 0;
+    padding: 20px 0;
 
     border-top:
         1px solid
@@ -1684,8 +774,7 @@ button:disabled {
 .game-info p {
     margin: 0;
 
-    padding:
-        9px 15px;
+    padding: 9px 15px;
 
     border:
         1px solid
@@ -1713,8 +802,7 @@ button:disabled {
 .status-section {
     text-align: center;
 
-    padding:
-        22px;
+    padding: 22px;
 }
 
 
@@ -1722,31 +810,73 @@ button:disabled {
     margin:
         0 0 9px;
 
-    color:
-        #686875;
+    color: #686875;
 
-    font-size:
-        9px;
+    font-size: 9px;
 
-    font-weight:
-        800;
+    font-weight: 800;
 
-    letter-spacing:
-        3px;
+    letter-spacing: 3px;
 }
 
 
 #game-status {
     margin: 0;
 
-    color:
-        #dedaff;
+    color: #dedaff;
 
-    font-size:
-        18px;
+    font-size: 18px;
 
-    font-weight:
-        750;
+    font-weight: 750;
+}
+
+
+/* =========================================
+   CPU ACTION
+========================================= */
+
+#cpu-action-section {
+    max-width: 700px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    text-align: center;
+
+    border-color:
+        rgba(124, 100, 220, 0.32);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(104, 82, 208, 0.11),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+
+#cpu-action-section::before {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(170, 151, 255, 0.8),
+            transparent
+        );
+}
+
+
+#cpu-action-text {
+    margin:
+        12px 0 0;
+
+    color: #ded9ff;
+
+    font-size: 18px;
+
+    line-height: 1.7;
+
+    white-space: pre-line;
 }
 
 
@@ -1792,8 +922,7 @@ button:disabled {
             #d6d6db
         );
 
-    color:
-        #111116;
+    color: #111116;
 
     box-shadow:
         0 17px 35px
@@ -1828,8 +957,7 @@ button:disabled {
 
 
 .playing-card:hover {
-    transform:
-        translateY(-7px);
+    transform: translateY(-7px);
 
     box-shadow:
         0 24px 48px
@@ -1838,14 +966,12 @@ button:disabled {
 
 
 .card-red {
-    color:
-        #a21f39;
+    color: #a21f39;
 }
 
 
 .card-black {
-    color:
-        #111116;
+    color: #111116;
 }
 
 
@@ -1878,8 +1004,7 @@ button:disabled {
     right: 12px;
     bottom: 12px;
 
-    transform:
-        rotate(180deg);
+    transform: rotate(180deg);
 }
 
 
@@ -1909,8 +1034,7 @@ button:disabled {
     justify-content: center;
     align-items: center;
 
-    border-color:
-        #6e59d0;
+    border-color: #6e59d0;
 
     background:
         radial-gradient(
@@ -1920,17 +1044,13 @@ button:disabled {
             #0b0b10 100%
         );
 
-    color:
-        #cec6ff;
+    color: #cec6ff;
 
-    font-size:
-        27px;
+    font-size: 27px;
 
-    font-weight:
-        900;
+    font-weight: 900;
 
-    letter-spacing:
-        4px;
+    letter-spacing: 4px;
 
     text-shadow:
         0 0 22px
@@ -1965,17 +1085,13 @@ button:disabled {
     margin:
         0 0 13px;
 
-    color:
-        #777686;
+    color: #777686;
 
-    font-size:
-        10px;
+    font-size: 10px;
 
-    font-weight:
-        800;
+    font-weight: 800;
 
-    letter-spacing:
-        2px;
+    letter-spacing: 2px;
 }
 
 
@@ -2026,14 +1142,11 @@ button:disabled {
     margin:
         12px 0 0;
 
-    color:
-        #62616e;
+    color: #62616e;
 
-    font-size:
-        11px;
+    font-size: 11px;
 
-    line-height:
-        1.7;
+    line-height: 1.7;
 }
 
 
@@ -2061,37 +1174,31 @@ button:disabled {
 
 
 .question-suit-symbol {
-    font-size:
-        23px;
+    font-size: 23px;
 }
 
 
 .red-suit {
-    color:
-        #f27487;
+    color: #f27487;
 }
 
 
 .black-suit {
-    color:
-        #e4e4e9;
+    color: #e4e4e9;
 }
 
 
 .joker-grid {
     display: grid;
 
-    grid-template-columns:
-        1fr;
+    grid-template-columns: 1fr;
 }
 
 
 .joker-question-button {
-    border-color:
-        #6556bb;
+    border-color: #6556bb;
 
-    color:
-        #cdc6ff;
+    color: #cdc6ff;
 
     background:
         linear-gradient(
@@ -2107,20 +1214,15 @@ button:disabled {
 ========================================= */
 
 .guess-section {
-    max-width:
-        700px;
+    max-width: 700px;
 
-    margin-left:
-        auto;
-
-    margin-right:
-        auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 
 .guess-input-group {
-    margin-top:
-        18px;
+    margin-top: 18px;
 }
 
 
@@ -2128,27 +1230,22 @@ button:disabled {
     margin:
         18px 0;
 
-    padding:
-        13px;
+    padding: 13px;
 
     border:
         1px solid
         #2d2c38;
 
-    border-radius:
-        10px;
+    border-radius: 10px;
 
     background:
         rgba(255, 255, 255, 0.025);
 
-    color:
-        #c8c4e6;
+    color: #c8c4e6;
 
-    text-align:
-        center;
+    text-align: center;
 
-    font-weight:
-        750;
+    font-weight: 750;
 }
 
 
@@ -2157,17 +1254,12 @@ button:disabled {
 ========================================= */
 
 .guess-result-section {
-    max-width:
-        700px;
+    max-width: 700px;
 
-    margin-left:
-        auto;
+    margin-left: auto;
+    margin-right: auto;
 
-    margin-right:
-        auto;
-
-    text-align:
-        center;
+    text-align: center;
 }
 
 
@@ -2175,14 +1267,11 @@ button:disabled {
     margin:
         0 0 24px;
 
-    color:
-        #f1f0f8;
+    color: #f1f0f8;
 
-    font-size:
-        23px;
+    font-size: 23px;
 
-    letter-spacing:
-        3px;
+    letter-spacing: 3px;
 }
 
 
@@ -2190,29 +1279,22 @@ button:disabled {
     margin:
         20px 0;
 
-    color:
-        #e9e6ff;
+    color: #e9e6ff;
 
-    font-size:
-        25px;
+    font-size: 25px;
 
-    font-weight:
-        800;
+    font-weight: 800;
 
-    line-height:
-        1.6;
+    line-height: 1.6;
 
-    white-space:
-        pre-line;
+    white-space: pre-line;
 }
 
 
 .guess-result-count {
-    color:
-        #9a98aa;
+    color: #9a98aa;
 
-    font-size:
-        14px;
+    font-size: 14px;
 }
 
 
@@ -2221,8 +1303,7 @@ button:disabled {
 ========================================= */
 
 .game-over-section {
-    text-align:
-        center;
+    text-align: center;
 
     border-color:
         rgba(
@@ -2238,8 +1319,7 @@ button:disabled {
     margin:
         5px 0 8px;
 
-    color:
-        #e4e0ff;
+    color: #e4e0ff;
 
     font-size:
         clamp(
@@ -2248,11 +1328,9 @@ button:disabled {
             50px
         );
 
-    font-weight:
-        900;
+    font-weight: 900;
 
-    letter-spacing:
-        7px;
+    letter-spacing: 7px;
 
     text-shadow:
         0 0 32px
@@ -2264,35 +1342,25 @@ button:disabled {
     margin:
         0 0 32px;
 
-    color:
-        #aaa7bb;
+    color: #aaa7bb;
 
-    font-size:
-        19px;
+    font-size: 19px;
 }
 
 
 .revealed-player {
-    margin-top:
-        26px;
+    margin-top: 26px;
 
-    padding:
-        20px;
+    padding: 20px;
 
     border:
         1px solid
         #292933;
 
-    border-radius:
-        14px;
+    border-radius: 14px;
 
     background:
-        rgba(
-            255,
-            255,
-            255,
-            0.018
-        );
+        rgba(255, 255, 255, 0.018);
 }
 
 
@@ -2304,22 +1372,18 @@ button:disabled {
 
     gap: 10px;
 
-    margin-bottom:
-        8px;
+    margin-bottom: 8px;
 }
 
 
 .revealed-player-title h3 {
     margin: 0;
 
-    color:
-        #aaa8b8;
+    color: #aaa8b8;
 
-    font-size:
-        13px;
+    font-size: 13px;
 
-    letter-spacing:
-        2px;
+    letter-spacing: 2px;
 }
 
 
@@ -2336,31 +1400,21 @@ button:disabled {
         1px solid
         #554b92;
 
-    border-radius:
-        999px;
+    border-radius: 999px;
 
     background:
-        rgba(
-            103,
-            82,
-            203,
-            0.12
-        );
+        rgba(103, 82, 203, 0.12);
 
-    color:
-        #bcb3ff;
+    color: #bcb3ff;
 
-    font-size:
-        10px;
+    font-size: 10px;
 
-    font-weight:
-        800;
+    font-weight: 800;
 }
 
 
 .revealed-hand {
-    min-height:
-        215px;
+    min-height: 215px;
 }
 
 
@@ -2371,14 +1425,12 @@ button:disabled {
 
     gap: 14px;
 
-    margin-top:
-        30px;
+    margin-top: 30px;
 }
 
 
 .game-over-buttons button {
-    width:
-        220px;
+    width: 220px;
 }
 
 
@@ -2388,23 +1440,18 @@ button:disabled {
 
 
 .leave-game-button {
-    border-color:
-        #3f3f49;
+    border-color: #3f3f49;
 
-    background:
-        #141419;
+    background: #141419;
 
-    color:
-        #aaaab3;
+    color: #aaaab3;
 }
 
 
 .leave-game-button:hover:not(:disabled) {
-    border-color:
-        #696977;
+    border-color: #696977;
 
-    background:
-        #1c1c22;
+    background: #1c1c22;
 }
 
 
@@ -2413,49 +1460,31 @@ button:disabled {
 ========================================= */
 
 .system-message {
-    max-width:
-        760px;
+    max-width: 760px;
 
     margin:
         26px auto 0;
 
-    padding:
-        14px 16px;
+    padding: 14px 16px;
 
     border:
         1px solid
-        rgba(
-            255,
-            255,
-            255,
-            0.04
-        );
+        rgba(255, 255, 255, 0.04);
 
-    border-radius:
-        10px;
+    border-radius: 10px;
 
     background:
-        rgba(
-            255,
-            255,
-            255,
-            0.012
-        );
+        rgba(255, 255, 255, 0.012);
 
-    color:
-        #858491;
+    color: #858491;
 
-    text-align:
-        center;
+    text-align: center;
 
-    font-size:
-        13px;
+    font-size: 13px;
 
-    line-height:
-        1.7;
+    line-height: 1.7;
 
-    white-space:
-        pre-line;
+    white-space: pre-line;
 }
 
 
@@ -2471,26 +1500,20 @@ button:disabled {
 
     gap: 9px;
 
-    margin-top:
-        38px;
+    margin-top: 38px;
 
-    color:
-        #3f3f49;
+    color: #3f3f49;
 
-    font-size:
-        9px;
+    font-size: 9px;
 
-    font-weight:
-        700;
+    font-weight: 700;
 
-    letter-spacing:
-        2px;
+    letter-spacing: 2px;
 }
 
 
 .footer-dot {
-    color:
-        #675ab0;
+    color: #675ab0;
 }
 
 
@@ -2498,9 +1521,7 @@ button:disabled {
    MOBILE
 ========================================= */
 
-@media (
-    max-width: 700px
-) {
+@media (max-width: 700px) {
 
     .game-container {
         width:
@@ -2511,17 +1532,12 @@ button:disabled {
     }
 
 
-    /* HEADER */
-
     .game-header {
-        justify-content:
-            flex-start;
+        justify-content: flex-start;
 
-        gap:
-            12px;
+        gap: 12px;
 
-        margin-bottom:
-            24px;
+        margin-bottom: 24px;
 
         padding:
             15px 6px 20px;
@@ -2529,42 +1545,30 @@ button:disabled {
 
 
     .brand-mark {
-        width:
-            48px;
+        width: 48px;
+        height: 48px;
 
-        height:
-            48px;
+        border-radius: 12px;
 
-        border-radius:
-            12px;
-
-        font-size:
-            12px;
+        font-size: 12px;
     }
 
 
     .game-header h1 {
-        font-size:
-            29px;
+        font-size: 29px;
 
-        letter-spacing:
-            5px;
+        letter-spacing: 5px;
     }
 
 
     .subtitle {
-        margin-top:
-            7px;
+        margin-top: 7px;
 
-        font-size:
-            8px;
+        font-size: 8px;
 
-        letter-spacing:
-            1.7px;
+        letter-spacing: 1.7px;
     }
 
-
-    /* PANELS */
 
     .panel,
     .hand-section,
@@ -2573,11 +1577,9 @@ button:disabled {
     .guess-section,
     .guess-result-section,
     .game-over-section {
-        padding:
-            18px;
+        padding: 18px;
 
-        border-radius:
-            14px;
+        border-radius: 14px;
     }
 
 
@@ -2587,14 +1589,11 @@ button:disabled {
     }
 
 
-    /* RULES */
-
     .rule-item {
         grid-template-columns:
             36px 1fr;
 
-        gap:
-            10px;
+        gap: 10px;
 
         padding:
             17px 0;
@@ -2602,41 +1601,31 @@ button:disabled {
 
 
     .rules-content {
-        font-size:
-            13px;
+        font-size: 13px;
     }
 
 
     .rules-intro {
-        font-size:
-            13px;
+        font-size: 13px;
     }
 
 
     .rules-note {
-        padding:
-            15px;
+        padding: 15px;
     }
 
 
-    /* INFO */
-
     .game-info {
-        flex-direction:
-            column;
+        flex-direction: column;
 
-        gap:
-            8px;
+        gap: 8px;
     }
 
 
     .game-info p {
-        text-align:
-            center;
+        text-align: center;
     }
 
-
-    /* QUESTION */
 
     .question-grid,
     .suit-grid {
@@ -2649,115 +1638,87 @@ button:disabled {
 
 
     .parameter-question {
-        grid-template-columns:
-            1fr;
+        grid-template-columns: 1fr;
     }
 
 
-    /* CARDS */
-
     .hand-container {
-        gap:
-            10px;
+        gap: 10px;
     }
 
 
     .playing-card {
-        width:
-            100px;
+        width: 100px;
+        height: 145px;
 
-        height:
-            145px;
-
-        border-radius:
-            10px;
+        border-radius: 10px;
     }
 
 
     .card-center {
-        font-size:
-            46px;
+        font-size: 46px;
     }
 
 
     .card-corner {
-        top:
-            8px;
+        top: 8px;
+        left: 8px;
 
-        left:
-            8px;
-
-        font-size:
-            15px;
+        font-size: 15px;
     }
 
 
     .card-bottom {
-        top:
-            auto;
+        top: auto;
+        left: auto;
 
-        left:
-            auto;
-
-        right:
-            8px;
-
-        bottom:
-            8px;
+        right: 8px;
+        bottom: 8px;
     }
 
 
     .joker-card {
-        font-size:
-            17px;
+        font-size: 17px;
 
-        letter-spacing:
-            2px;
+        letter-spacing: 2px;
     }
 
 
-    /* GAME OVER */
+    #cpu-action-text {
+        font-size: 15px;
+    }
+
 
     .revealed-hand {
-        min-height:
-            145px;
+        min-height: 145px;
     }
 
 
     .game-over-buttons {
-        flex-direction:
-            column;
+        flex-direction: column;
     }
 
 
     .game-over-buttons button {
-        width:
-            100%;
+        width: 100%;
     }
 
 
     .rematch-button {
-        margin-top:
-            0;
+        margin-top: 0;
     }
 
 
-    /* FOOTER */
-
     .game-footer {
-        flex-wrap:
-            wrap;
+        flex-wrap: wrap;
 
         padding:
             0 10px;
 
-        text-align:
-            center;
+        text-align: center;
 
-        line-height:
-            1.8;
+        line-height: 1.8;
     }
-
 }
 
 
@@ -2765,56 +1726,42 @@ button:disabled {
    VERY SMALL MOBILE
 ========================================= */
 
-@media (
-    max-width: 390px
-) {
+@media (max-width: 390px) {
 
     .game-header h1 {
-        font-size:
-            25px;
+        font-size: 25px;
 
-        letter-spacing:
-            4px;
+        letter-spacing: 4px;
     }
 
 
     .brand-mark {
-        width:
-            43px;
-
-        height:
-            43px;
+        width: 43px;
+        height: 43px;
     }
 
 
     .question-grid,
     .suit-grid {
-        grid-template-columns:
-            1fr;
+        grid-template-columns: 1fr;
     }
 
 
     .playing-card {
-        width:
-            90px;
-
-        height:
-            132px;
+        width: 90px;
+        height: 132px;
     }
 
 
     .card-center {
-        font-size:
-            40px;
+        font-size: 40px;
     }
 
 
     .room-id-input {
-        font-size:
-            22px;
+        font-size: 22px;
 
-        letter-spacing:
-            6px;
+        letter-spacing: 6px;
     }
 
 
@@ -2822,824 +1769,6 @@ button:disabled {
         grid-template-columns:
             30px 1fr;
 
-        gap:
-            8px;
+        gap: 8px;
     }
-
-}
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        2px;
-}
-
-
-.question-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            3,
-            minmax(0, 1fr)
-        );
-
-    gap: 12px;
-}
-
-
-.question-button {
-    min-height: 58px;
-}
-
-
-.parameter-question {
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    align-items: end;
-
-    gap: 12px;
-
-    margin-top: 14px;
-}
-
-
-.question-input-area {
-    width: 100%;
-}
-
-
-.parameter-button {
-    margin: 0;
-}
-
-
-.number-help,
-.guess-help {
-    margin:
-        12px 0 0;
-
-    color:
-        #62616e;
-
-    font-size:
-        11px;
-
-    line-height:
-        1.7;
-}
-
-
-/* =========================================
-   SUIT QUESTIONS
-========================================= */
-
-.suit-grid {
-    grid-template-columns:
-        repeat(
-            4,
-            minmax(0, 1fr)
-        );
-}
-
-
-.suit-button {
-    display: flex;
-
-    justify-content: center;
-    align-items: center;
-
-    gap: 8px;
-}
-
-
-.question-suit-symbol {
-    font-size:
-        23px;
-}
-
-
-.red-suit {
-    color:
-        #f27487;
-}
-
-
-.black-suit {
-    color:
-        #e4e4e9;
-}
-
-
-.joker-grid {
-    display: grid;
-
-    grid-template-columns:
-        1fr;
-}
-
-
-.joker-question-button {
-    border-color:
-        #6556bb;
-
-    color:
-        #cdc6ff;
-
-    background:
-        linear-gradient(
-            180deg,
-            #242033,
-            #15131e
-        );
-}
-
-
-/* =========================================
-   GUESS
-========================================= */
-
-.guess-section {
-    max-width:
-        700px;
-
-    margin-left:
-        auto;
-
-    margin-right:
-        auto;
-}
-
-
-.guess-input-group {
-    margin-top:
-        18px;
-}
-
-
-.found-count {
-    margin:
-        18px 0;
-
-    padding:
-        13px;
-
-    border:
-        1px solid
-        #2d2c38;
-
-    border-radius:
-        10px;
-
-    background:
-        rgba(255, 255, 255, 0.025);
-
-    color:
-        #c8c4e6;
-
-    text-align:
-        center;
-
-    font-weight:
-        750;
-}
-
-
-/* =========================================
-   RESULT
-========================================= */
-
-.guess-result-section {
-    max-width:
-        700px;
-
-    margin-left:
-        auto;
-
-    margin-right:
-        auto;
-
-    text-align:
-        center;
-}
-
-
-.guess-result-section h2 {
-    margin:
-        0 0 24px;
-
-    color:
-        #f1f0f8;
-
-    font-size:
-        23px;
-
-    letter-spacing:
-        3px;
-}
-
-
-.guess-result-text {
-    margin:
-        20px 0;
-
-    color:
-        #e9e6ff;
-
-    font-size:
-        25px;
-
-    font-weight:
-        800;
-
-    line-height:
-        1.6;
-
-    white-space:
-        pre-line;
-}
-
-
-.guess-result-count {
-    color:
-        #9a98aa;
-
-    font-size:
-        14px;
-}
-
-
-/* =========================================
-   GAME OVER
-========================================= */
-
-.game-over-section {
-    text-align:
-        center;
-
-    border-color:
-        rgba(
-            117,
-            95,
-            213,
-            0.42
-        );
-}
-
-
-.game-over-title {
-    margin:
-        5px 0 8px;
-
-    color:
-        #e4e0ff;
-
-    font-size:
-        clamp(
-            35px,
-            7vw,
-            50px
-        );
-
-    font-weight:
-        900;
-
-    letter-spacing:
-        7px;
-
-    text-shadow:
-        0 0 32px
-        rgba(134, 110, 255, 0.32);
-}
-
-
-.game-over-message {
-    margin:
-        0 0 32px;
-
-    color:
-        #aaa7bb;
-
-    font-size:
-        19px;
-}
-
-
-.revealed-player {
-    margin-top:
-        26px;
-
-    padding:
-        20px;
-
-    border:
-        1px solid
-        #292933;
-
-    border-radius:
-        14px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.018
-        );
-}
-
-
-.revealed-player-title {
-    display: flex;
-
-    justify-content: center;
-    align-items: center;
-
-    gap: 10px;
-
-    margin-bottom:
-        8px;
-}
-
-
-.revealed-player-title h3 {
-    margin: 0;
-
-    color:
-        #aaa8b8;
-
-    font-size:
-        13px;
-
-    letter-spacing:
-        2px;
-}
-
-
-.player-chip {
-    display: inline-flex;
-
-    justify-content: center;
-    align-items: center;
-
-    width: 32px;
-    height: 24px;
-
-    border:
-        1px solid
-        #554b92;
-
-    border-radius:
-        999px;
-
-    background:
-        rgba(
-            103,
-            82,
-            203,
-            0.12
-        );
-
-    color:
-        #bcb3ff;
-
-    font-size:
-        10px;
-
-    font-weight:
-        800;
-}
-
-
-.revealed-hand {
-    min-height:
-        215px;
-}
-
-
-.game-over-buttons {
-    display: flex;
-
-    justify-content: center;
-
-    gap: 14px;
-
-    margin-top:
-        30px;
-}
-
-
-.game-over-buttons button {
-    width:
-        220px;
-}
-
-
-.rematch-button {
-    margin-top: 0;
-}
-
-
-.leave-game-button {
-    border-color:
-        #3f3f49;
-
-    background:
-        #141419;
-
-    color:
-        #aaaab3;
-}
-
-
-.leave-game-button:hover:not(:disabled) {
-    border-color:
-        #696977;
-
-    background:
-        #1c1c22;
-}
-
-
-/* =========================================
-   SYSTEM MESSAGE
-========================================= */
-
-.system-message {
-    max-width:
-        760px;
-
-    margin:
-        26px auto 0;
-
-    padding:
-        14px 16px;
-
-    border:
-        1px solid
-        rgba(
-            255,
-            255,
-            255,
-            0.04
-        );
-
-    border-radius:
-        10px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.012
-        );
-
-    color:
-        #858491;
-
-    text-align:
-        center;
-
-    font-size:
-        13px;
-
-    line-height:
-        1.7;
-
-    white-space:
-        pre-line;
-}
-
-
-/* =========================================
-   FOOTER
-========================================= */
-
-.game-footer {
-    display: flex;
-
-    justify-content: center;
-    align-items: center;
-
-    gap: 9px;
-
-    margin-top:
-        38px;
-
-    color:
-        #3f3f49;
-
-    font-size:
-        9px;
-
-    font-weight:
-        700;
-
-    letter-spacing:
-        2px;
-}
-
-
-.footer-dot {
-    color:
-        #675ab0;
-}
-
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media (
-    max-width: 700px
-) {
-
-    .game-container {
-        width:
-            calc(100% - 20px);
-
-        padding:
-            18px 0 42px;
-    }
-
-
-    /* HEADER */
-
-    .game-header {
-        justify-content:
-            flex-start;
-
-        gap:
-            12px;
-
-        margin-bottom:
-            24px;
-
-        padding:
-            15px 6px 20px;
-    }
-
-
-    .brand-mark {
-        width:
-            48px;
-
-        height:
-            48px;
-
-        border-radius:
-            12px;
-
-        font-size:
-            12px;
-    }
-
-
-    .game-header h1 {
-        font-size:
-            29px;
-
-        letter-spacing:
-            5px;
-    }
-
-
-    .subtitle {
-        margin-top:
-            7px;
-
-        font-size:
-            8px;
-
-        letter-spacing:
-            1.7px;
-    }
-
-
-    /* PANELS */
-
-    .panel,
-    .hand-section,
-    .status-section,
-    .question-section,
-    .guess-section,
-    .guess-result-section,
-    .game-over-section {
-        padding:
-            18px;
-
-        border-radius:
-            14px;
-    }
-
-
-    .room-panel {
-        padding:
-            21px 18px;
-    }
-
-
-    /* INFO */
-
-    .game-info {
-        flex-direction:
-            column;
-
-        gap:
-            8px;
-    }
-
-
-    .game-info p {
-        text-align:
-            center;
-    }
-
-
-    /* QUESTION */
-
-    .question-grid,
-    .suit-grid {
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(0, 1fr)
-            );
-    }
-
-
-    .parameter-question {
-        grid-template-columns:
-            1fr;
-    }
-
-
-    /* CARDS */
-
-    .hand-container {
-        gap:
-            10px;
-    }
-
-
-    .playing-card {
-        width:
-            100px;
-
-        height:
-            145px;
-
-        border-radius:
-            10px;
-    }
-
-
-    .card-center {
-        font-size:
-            46px;
-    }
-
-
-    .card-corner {
-        top:
-            8px;
-
-        left:
-            8px;
-
-        font-size:
-            15px;
-    }
-
-
-    .card-bottom {
-        top:
-            auto;
-
-        left:
-            auto;
-
-        right:
-            8px;
-
-        bottom:
-            8px;
-    }
-
-
-    .joker-card {
-        font-size:
-            17px;
-
-        letter-spacing:
-            2px;
-    }
-
-
-    /* GAME OVER */
-
-    .revealed-hand {
-        min-height:
-            145px;
-    }
-
-
-    .game-over-buttons {
-        flex-direction:
-            column;
-    }
-
-
-    .game-over-buttons button {
-        width:
-            100%;
-    }
-
-
-    .rematch-button {
-        margin-top:
-            0;
-    }
-
-
-    /* FOOTER */
-
-    .game-footer {
-        flex-wrap:
-            wrap;
-
-        padding:
-            0 10px;
-
-        text-align:
-            center;
-
-        line-height:
-            1.8;
-    }
-
-}
-
-
-/* =========================================
-   VERY SMALL MOBILE
-========================================= */
-
-@media (
-    max-width: 390px
-) {
-
-    .game-header h1 {
-        font-size:
-            25px;
-
-        letter-spacing:
-            4px;
-    }
-
-
-    .brand-mark {
-        width:
-            43px;
-
-        height:
-            43px;
-    }
-
-
-    .question-grid,
-    .suit-grid {
-        grid-template-columns:
-            1fr;
-    }
-
-
-    .playing-card {
-        width:
-            90px;
-
-        height:
-            132px;
-    }
-
-
-    .card-center {
-        font-size:
-            40px;
-    }
-
-
-    .room-id-input {
-        font-size:
-            22px;
-
-        letter-spacing:
-            6px;
-    }
-
 }
