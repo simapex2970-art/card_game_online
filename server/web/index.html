@@ -85,7 +85,59 @@
     >
 
 
-        <!-- CREATE ROOM -->
+        <!-- =================================
+             PLAYER NAME
+        ================================== -->
+
+        <section class="panel room-panel">
+
+            <div class="section-heading">
+
+                <p class="section-number">
+                    YOU
+                </p>
+
+                <div>
+
+                    <h2>
+                        PLAYER NAME
+                    </h2>
+
+                    <p class="section-jp">
+                        プレイヤー名を入力
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <p class="panel-description">
+                対戦で使用する名前を入力してください。
+                1〜12文字まで使用できます。
+            </p>
+
+
+            <label for="player-name">
+                NAME
+            </label>
+
+
+            <input
+                id="player-name"
+                class="room-id-input"
+                type="text"
+                maxlength="12"
+                autocomplete="nickname"
+                placeholder="名前を入力"
+            >
+
+        </section>
+
+
+        <!-- =================================
+             CREATE ROOM
+        ================================== -->
 
         <section class="panel room-panel">
 
@@ -134,7 +186,9 @@
         </div>
 
 
-        <!-- JOIN ROOM -->
+        <!-- =================================
+             JOIN ROOM
+        ================================== -->
 
         <section class="panel room-panel">
 
@@ -198,7 +252,9 @@
         </div>
 
 
-        <!-- CPU BATTLE -->
+        <!-- =================================
+             CPU BATTLE
+        ================================== -->
 
         <section class="panel room-panel">
 
@@ -567,9 +623,7 @@
         </section>
 
 
-        <!-- =================================
-             QUESTION
-        ================================== -->
+        <!-- QUESTION -->
 
         <section
             id="question-section"
@@ -602,8 +656,6 @@
                 質問します。
             </p>
 
-
-            <!-- BASIC -->
 
             <div class="question-group">
 
@@ -644,8 +696,6 @@
 
             </div>
 
-
-            <!-- RANK -->
 
             <div class="question-group">
 
@@ -700,8 +750,6 @@
 
             </div>
 
-
-            <!-- NUMBER -->
 
             <div class="question-group">
 
@@ -777,8 +825,6 @@
             </div>
 
 
-            <!-- SUIT -->
-
             <div class="question-group">
 
                 <h3>
@@ -840,8 +886,6 @@
             </div>
 
 
-            <!-- JOKER -->
-
             <div class="question-group">
 
                 <h3>
@@ -866,9 +910,7 @@
         </section>
 
 
-        <!-- =================================
-             GUESS
-        ================================== -->
+        <!-- GUESS -->
 
         <section
             id="guess-section"
@@ -1000,9 +1042,7 @@
         </section>
 
 
-        <!-- =================================
-             GUESS RESULT
-        ================================== -->
+        <!-- RESULT -->
 
         <section
             id="guess-result-section"
@@ -1045,9 +1085,7 @@
         </section>
 
 
-        <!-- =================================
-             GAME OVER
-        ================================== -->
+        <!-- GAME OVER -->
 
         <section
             id="game-over-section"
@@ -1082,7 +1120,7 @@
                         P1
                     </span>
 
-                    <h3>
+                    <h3 id="player1-title">
                         PLAYER 1
                     </h3>
 
@@ -1148,21 +1186,13 @@
     </section>
 
 
-    <!-- =====================================
-         MESSAGE
-    ====================================== -->
-
     <p
         id="message"
         class="system-message"
     >
-        対戦方法を選んでください。
+        名前を入力して対戦方法を選んでください。
     </p>
 
-
-    <!-- =====================================
-         FOOTER
-    ====================================== -->
 
     <footer class="game-footer">
 

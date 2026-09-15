@@ -110,6 +110,55 @@ ROOM_ID_LENGTH = 4
 
 
 # =============================================
+# ★ PLAYER NAME
+# =============================================
+
+PLAYER_NAME_MAX_LENGTH = 12
+
+
+def normalize_player_name(
+    name
+):
+
+    if name is None:
+
+        return ""
+
+
+    return str(
+        name
+    ).strip()
+
+
+def is_valid_player_name(
+    name
+):
+
+    if not name:
+
+        return False
+
+
+    if len(
+        name
+    ) > PLAYER_NAME_MAX_LENGTH:
+
+        return False
+
+
+    return True
+
+
+def get_cpu_name(
+    room
+):
+
+    return (
+        f"CPU Lv.{room['cpu_level']}"
+    )
+
+
+# =============================================
 # ルーム
 # =============================================
 
@@ -124,6 +173,10 @@ def create_room(
     return {
         "players": [],
 
+        # ★ PLAYER NAME
+        # playersと同じ順番で名前を保存
+        "player_names": [],
+
         "game": None,
 
         "current_turn": 1,
@@ -136,7 +189,6 @@ def create_room(
 
         "cpu_level": cpu_level,
 
-        # CPU Lv.2 / Lv.3 共通
         "cpu_candidate_hands": [],
 
         "cpu_question_history": [],
@@ -221,8 +273,6 @@ async def create_cpu_room(
     level: int = 1
 ):
 
-    # ★ 変更
-    # Lv.3を許可
     if level not in [
         1,
         2,
@@ -316,11 +366,6 @@ def initialize_cpu_candidates(
     ]
 
 
-    # CPU自身の3枚を除いた50枚から
-    # プレイヤーの3枚を仮定する
-    #
-    # 50C3 = 19600通り
-
     room[
         "cpu_candidate_hands"
     ] = [
@@ -368,8 +413,6 @@ def initialize_cpu_state(
     ] = set()
 
 
-    # ★ 変更
-    # Lv.2とLv.3は候補手札を利用する
     if room[
         "cpu_level"
     ] in [
@@ -506,63 +549,36 @@ def create_question_text(
 ):
 
     if question_id == 1:
-
         return "偶数のカードはありますか？"
 
-
     if question_id == 2:
-
         return "奇数のカードはありますか？"
 
-
     if question_id == 3:
-
         return "絵札はありますか？"
 
-
     if question_id == 4:
-
-        return (
-            f"{rank} はありますか？"
-        )
-
+        return f"{rank} はありますか？"
 
     if question_id == 5:
-
-        return (
-            f"{number}以上のカードはありますか？"
-        )
-
+        return f"{number}以上のカードはありますか？"
 
     if question_id == 6:
-
-        return (
-            f"{number}以下のカードはありますか？"
-        )
-
+        return f"{number}以下のカードはありますか？"
 
     if question_id == 7:
-
         return "スペードはありますか？"
 
-
     if question_id == 8:
-
         return "ハートはありますか？"
 
-
     if question_id == 9:
-
         return "ダイヤはありますか？"
 
-
     if question_id == 10:
-
         return "クラブはありますか？"
 
-
     if question_id == 11:
-
         return "JOKERはありますか？"
 
 
@@ -723,11 +739,6 @@ def create_cpu_question_pool():
     questions = []
 
 
-    # 偶数
-    # 奇数
-    # 絵札
-    # スート4種類
-    # JOKER
     for question_id in [
         1,
         2,
@@ -745,7 +756,6 @@ def create_cpu_question_pool():
         })
 
 
-    # ランク質問
     for rank in RANKS:
 
         questions.append({
@@ -757,7 +767,6 @@ def create_cpu_question_pool():
         })
 
 
-    # ○以上
     for number in range(
         1,
         14
@@ -772,7 +781,6 @@ def create_cpu_question_pool():
         })
 
 
-    # ○以下
     for number in range(
         1,
         14
@@ -814,15 +822,8 @@ def cpu_question_key(
 
 
 # =============================================
-# ★ Lv.3追加
-#
-# ある質問をしたと仮定したとき、
-# 現在の候補手札が
-#
-# YES何通り
-# NO何通り
-#
-# に分かれるかを調べる
+# Lv.3
+# 質問分割チェック
 # =============================================
 
 def evaluate_cpu_question_split(
@@ -891,20 +892,8 @@ def evaluate_cpu_question_split(
 
 
 # =============================================
-# ★ Lv.3追加
-#
-# YESとNOの差が小さいほど
-# 50:50に近い良い質問
-#
-# 例：
-#
-# YES 500
-# NO  500
-# score = 0
-#
-# YES 800
-# NO  200
-# score = 600
+# Lv.3
+# 分割スコア
 # =============================================
 
 def calculate_question_split_score(
@@ -920,10 +909,8 @@ def calculate_question_split_score(
 
 
 # =============================================
-# ★ Lv.3追加
-#
-# 現在の候補を最も半分に近く分割する
-# 質問を選択する
+# Lv.3
+# 最も50:50に近い質問
 # =============================================
 
 def choose_cpu_level3_question(
@@ -936,7 +923,6 @@ def choose_cpu_level3_question(
 
 
     best_score = None
-
     best_questions = []
 
 
@@ -950,18 +936,6 @@ def choose_cpu_level3_question(
             question
         )
 
-
-        # =====================================
-        # YESかNOのどちらかしか存在しない
-        #
-        # 例：
-        #
-        # YES 500
-        # NO    0
-        #
-        # この質問をしても
-        # 候補は1枚も減らないので除外
-        # =====================================
 
         if (
             yes_count == 0
@@ -980,10 +954,6 @@ def choose_cpu_level3_question(
         )
 
 
-        # =====================================
-        # 今までで最良
-        # =====================================
-
         if (
             best_score is None
             or
@@ -992,18 +962,10 @@ def choose_cpu_level3_question(
 
             best_score = score
 
-
             best_questions = [
                 question
             ]
 
-
-        # =====================================
-        # 同点
-        #
-        # 同じ性能ならランダムで選ぶため
-        # 候補に追加
-        # =====================================
 
         elif score == best_score:
 
@@ -1012,23 +974,12 @@ def choose_cpu_level3_question(
             )
 
 
-    # =========================================
-    # 良い質問が存在する
-    # =========================================
-
     if best_questions:
 
         return random.choice(
             best_questions
         )
 
-
-    # =========================================
-    # 候補が1通りなど、
-    # どの質問でも分割不能だった場合
-    #
-    # ゲームを止めないためランダム質問
-    # =========================================
 
     return random.choice(
         pool
@@ -1048,12 +999,7 @@ def choose_cpu_question(
     )
 
 
-    # =========================================
     # Lv.1
-    #
-    # 質問を完全ランダム選択
-    # =========================================
-
     if room[
         "cpu_level"
     ] == 1:
@@ -1063,12 +1009,7 @@ def choose_cpu_question(
         )
 
 
-    # =========================================
-    # ★ Lv.3追加
-    #
-    # 候補手札を最も50:50に分ける質問
-    # =========================================
-
+    # Lv.3
     if room[
         "cpu_level"
     ] == 3:
@@ -1078,14 +1019,7 @@ def choose_cpu_question(
         )
 
 
-    # =========================================
     # Lv.2
-    #
-    # 未使用の質問からランダム
-    #
-    # ここは今までのLv.2を維持
-    # =========================================
-
     used_keys = {
         cpu_question_key(
             item
@@ -1122,7 +1056,7 @@ def choose_cpu_question(
 
 # =============================================
 # Lv.2 / Lv.3
-# 質問結果から候補を絞る
+# 質問結果から候補絞り込み
 # =============================================
 
 def filter_cpu_candidates_by_question(
@@ -1131,7 +1065,6 @@ def filter_cpu_candidates_by_question(
     answer
 ):
 
-    # ★ 変更
     if room[
         "cpu_level"
     ] not in [
@@ -1202,7 +1135,7 @@ def filter_cpu_candidates_by_question(
 
 # =============================================
 # Lv.2 / Lv.3
-# 予想結果から候補を絞る
+# 予想結果から候補絞り込み
 # =============================================
 
 def filter_cpu_candidates_by_guess(
@@ -1211,7 +1144,6 @@ def filter_cpu_candidates_by_guess(
     correct
 ):
 
-    # ★ 変更
     if room[
         "cpu_level"
     ] not in [
@@ -1227,12 +1159,6 @@ def filter_cpu_candidates_by_guess(
     ]
 
 
-    # =========================================
-    # 当たり
-    #
-    # そのカードを含んでいる候補だけ残す
-    # =========================================
-
     if correct:
 
         room[
@@ -1244,12 +1170,6 @@ def filter_cpu_candidates_by_guess(
             if guess in hand
         ]
 
-
-    # =========================================
-    # はずれ
-    #
-    # そのカードを含む候補を消す
-    # =========================================
 
     else:
 
@@ -1271,8 +1191,7 @@ def filter_cpu_candidates_by_guess(
 
 
 # =============================================
-# Lv.1
-# ランダム予想
+# Lv.1予想
 # =============================================
 
 def choose_cpu_level1_guess(
@@ -1322,12 +1241,7 @@ def choose_cpu_level1_guess(
 
 
 # =============================================
-# Lv.2
-#
-# 候補手札に最も多く出現している
-# カードを予想
-#
-# ★ Lv.3でもこの予想ロジックを再利用
+# Lv.2 / Lv.3予想
 # =============================================
 
 def choose_cpu_level2_guess(
@@ -1364,12 +1278,9 @@ def choose_cpu_level2_guess(
         for card in candidate_hand:
 
             if card in found_cards:
-
                 continue
 
-
             if card in wrong_guesses:
-
                 continue
 
 
@@ -1404,10 +1315,6 @@ def choose_cpu_level2_guess(
         )
 
 
-    # =========================================
-    # 万一候補が0になったときの保険
-    # =========================================
-
     cpu_hand = set(
         cpu_player.hand
     )
@@ -1438,14 +1345,13 @@ def choose_cpu_level2_guess(
 
 
 # =============================================
-# CPU予想選択
+# CPU予想
 # =============================================
 
 def choose_cpu_guess(
     room
 ):
 
-    # Lv.1
     if room[
         "cpu_level"
     ] == 1:
@@ -1454,12 +1360,6 @@ def choose_cpu_guess(
             room
         )
 
-
-    # =========================================
-    # Lv.2 / Lv.3
-    #
-    # 予想ロジックは共通
-    # =========================================
 
     return choose_cpu_level2_guess(
         room
@@ -1509,23 +1409,9 @@ def cpu_ask_question(
     )
 
 
-    # =========================================
-    # ★ Lv.3追加
-    #
-    # 実際に答えを見る前に、
-    #
-    # この質問なら
-    # YES何通り / NO何通り
-    #
-    # になるとCPUが予測していたか保存
-    # =========================================
-
     before_candidate_count = None
-
     yes_prediction_count = None
-
     no_prediction_count = None
-
     split_score = None
 
 
@@ -1557,13 +1443,6 @@ def cpu_ask_question(
         )
 
 
-    # =========================================
-    # 実際のプレイヤーの手札に質問
-    #
-    # CPUの候補選択では
-    # 本物の手札を直接見ていない
-    # =========================================
-
     answer = evaluate_question_on_hand(
         game.question_manager,
         human_player.hand,
@@ -1580,12 +1459,6 @@ def cpu_ask_question(
         number
     )
 
-
-    # =========================================
-    # Lv.2 / Lv.3
-    #
-    # 質問履歴と候補手札を更新
-    # =========================================
 
     if room[
         "cpu_level"
@@ -1648,7 +1521,6 @@ def cpu_ask_question(
         "candidate_count":
             candidate_count,
 
-        # ★ Lv.3用
         "before_candidate_count":
             before_candidate_count,
 
@@ -1705,12 +1577,53 @@ async def finish_game(
     ] = "finished"
 
 
+    # ★ PLAYER NAME
+    player1_name = (
+        room[
+            "player_names"
+        ][0]
+        if room[
+            "player_names"
+        ]
+        else "PLAYER 1"
+    )
+
+
+    if room[
+        "mode"
+    ] == "cpu":
+
+        player2_name = get_cpu_name(
+            room
+        )
+
+    else:
+
+        player2_name = (
+            room[
+                "player_names"
+            ][1]
+            if len(
+                room[
+                    "player_names"
+                ]
+            ) >= 2
+            else "PLAYER 2"
+        )
+
+
     message = {
         "type":
             "game_over",
 
         "winner":
             winner,
+
+        "player1_name":
+            player1_name,
+
+        "player2_name":
+            player2_name,
 
         "player1_hand": [
             str(
@@ -1743,7 +1656,7 @@ async def finish_game(
 
 
 # =============================================
-# ターン変更通知
+# ターン変更
 # =============================================
 
 async def send_turn_changed(
@@ -1759,10 +1672,6 @@ async def send_turn_changed(
         "current_phase"
     ]
 
-
-    # =========================================
-    # CPU戦
-    # =========================================
 
     if room[
         "mode"
@@ -1806,10 +1715,6 @@ async def send_turn_changed(
 
         return
 
-
-    # =========================================
-    # PvP
-    # =========================================
 
     for index, websocket in enumerate(
         list(
@@ -1912,8 +1817,6 @@ async def start_new_game(
         candidate_count = None
 
 
-        # ★ 変更
-        # Lv.2 / Lv.3は候補数を持つ
         if room[
             "cpu_level"
         ] in [
@@ -1928,6 +1831,19 @@ async def start_new_game(
             )
 
 
+        # ★ PLAYER NAME
+        player1_name = (
+            room[
+                "player_names"
+            ][0]
+        )
+
+
+        player2_name = get_cpu_name(
+            room
+        )
+
+
         await send_json_safe(
             websocket,
             {
@@ -1936,6 +1852,12 @@ async def start_new_game(
 
                 "player":
                     1,
+
+                "player1_name":
+                    player1_name,
+
+                "player2_name":
+                    player2_name,
 
                 "hand": [
                     str(
@@ -1981,6 +1903,15 @@ async def start_new_game(
         return
 
 
+    if len(
+        room[
+            "player_names"
+        ]
+    ) < 2:
+
+        return
+
+
     player1_socket = room[
         "players"
     ][0]
@@ -1988,6 +1919,17 @@ async def start_new_game(
 
     player2_socket = room[
         "players"
+    ][1]
+
+
+    # ★ PLAYER NAME
+    player1_name = room[
+        "player_names"
+    ][0]
+
+
+    player2_name = room[
+        "player_names"
     ][1]
 
 
@@ -1999,6 +1941,12 @@ async def start_new_game(
 
             "player":
                 1,
+
+            "player1_name":
+                player1_name,
+
+            "player2_name":
+                player2_name,
 
             "hand": [
                 str(
@@ -2029,6 +1977,12 @@ async def start_new_game(
             "player":
                 2,
 
+            "player1_name":
+                player1_name,
+
+            "player2_name":
+                player2_name,
+
             "hand": [
                 str(
                     card
@@ -2058,7 +2012,6 @@ async def cpu_take_turn(
 ):
 
     if room_id not in rooms:
-
         return
 
 
@@ -2070,14 +2023,12 @@ async def cpu_take_turn(
     if room[
         "mode"
     ] != "cpu":
-
         return
 
 
     if not room[
         "players"
     ]:
-
         return
 
 
@@ -2087,14 +2038,12 @@ async def cpu_take_turn(
 
 
     if game is None:
-
         return
 
 
     if room[
         "current_turn"
     ] != 2:
-
         return
 
 
@@ -2103,23 +2052,14 @@ async def cpu_take_turn(
     ]
 
 
-    # =========================================
-    # CPU思考
-    # =========================================
-
     await asyncio.sleep(
         1.0
     )
 
 
     if room_id not in rooms:
-
         return
 
-
-    # =========================================
-    # CPU質問
-    # =========================================
 
     question_result = (
         cpu_ask_question(
@@ -2131,7 +2071,6 @@ async def cpu_take_turn(
     if not room[
         "players"
     ]:
-
         return
 
 
@@ -2162,13 +2101,6 @@ async def cpu_take_turn(
             "cpu_level":
                 cpu_level,
 
-            # =================================
-            # ★ Lv.3追加
-            #
-            # app.jsがまだ対応していなくても
-            # 余分なJSON項目は無視されるので問題なし
-            # =================================
-
             "before_candidate_count":
                 question_result[
                     "before_candidate_count"
@@ -2198,13 +2130,8 @@ async def cpu_take_turn(
 
 
     if room_id not in rooms:
-
         return
 
-
-    # =========================================
-    # CPU予想
-    # =========================================
 
     guess = choose_cpu_guess(
         room
@@ -2212,7 +2139,6 @@ async def cpu_take_turn(
 
 
     if guess is None:
-
         return
 
 
@@ -2223,11 +2149,6 @@ async def cpu_take_turn(
     )
 
 
-    # =========================================
-    # Lv.2 / Lv.3だけ結果を記憶
-    # =========================================
-
-    # ★ 変更
     if cpu_level in [
         2,
         3
@@ -2289,13 +2210,8 @@ async def cpu_take_turn(
 
 
     if room_id not in rooms:
-
         return
 
-
-    # =========================================
-    # CPU勝利
-    # =========================================
 
     if game.player2.is_winner():
 
@@ -2306,10 +2222,6 @@ async def cpu_take_turn(
 
         return
 
-
-    # =========================================
-    # 人間ターン
-    # =========================================
 
     room[
         "current_turn"
@@ -2346,6 +2258,39 @@ async def websocket_endpoint(
 
 
     await websocket.accept()
+
+
+    # =========================================
+    # ★ PLAYER NAME
+    # URLの ?name=○○ を取得
+    # =========================================
+
+    player_name = normalize_player_name(
+        websocket.query_params.get(
+            "name"
+        )
+    )
+
+
+    if not is_valid_player_name(
+        player_name
+    ):
+
+        await websocket.send_json({
+            "type":
+                "error",
+
+            "code":
+                "INVALID_PLAYER_NAME",
+
+            "message":
+                "名前は1〜12文字で入力してください。"
+        })
+
+
+        await websocket.close()
+
+        return
 
 
     # =========================================
@@ -2474,12 +2419,19 @@ async def websocket_endpoint(
     )
 
 
+    # ★ PLAYER NAME
+    room[
+        "player_names"
+    ].append(
+        player_name
+    )
+
+
     if room[
         "mode"
     ] == "cpu":
 
         player_number = 1
-
 
     else:
 
@@ -2496,6 +2448,9 @@ async def websocket_endpoint(
 
         "player":
             player_number,
+
+        "player_name":
+            player_name,
 
         "room_id":
             room_id,
@@ -2546,7 +2501,6 @@ async def websocket_endpoint(
 
 
             if room_id not in rooms:
-
                 break
 
 
@@ -2620,7 +2574,6 @@ async def websocket_endpoint(
                     opponent = (
                         game.player2
                     )
-
 
                 else:
 
@@ -2760,7 +2713,6 @@ async def websocket_endpoint(
                         game.player2
                     )
 
-
                 else:
 
                     asking_player = (
@@ -2815,7 +2767,6 @@ async def websocket_endpoint(
             ) == "continue_after_guess":
 
                 if game is None:
-
                     continue
 
 
@@ -2839,17 +2790,12 @@ async def websocket_endpoint(
                         game.player1
                     )
 
-
                 else:
 
                     current_player = (
                         game.player2
                     )
 
-
-                # =============================
-                # 勝利
-                # =============================
 
                 if current_player.is_winner():
 
@@ -2860,10 +2806,6 @@ async def websocket_endpoint(
 
                     continue
 
-
-                # =============================
-                # CPU戦
-                # =============================
 
                 if room[
                     "mode"
@@ -2891,10 +2833,6 @@ async def websocket_endpoint(
 
                     continue
 
-
-                # =============================
-                # PvP
-                # =============================
 
                 room[
                     "current_turn"
@@ -2926,7 +2864,6 @@ async def websocket_endpoint(
                 "type"
             ) == "rematch_request":
 
-                # CPUは即再戦
                 if room[
                     "mode"
                 ] == "cpu":
@@ -2954,7 +2891,6 @@ async def websocket_endpoint(
                     await start_new_game(
                         room_id
                     )
-
 
                 else:
 
@@ -2986,7 +2922,6 @@ async def websocket_endpoint(
                     ):
 
                         if other_socket is websocket:
-
                             continue
 
 
@@ -3010,18 +2945,12 @@ async def websocket_endpoint(
 
                     await websocket.close()
 
-
                 except Exception:
-
                     pass
 
 
                 break
 
-
-            # =================================
-            # 不明
-            # =================================
 
             await websocket.send_json({
                 "type":
@@ -3048,7 +2977,6 @@ async def websocket_endpoint(
     finally:
 
         if room_id not in rooms:
-
             return
 
 
@@ -3057,20 +2985,41 @@ async def websocket_endpoint(
         ]
 
 
+        # =====================================
+        # ★ PLAYER NAME
+        # playersとplayer_namesを同じ位置で削除
+        # =====================================
+
         if websocket in room[
             "players"
         ]:
 
-            room[
+            player_index = room[
                 "players"
-            ].remove(
+            ].index(
                 websocket
             )
 
 
-        # =====================================
-        # CPU
-        # =====================================
+            room[
+                "players"
+            ].pop(
+                player_index
+            )
+
+
+            if player_index < len(
+                room[
+                    "player_names"
+                ]
+            ):
+
+                room[
+                    "player_names"
+                ].pop(
+                    player_index
+                )
+
 
         if room[
             "mode"
@@ -3085,10 +3034,6 @@ async def websocket_endpoint(
 
             return
 
-
-        # =====================================
-        # PvP
-        # =====================================
 
         for other_socket in list(
             room[
@@ -3108,7 +3053,6 @@ async def websocket_endpoint(
             try:
 
                 await other_socket.close()
-
 
             except Exception:
 
