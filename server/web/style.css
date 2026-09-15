@@ -12,9 +12,11 @@
     box-sizing: border-box;
 }
 
+
 html {
     min-height: 100%;
 }
+
 
 body {
     margin: 0;
@@ -94,6 +96,18 @@ body::before {
 
     padding:
         36px 0 60px;
+}
+
+
+/* =========================================
+   ROOM SCREEN
+========================================= */
+
+.room-screen,
+#room-screen {
+    max-width: 680px;
+
+    margin: 0 auto;
 }
 
 
@@ -343,13 +357,6 @@ body::before {
    ROOM SCREEN
 ========================================= */
 
-.room-screen {
-    max-width: 680px;
-
-    margin: 0 auto;
-}
-
-
 .room-panel {
     padding: 30px;
 }
@@ -480,6 +487,12 @@ select:disabled {
     font-weight: 800;
 
     letter-spacing: 8px;
+}
+
+
+/* プレイヤー名まで大文字化しない */
+#player-name {
+    text-transform: none;
 }
 
 
@@ -626,11 +639,65 @@ button:disabled {
 
 
 /* =========================================
+   QUICK MATCH TIMER
+========================================= */
+
+.quick-match-timer {
+    margin:
+        14px 0 0;
+
+    padding:
+        10px 12px;
+
+    border:
+        1px solid
+        rgba(133, 117, 230, 0.22);
+
+    border-radius: 10px;
+
+    background:
+        rgba(101, 82, 212, 0.07);
+
+    color: #aaa1e6;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+/* =========================================
    HOW TO PLAY
 ========================================= */
 
 .rules-panel {
     margin-top: 30px;
+
+    /*
+       COMMON PANELS の overflow:hidden を
+       HOW TO PLAY だけ解除する
+    */
+    overflow: visible;
+
+    height: auto;
+
+    max-height: none;
+}
+
+
+.rules-content,
+.rule-list {
+    width: 100%;
+
+    height: auto;
+
+    max-height: none;
+
+    overflow: visible;
 }
 
 
@@ -663,11 +730,15 @@ button:disabled {
 
     gap: 16px;
 
+    min-height: 0;
+
     padding: 20px 0;
 
     border-top:
         1px solid
         rgba(255, 255, 255, 0.055);
+
+    overflow: visible;
 }
 
 
@@ -707,6 +778,8 @@ button:disabled {
     color: #92919e;
 
     line-height: 1.8;
+
+    overflow-wrap: anywhere;
 }
 
 
@@ -1315,7 +1388,8 @@ button:disabled {
 }
 
 
-.game-over-title {
+.game-over-title,
+#game-over-title {
     margin:
         5px 0 8px;
 
@@ -1338,7 +1412,8 @@ button:disabled {
 }
 
 
-.game-over-message {
+.game-over-message,
+#game-over-message {
     margin:
         0 0 32px;
 
@@ -1434,12 +1509,14 @@ button:disabled {
 }
 
 
-.rematch-button {
+.rematch-button,
+#rematch-button {
     margin-top: 0;
 }
 
 
-.leave-game-button {
+.leave-game-button,
+#leave-game-button {
     border-color: #3f3f49;
 
     background: #141419;
@@ -1448,7 +1525,8 @@ button:disabled {
 }
 
 
-.leave-game-button:hover:not(:disabled) {
+.leave-game-button:hover:not(:disabled),
+#leave-game-button:hover:not(:disabled) {
     border-color: #696977;
 
     background: #1c1c22;
@@ -1456,10 +1534,42 @@ button:disabled {
 
 
 /* =========================================
+   CURRENT HTML REVEAL SECTION
+========================================= */
+
+.reveal-section {
+    margin-top: 26px;
+
+    padding: 20px;
+
+    border:
+        1px solid
+        #292933;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.018);
+}
+
+
+.reveal-section h3 {
+    margin: 0;
+
+    color: #aaa8b8;
+
+    font-size: 13px;
+
+    letter-spacing: 2px;
+}
+
+
+/* =========================================
    SYSTEM MESSAGE
 ========================================= */
 
-.system-message {
+.system-message,
+#message {
     max-width: 760px;
 
     margin:
@@ -1529,6 +1639,14 @@ button:disabled {
 
         padding:
             18px 0 42px;
+    }
+
+
+    .room-screen,
+    #room-screen {
+        max-width: none;
+
+        width: 100%;
     }
 
 
@@ -1704,7 +1822,8 @@ button:disabled {
     }
 
 
-    .rematch-button {
+    .rematch-button,
+    #rematch-button {
         margin-top: 0;
     }
 

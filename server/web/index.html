@@ -2,6 +2,7 @@
 <html lang="ja">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -42,10 +43,12 @@
         rel="stylesheet"
         href="/static/style.css"
     >
+
 </head>
 
 
 <body>
+
 
 <main class="game-container">
 
@@ -136,53 +139,65 @@
 
 
         <!-- =================================
-        QUICK MATCH
+             QUICK MATCH
         ================================== -->
 
         <section class="panel room-panel">
 
-        <div class="section-heading">
+            <div class="section-heading">
 
-        <p class="section-number">
-            QM
-        </p>
+                <p class="section-number">
+                    QM
+                </p>
 
-        <div>
+                <div>
 
-            <h2>
-                QUICK MATCH
-            </h2>
+                    <h2>
+                        QUICK MATCH
+                    </h2>
 
-            <p class="section-jp">
-                対戦相手を自動で検索
+                    <p class="section-jp">
+                        対戦相手を自動で検索
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <p class="panel-description">
+                待機中のプレイヤーと自動でマッチングします。
             </p>
 
-        </div>
+
+            <button
+                id="quick-match-button"
+                class="primary-button"
+                type="button"
+            >
+                QUICK MATCH
+            </button>
+
+
+            <!-- QUICK MATCH WAITING TIMER -->
+
+            <p
+                id="quick-match-timer"
+                class="quick-match-timer hidden"
+            >
+                WAITING 00:00
+            </p>
+
+        </section>
+
+
+        <div class="separator">
+
+            <span>
+                OR
+            </span>
 
         </div>
-
-
-    <p class="panel-description">
-        待機中のプレイヤーと自動でマッチングします。
-    </p>
-
-
-    <button
-        id="quick-match-button"
-        class="primary-button"
-        type="button"
-    >
-        QUICK MATCH
-    </button>
-
-</section>
-
-
-<div class="separator">
-    <span>
-        OR
-    </span>
-</div>
 
 
         <!-- =================================
@@ -230,9 +245,11 @@
 
 
         <div class="separator">
+
             <span>
                 OR
             </span>
+
         </div>
 
 
@@ -296,9 +313,11 @@
 
 
         <div class="separator">
+
             <span>
                 OR
             </span>
+
         </div>
 
 
@@ -598,7 +617,9 @@
         </div>
 
 
-        <!-- HAND -->
+        <!-- =================================
+             HAND
+        ================================== -->
 
         <section
             id="hand-section"
@@ -635,7 +656,9 @@
         </section>
 
 
-        <!-- STATUS -->
+        <!-- =================================
+             STATUS
+        ================================== -->
 
         <section
             id="status-section"
@@ -653,7 +676,9 @@
         </section>
 
 
-        <!-- CPU ACTION -->
+        <!-- =================================
+             CPU ACTION
+        ================================== -->
 
         <section
             id="cpu-action-section"
@@ -673,7 +698,9 @@
         </section>
 
 
-        <!-- QUESTION -->
+        <!-- =================================
+             QUESTION
+        ================================== -->
 
         <section
             id="question-section"
@@ -706,6 +733,8 @@
                 質問します。
             </p>
 
+
+            <!-- BASIC -->
 
             <div class="question-group">
 
@@ -746,6 +775,8 @@
 
             </div>
 
+
+            <!-- RANK -->
 
             <div class="question-group">
 
@@ -800,6 +831,8 @@
 
             </div>
 
+
+            <!-- NUMBER -->
 
             <div class="question-group">
 
@@ -875,6 +908,8 @@
             </div>
 
 
+            <!-- SUIT -->
+
             <div class="question-group">
 
                 <h3>
@@ -892,6 +927,7 @@
                         <span class="question-suit-symbol black-suit">
                             ♠
                         </span>
+
                         SPADE
                     </button>
 
@@ -904,6 +940,7 @@
                         <span class="question-suit-symbol red-suit">
                             ♥
                         </span>
+
                         HEART
                     </button>
 
@@ -916,6 +953,7 @@
                         <span class="question-suit-symbol red-suit">
                             ♦
                         </span>
+
                         DIAMOND
                     </button>
 
@@ -928,6 +966,7 @@
                         <span class="question-suit-symbol black-suit">
                             ♣
                         </span>
+
                         CLUB
                     </button>
 
@@ -935,6 +974,8 @@
 
             </div>
 
+
+            <!-- JOKER -->
 
             <div class="question-group">
 
@@ -960,7 +1001,9 @@
         </section>
 
 
-        <!-- GUESS -->
+        <!-- =================================
+             GUESS
+        ================================== -->
 
         <section
             id="guess-section"
@@ -1092,7 +1135,9 @@
         </section>
 
 
-        <!-- RESULT -->
+        <!-- =================================
+             RESULT
+        ================================== -->
 
         <section
             id="guess-result-section"
@@ -1135,7 +1180,9 @@
         </section>
 
 
-        <!-- GAME OVER -->
+        <!-- =================================
+             GAME OVER
+        ================================== -->
 
         <section
             id="game-over-section"
@@ -1236,6 +1283,10 @@
     </section>
 
 
+    <!-- =====================================
+         SYSTEM MESSAGE
+    ====================================== -->
+
     <p
         id="message"
         class="system-message"
@@ -1243,6 +1294,10 @@
         名前を入力して対戦方法を選んでください。
     </p>
 
+
+    <!-- =====================================
+         FOOTER
+    ====================================== -->
 
     <footer class="game-footer">
 
@@ -1273,6 +1328,7 @@
 
 
 <script src="/static/app.js"></script>
+
 
 </body>
 
