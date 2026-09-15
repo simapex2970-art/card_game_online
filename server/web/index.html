@@ -14,7 +14,9 @@
         content="#07070b"
     >
 
-    <title>VEIL 53 | オンライン対戦カード推理ゲーム</title>
+    <title>
+        VEIL 53 | オンライン対戦カード推理ゲーム
+    </title>
 
     <meta
         name="description"
@@ -42,1167 +44,1151 @@
     >
 </head>
 
+
 <body>
 
-    <main class="game-container">
+<main class="game-container">
 
-        <!-- =====================================
-             HEADER
-        ====================================== -->
 
-        <header class="game-header">
+    <!-- =====================================
+         HEADER
+    ====================================== -->
 
-            <div class="brand-mark">
-                V53
-            </div>
+    <header class="game-header">
 
-            <div class="brand-text">
+        <div class="brand-mark">
+            V53
+        </div>
 
-                <h1>
-                    VEIL 53
-                </h1>
+        <div class="brand-text">
 
-                <p class="subtitle">
-                    READ THE HAND. BREAK THE VEIL.
+            <h1>
+                VEIL 53
+            </h1>
+
+            <p class="subtitle">
+                READ THE HAND. BREAK THE VEIL.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================
+         ROOM SCREEN
+    ====================================== -->
+
+    <section
+        id="room-screen"
+        class="screen room-screen"
+    >
+
+
+        <!-- CREATE ROOM -->
+
+        <section class="panel room-panel">
+
+            <div class="section-heading">
+
+                <p class="section-number">
+                    01
                 </p>
 
-            </div>
+                <div>
 
-        </header>
+                    <h2>
+                        CREATE ROOM
+                    </h2>
 
-
-        <!-- =====================================
-             ROOM SCREEN
-        ====================================== -->
-
-        <section
-            id="room-screen"
-            class="screen room-screen"
-        >
-
-            <!-- =================================
-                 CREATE ROOM
-            ================================== -->
-
-            <section class="panel room-panel">
-
-                <div class="section-heading">
-
-                    <p class="section-number">
-                        01
+                    <p class="section-jp">
+                        対戦ルームを作成
                     </p>
 
-                    <div>
-
-                        <h2>
-                            CREATE ROOM
-                        </h2>
-
-                        <p class="section-jp">
-                            オンライン対戦ルームを作成
-                        </p>
-
-                    </div>
-
                 </div>
-
-
-                <p class="panel-description">
-                    新しい対戦ルームを作成して、
-                    ルームIDを相手に共有します。
-                </p>
-
-
-                <button
-                    id="create-room-button"
-                    class="primary-button"
-                    type="button"
-                >
-                    ルームを作る
-                </button>
-
-            </section>
-
-
-            <div class="separator">
-
-                <span>
-                    OR
-                </span>
 
             </div>
 
 
-            <!-- =================================
-                 JOIN ROOM
-            ================================== -->
-
-            <section class="panel room-panel">
-
-                <div class="section-heading">
-
-                    <p class="section-number">
-                        02
-                    </p>
-
-                    <div>
-
-                        <h2>
-                            JOIN ROOM
-                        </h2>
-
-                        <p class="section-jp">
-                            オンライン対戦に参加
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <p class="panel-description">
-                    相手から受け取った
-                    4文字のルームIDを入力してください。
-                </p>
-
-
-                <div class="room-input-area">
-
-                    <label for="room-id">
-                        ROOM ID
-                    </label>
-
-                    <input
-                        id="room-id"
-                        class="room-id-input"
-                        type="text"
-                        maxlength="4"
-                        placeholder="AB53"
-                        autocomplete="off"
-                        spellcheck="false"
-                    >
-
-                </div>
-
-
-                <button
-                    id="join-room-button"
-                    class="primary-button"
-                    type="button"
-                >
-                    ルームに参加
-                </button>
-
-            </section>
-
-
-            <div class="separator">
-
-                <span>
-                    OR
-                </span>
-
-            </div>
-
-
-            <!-- =================================
-                 CPU BATTLE
-            ================================== -->
-
-            <section class="panel room-panel">
-
-                <div class="section-heading">
-
-                    <p class="section-number">
-                        CPU
-                    </p>
-
-                    <div>
-
-                        <h2>
-                            CPU BATTLE
-                        </h2>
-
-                        <p class="section-jp">
-                            CPUと1人で対戦
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <p class="panel-description">
-                    ランダムに質問と予想をする
-                    CPU Lv.1と対戦します。
-                </p>
-
-
-                <button
-                    id="cpu-game-button"
-                    class="primary-button"
-                    type="button"
-                >
-                    CPUと対戦する
-                </button>
-
-            </section>
-
-
-            <!-- =================================
-                 HOW TO PLAY
-            ================================== -->
-
-            <section class="panel rules-panel">
-
-                <div class="section-heading">
-
-                    <p class="section-number">
-                        03
-                    </p>
-
-                    <div>
-
-                        <h2>
-                            HOW TO PLAY
-                        </h2>
-
-                        <p class="section-jp">
-                            VEIL 53の遊び方
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="rules-content">
-
-                    <p class="rules-intro">
-                        VEIL 53は、質問と推理を使って
-                        相手の3枚のカードを見破る
-                        2人用オンライン対戦カードゲームです。
-                    </p>
-
-
-                    <div class="rule-item">
-
-                        <span class="rule-number">
-                            01
-                        </span>
-
-                        <div>
-
-                            <h3>
-                                3枚のカードが配られる
-                            </h3>
-
-                            <p>
-                                52枚の通常カードとJOKER1枚、
-                                合計53枚の中から
-                                お互いに3枚ずつカードが配られます。
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="rule-item">
-
-                        <span class="rule-number">
-                            02
-                        </span>
-
-                        <div>
-
-                            <h3>
-                                相手のカードについて質問する
-                            </h3>
-
-                            <p>
-                                自分のターンでは、
-                                相手のまだ見つけていないカードについて
-                                1つ質問できます。
-                                答えはYESまたはNOで返されます。
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="rule-item">
-
-                        <span class="rule-number">
-                            03
-                        </span>
-
-                        <div>
-
-                            <h3>
-                                質問からカードを絞り込む
-                            </h3>
-
-                            <p>
-                                偶数・奇数・絵札・ランク・数字の範囲・
-                                スート・JOKERなどの質問を使って、
-                                相手のカードを推理します。
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="rule-item">
-
-                        <span class="rule-number">
-                            04
-                        </span>
-
-                        <div>
-
-                            <h3>
-                                相手のカードを1枚予想する
-                            </h3>
-
-                            <p>
-                                質問の答えをヒントに、
-                                相手が持っていると思うカードを
-                                1枚予想します。
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="rule-item">
-
-                        <span class="rule-number">
-                            05
-                        </span>
-
-                        <div>
-
-                            <h3>
-                                正解したカードは発見済み
-                            </h3>
-
-                            <p>
-                                当てたカードは発見済みになります。
-                                そのカードは、
-                                以降の質問の判定対象から除外されます。
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="rule-item">
-
-                        <span class="rule-number">
-                            06
-                        </span>
-
-                        <div>
-
-                            <h3>
-                                先に3枚すべて当てれば勝利
-                            </h3>
-
-                            <p>
-                                相手の3枚のカードを
-                                先にすべて見破ったプレイヤーの勝利です。
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="rules-note">
-
-                        <strong>
-                            MEMORY IS YOUR WEAPON.
-                        </strong>
-
-                        <p>
-                            質問履歴や発見済みカードの一覧は表示されません。
-                            得られた情報を覚えながら推理することが、
-                            VEIL 53の重要なポイントです。
-                        </p>
-
-                    </div>
-
-
-                    <div class="rules-note joker-rule-note">
-
-                        <strong>
-                            ABOUT JOKER
-                        </strong>
-
-                        <p>
-                            JOKERにはスートや数字がありません。
-                            JOKERについて調べる場合は、
-                            JOKER専用の質問を使用します。
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </section>
+            <p class="panel-description">
+                ルームを作成して、
+                相手に4文字のルームIDを教えてください。
+            </p>
+
+
+            <button
+                id="create-room-button"
+                class="primary-button"
+                type="button"
+            >
+                ルームを作る
+            </button>
 
         </section>
 
 
-        <!-- =====================================
-             GAME SCREEN
-        ====================================== -->
+        <div class="separator">
+            <span>
+                OR
+            </span>
+        </div>
 
-        <section
-            id="game-screen"
-            class="screen hidden"
-        >
 
-            <!-- ROOM INFO -->
+        <!-- JOIN ROOM -->
 
-            <div class="game-info">
+        <section class="panel room-panel">
 
-                <p id="room-info">
-                    Room ----
+            <div class="section-heading">
+
+                <p class="section-number">
+                    02
                 </p>
 
-                <p id="player-info">
-                    Player -
+                <div>
+
+                    <h2>
+                        JOIN ROOM
+                    </h2>
+
+                    <p class="section-jp">
+                        ルームに参加
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <p class="panel-description">
+                相手から教えてもらった
+                4文字のルームIDを入力してください。
+            </p>
+
+
+            <label for="room-id">
+                ROOM ID
+            </label>
+
+
+            <input
+                id="room-id"
+                class="room-id-input"
+                type="text"
+                maxlength="4"
+                autocomplete="off"
+                placeholder="ABCD"
+            >
+
+
+            <button
+                id="join-room-button"
+                class="primary-button"
+                type="button"
+            >
+                ルームに参加
+            </button>
+
+        </section>
+
+
+        <div class="separator">
+            <span>
+                OR
+            </span>
+        </div>
+
+
+        <!-- CPU BATTLE -->
+
+        <section class="panel room-panel">
+
+            <div class="section-heading">
+
+                <p class="section-number">
+                    CPU
+                </p>
+
+                <div>
+
+                    <h2>
+                        CPU BATTLE
+                    </h2>
+
+                    <p class="section-jp">
+                        CPUと1人で対戦
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <p class="panel-description">
+                CPUの強さを選んで対戦できます。
+            </p>
+
+
+            <label for="cpu-level">
+                CPU LEVEL
+            </label>
+
+
+            <select id="cpu-level">
+
+                <option value="1">
+                    Lv.1 - RANDOM
+                </option>
+
+                <option value="2">
+                    Lv.2 - THINKER
+                </option>
+
+            </select>
+
+
+            <button
+                id="cpu-game-button"
+                class="primary-button"
+                type="button"
+            >
+                CPU Lv.1と対戦する
+            </button>
+
+        </section>
+
+
+        <!-- =================================
+             HOW TO PLAY
+        ================================== -->
+
+        <section class="panel rules-panel">
+
+            <div class="section-heading">
+
+                <p class="section-number">
+                    RULE
+                </p>
+
+                <div>
+
+                    <h2>
+                        HOW TO PLAY
+                    </h2>
+
+                    <p class="section-jp">
+                        VEIL 53の遊び方
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="rules-content">
+
+                <p class="rules-intro">
+                    相手の3枚のカードを、
+                    質問と推理だけで見破るゲームです。
+                </p>
+
+
+                <div class="rule-item">
+
+                    <div class="rule-number">
+                        01
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            3枚のカード
+                        </h3>
+
+                        <p>
+                            53枚のカードから、
+                            お互いに3枚ずつ配られます。
+                            相手のカードを見ることはできません。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rule-item">
+
+                    <div class="rule-number">
+                        02
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            質問する
+                        </h3>
+
+                        <p>
+                            自分のターンでは、
+                            相手の残っているカードについて
+                            質問を1つ行います。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rule-item">
+
+                    <div class="rule-number">
+                        03
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            YES / NOから推理
+                        </h3>
+
+                        <p>
+                            偶数・奇数・絵札・ランク・
+                            数字・スート・JOKERなどを質問し、
+                            相手のカードを絞り込みます。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rule-item">
+
+                    <div class="rule-number">
+                        04
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            1枚を予想
+                        </h3>
+
+                        <p>
+                            質問のあと、
+                            相手が持っていると思うカードを
+                            1枚予想します。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rule-item">
+
+                    <div class="rule-number">
+                        05
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            当てたカードは除外
+                        </h3>
+
+                        <p>
+                            一度正解したカードは、
+                            以降の質問対象から除外されます。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rule-item">
+
+                    <div class="rule-number">
+                        06
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            3枚すべて当てれば勝利
+                        </h3>
+
+                        <p>
+                            相手の3枚を先にすべて見破った
+                            プレイヤーの勝利です。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="rules-note">
+
+                    <strong>
+                        MEMORY IS YOUR WEAPON.
+                    </strong>
+
+                    <p>
+                        質問履歴は表示されません。
+                        過去の答えを覚えて推理してください。
+                    </p>
+
+                </div>
+
+
+                <div class="rules-note joker-rule-note">
+
+                    <strong>
+                        ABOUT JOKER
+                    </strong>
+
+                    <p>
+                        JOKERは数字・偶数・奇数・絵札・
+                        スートの質問には反応しません。
+                        JOKER専用の質問で確認できます。
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </section>
+
+
+    <!-- =====================================
+         GAME SCREEN
+    ====================================== -->
+
+    <section
+        id="game-screen"
+        class="screen hidden"
+    >
+
+
+        <!-- GAME INFO -->
+
+        <div class="game-info">
+
+            <p id="room-info">
+                Room ----
+            </p>
+
+            <p id="player-info">
+                Player -
+            </p>
+
+        </div>
+
+
+        <!-- HAND -->
+
+        <section
+            id="hand-section"
+            class="hand-section"
+        >
+
+            <div class="section-heading">
+
+                <p class="section-number">
+                    YOU
+                </p>
+
+                <div>
+
+                    <h2>
+                        YOUR HAND
+                    </h2>
+
+                    <p class="section-jp">
+                        あなたのカード
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="hand-container"
+                class="hand-container"
+            >
+            </div>
+
+        </section>
+
+
+        <!-- STATUS -->
+
+        <section
+            id="status-section"
+            class="status-section"
+        >
+
+            <p class="status-label">
+                CURRENT STATUS
+            </p>
+
+            <p id="game-status">
+                対戦開始を待っています
+            </p>
+
+        </section>
+
+
+        <!-- CPU ACTION -->
+
+        <section
+            id="cpu-action-section"
+            class="panel hidden"
+        >
+
+            <p class="status-label">
+                CPU ACTION
+            </p>
+
+            <p
+                id="cpu-action-text"
+                class="guess-result-text"
+            >
+            </p>
+
+        </section>
+
+
+        <!-- =================================
+             QUESTION
+        ================================== -->
+
+        <section
+            id="question-section"
+            class="question-section hidden"
+        >
+
+            <div class="section-heading">
+
+                <p class="section-number">
+                    01
+                </p>
+
+                <div>
+
+                    <h2>
+                        QUESTION
+                    </h2>
+
+                    <p class="section-jp">
+                        質問を1つ選択
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <p class="question-description">
+                相手のまだ見つけていないカードについて
+                質問します。
+            </p>
+
+
+            <!-- BASIC -->
+
+            <div class="question-group">
+
+                <h3>
+                    BASIC
+                </h3>
+
+
+                <div class="question-grid">
+
+                    <button
+                        id="question-even"
+                        class="question-button"
+                        type="button"
+                    >
+                        偶数はある？
+                    </button>
+
+
+                    <button
+                        id="question-odd"
+                        class="question-button"
+                        type="button"
+                    >
+                        奇数はある？
+                    </button>
+
+
+                    <button
+                        id="question-face"
+                        class="question-button"
+                        type="button"
+                    >
+                        絵札はある？
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- RANK -->
+
+            <div class="question-group">
+
+                <h3>
+                    RANK
+                </h3>
+
+
+                <div class="parameter-question">
+
+                    <div class="question-input-area">
+
+                        <label for="rank-question-value">
+                            RANK
+                        </label>
+
+
+                        <select id="rank-question-value">
+
+                            <option value="">
+                                ランクを選択
+                            </option>
+
+                            <option value="A">A</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="J">J</option>
+                            <option value="Q">Q</option>
+                            <option value="K">K</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <button
+                        id="question-rank"
+                        class="question-button parameter-button"
+                        type="button"
+                    >
+                        このランクはある？
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- NUMBER -->
+
+            <div class="question-group">
+
+                <h3>
+                    NUMBER
+                </h3>
+
+
+                <div class="parameter-question">
+
+                    <div class="question-input-area">
+
+                        <label for="more-than-value">
+                            GREATER OR EQUAL
+                        </label>
+
+                        <input
+                            id="more-than-value"
+                            type="number"
+                            min="1"
+                            max="13"
+                            placeholder="7"
+                        >
+
+                    </div>
+
+
+                    <button
+                        id="question-more-than"
+                        class="question-button parameter-button"
+                        type="button"
+                    >
+                        以上はある？
+                    </button>
+
+                </div>
+
+
+                <div class="parameter-question">
+
+                    <div class="question-input-area">
+
+                        <label for="less-than-value">
+                            LESS OR EQUAL
+                        </label>
+
+                        <input
+                            id="less-than-value"
+                            type="number"
+                            min="1"
+                            max="13"
+                            placeholder="7"
+                        >
+
+                    </div>
+
+
+                    <button
+                        id="question-less-than"
+                        class="question-button parameter-button"
+                        type="button"
+                    >
+                        以下はある？
+                    </button>
+
+                </div>
+
+
+                <p class="number-help">
+                    A = 1 / J = 11 / Q = 12 / K = 13
                 </p>
 
             </div>
 
 
-            <!-- =================================
-                 HAND
-            ================================== -->
+            <!-- SUIT -->
 
-            <section
-                id="hand-section"
-                class="hand-section"
-            >
+            <div class="question-group">
 
-                <div class="section-heading">
+                <h3>
+                    SUIT
+                </h3>
 
-                    <p class="section-number">
-                        HAND
+
+                <div class="question-grid suit-grid">
+
+                    <button
+                        id="question-spade"
+                        class="question-button suit-button"
+                        type="button"
+                    >
+                        <span class="question-suit-symbol black-suit">
+                            ♠
+                        </span>
+                        SPADE
+                    </button>
+
+
+                    <button
+                        id="question-heart"
+                        class="question-button suit-button"
+                        type="button"
+                    >
+                        <span class="question-suit-symbol red-suit">
+                            ♥
+                        </span>
+                        HEART
+                    </button>
+
+
+                    <button
+                        id="question-diamond"
+                        class="question-button suit-button"
+                        type="button"
+                    >
+                        <span class="question-suit-symbol red-suit">
+                            ♦
+                        </span>
+                        DIAMOND
+                    </button>
+
+
+                    <button
+                        id="question-club"
+                        class="question-button suit-button"
+                        type="button"
+                    >
+                        <span class="question-suit-symbol black-suit">
+                            ♣
+                        </span>
+                        CLUB
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- JOKER -->
+
+            <div class="question-group">
+
+                <h3>
+                    JOKER
+                </h3>
+
+
+                <div class="joker-grid">
+
+                    <button
+                        id="question-joker"
+                        class="question-button joker-question-button"
+                        type="button"
+                    >
+                        JOKERはある？
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================
+             GUESS
+        ================================== -->
+
+        <section
+            id="guess-section"
+            class="guess-section hidden"
+        >
+
+            <div class="section-heading">
+
+                <p class="section-number">
+                    02
+                </p>
+
+                <div>
+
+                    <h2>
+                        GUESS
+                    </h2>
+
+                    <p class="section-jp">
+                        カードを1枚予想
                     </p>
 
-                    <div>
+                </div>
 
-                        <h2>
-                            YOUR CARDS
-                        </h2>
+            </div>
 
-                        <p class="section-jp">
-                            あなたの手札
-                        </p>
 
-                    </div>
+            <p class="guess-description">
+                相手が持っていると思うカードを
+                1枚選んでください。
+            </p>
+
+
+            <p
+                id="found-count"
+                class="found-count"
+            >
+                現在 0 / 3 枚正解
+            </p>
+
+
+            <div class="guess-input-group">
+
+                <label for="guess-suit">
+                    SUIT
+                </label>
+
+
+                <select id="guess-suit">
+
+                    <option value="">
+                        スートを選択
+                    </option>
+
+                    <option value="スペード">
+                        ♠ スペード
+                    </option>
+
+                    <option value="ハート">
+                        ♥ ハート
+                    </option>
+
+                    <option value="ダイヤ">
+                        ♦ ダイヤ
+                    </option>
+
+                    <option value="クラブ">
+                        ♣ クラブ
+                    </option>
+
+                    <option value="JOKER">
+                        JOKER
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="guess-input-group">
+
+                <label for="guess-rank">
+                    RANK
+                </label>
+
+
+                <select
+                    id="guess-rank"
+                    disabled
+                >
+
+                    <option value="">
+                        ランクを選択
+                    </option>
+
+                    <option value="A">A</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="J">J</option>
+                    <option value="Q">Q</option>
+                    <option value="K">K</option>
+
+                </select>
+
+            </div>
+
+
+            <p class="guess-help">
+                JOKERを選んだ場合、
+                ランクの指定は必要ありません。
+            </p>
+
+
+            <button
+                id="guess-card-button"
+                class="primary-button"
+                type="button"
+            >
+                このカードで予想する
+            </button>
+
+        </section>
+
+
+        <!-- =================================
+             GUESS RESULT
+        ================================== -->
+
+        <section
+            id="guess-result-section"
+            class="guess-result-section hidden"
+        >
+
+            <p class="status-label">
+                GUESS RESULT
+            </p>
+
+
+            <h2>
+                RESULT
+            </h2>
+
+
+            <p
+                id="guess-result-text"
+                class="guess-result-text"
+            >
+            </p>
+
+
+            <p
+                id="guess-result-count"
+                class="guess-result-count"
+            >
+                現在 0 / 3 枚正解
+            </p>
+
+
+            <button
+                id="next-turn-button"
+                class="primary-button"
+                type="button"
+            >
+                次へ
+            </button>
+
+        </section>
+
+
+        <!-- =================================
+             GAME OVER
+        ================================== -->
+
+        <section
+            id="game-over-section"
+            class="game-over-section hidden"
+        >
+
+            <p class="status-label">
+                MATCH RESULT
+            </p>
+
+
+            <h2
+                id="game-over-title"
+                class="game-over-title"
+            >
+                GAME OVER
+            </h2>
+
+
+            <p
+                id="game-over-message"
+                class="game-over-message"
+            >
+            </p>
+
+
+            <div class="revealed-player">
+
+                <div class="revealed-player-title">
+
+                    <span class="player-chip">
+                        P1
+                    </span>
+
+                    <h3>
+                        PLAYER 1
+                    </h3>
 
                 </div>
 
 
                 <div
-                    id="hand-container"
-                    class="hand-container"
+                    id="player1-revealed-hand"
+                    class="hand-container revealed-hand"
                 >
                 </div>
 
-            </section>
+            </div>
 
 
-            <!-- =================================
-                 STATUS
-            ================================== -->
+            <div class="revealed-player">
 
-            <section
-                id="status-section"
-                class="status-section"
-            >
+                <div class="revealed-player-title">
 
-                <p class="status-label">
-                    CURRENT STATUS
-                </p>
+                    <span class="player-chip">
+                        P2
+                    </span>
 
-                <p id="game-status">
-                    相手を待っています...
-                </p>
+                    <h3 id="player2-title">
+                        PLAYER 2
+                    </h3>
 
-            </section>
+                </div>
 
 
-            <!-- =================================
-                 CPU ACTION
-            ================================== -->
-
-            <section
-                id="cpu-action-section"
-                class="panel hidden"
-            >
-
-                <p class="status-label">
-                    CPU ACTION
-                </p>
-
-                <p
-                    id="cpu-action-text"
-                    class="guess-result-text"
+                <div
+                    id="player2-revealed-hand"
+                    class="hand-container revealed-hand"
                 >
-                </p>
-
-            </section>
-
-
-            <!-- =================================
-                 QUESTION
-            ================================== -->
-
-            <section
-                id="question-section"
-                class="question-section hidden"
-            >
-
-                <div class="section-heading">
-
-                    <p class="section-number">
-                        Q
-                    </p>
-
-                    <div>
-
-                        <h2>
-                            QUESTION
-                        </h2>
-
-                        <p class="section-jp">
-                            相手のカードを絞り込む
-                        </p>
-
-                    </div>
-
                 </div>
 
+            </div>
 
-                <p class="question-description">
-                    相手のまだ見つけていないカードについて、
-                    質問を1つ選択してください。
-                </p>
 
+            <div class="game-over-buttons">
 
-                <!-- VALUE / TYPE -->
-
-                <div class="question-group">
-
-                    <h3>
-                        VALUE / TYPE
-                    </h3>
-
-                    <div class="question-grid">
-
-                        <button
-                            id="question-even"
-                            class="question-button"
-                            type="button"
-                        >
-                            偶数はある？
-                        </button>
-
-                        <button
-                            id="question-odd"
-                            class="question-button"
-                            type="button"
-                        >
-                            奇数はある？
-                        </button>
-
-                        <button
-                            id="question-face"
-                            class="question-button"
-                            type="button"
-                        >
-                            絵札はある？
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <!-- RANK -->
-
-                <div class="question-group">
-
-                    <h3>
-                        RANK
-                    </h3>
-
-
-                    <div class="parameter-question">
-
-                        <div class="question-input-area">
-
-                            <label for="rank-question-value">
-                                ランク
-                            </label>
-
-                            <select
-                                id="rank-question-value"
-                                class="question-value-input"
-                            >
-
-                                <option
-                                    value=""
-                                    selected
-                                    disabled
-                                >
-                                    ランクを選択
-                                </option>
-
-                                <option value="A">A</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
-                                <option value="J">J</option>
-                                <option value="Q">Q</option>
-                                <option value="K">K</option>
-
-                            </select>
-
-                        </div>
-
-
-                        <button
-                            id="question-rank"
-                            class="question-button parameter-button"
-                            type="button"
-                        >
-                            このランクはある？
-                        </button>
-
-                    </div>
-
-
-                    <div class="parameter-question">
-
-                        <div class="question-input-area">
-
-                            <label for="more-than-value">
-                                基準の数字
-                            </label>
-
-                            <input
-                                id="more-than-value"
-                                class="question-value-input number-input"
-                                type="number"
-                                min="1"
-                                max="13"
-                                step="1"
-                                placeholder="1〜13"
-                            >
-
-                        </div>
-
-
-                        <button
-                            id="question-more-than"
-                            class="question-button parameter-button"
-                            type="button"
-                        >
-                            この数字以上はある？
-                        </button>
-
-                    </div>
-
-
-                    <div class="parameter-question">
-
-                        <div class="question-input-area">
-
-                            <label for="less-than-value">
-                                基準の数字
-                            </label>
-
-                            <input
-                                id="less-than-value"
-                                class="question-value-input number-input"
-                                type="number"
-                                min="1"
-                                max="13"
-                                step="1"
-                                placeholder="1〜13"
-                            >
-
-                        </div>
-
-
-                        <button
-                            id="question-less-than"
-                            class="question-button parameter-button"
-                            type="button"
-                        >
-                            この数字以下はある？
-                        </button>
-
-                    </div>
-
-
-                    <p class="number-help">
-                        A = 1 / J = 11 / Q = 12 / K = 13
-                    </p>
-
-                </div>
-
-
-                <!-- SUIT -->
-
-                <div class="question-group">
-
-                    <h3>
-                        SUIT
-                    </h3>
-
-                    <div class="question-grid suit-grid">
-
-                        <button
-                            id="question-spade"
-                            class="question-button suit-button black-suit"
-                            type="button"
-                        >
-
-                            <span class="question-suit-symbol">
-                                ♠
-                            </span>
-
-                            <span>
-                                スペード
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            id="question-heart"
-                            class="question-button suit-button red-suit"
-                            type="button"
-                        >
-
-                            <span class="question-suit-symbol">
-                                ♥
-                            </span>
-
-                            <span>
-                                ハート
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            id="question-diamond"
-                            class="question-button suit-button red-suit"
-                            type="button"
-                        >
-
-                            <span class="question-suit-symbol">
-                                ♦
-                            </span>
-
-                            <span>
-                                ダイヤ
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            id="question-club"
-                            class="question-button suit-button black-suit"
-                            type="button"
-                        >
-
-                            <span class="question-suit-symbol">
-                                ♣
-                            </span>
-
-                            <span>
-                                クラブ
-                            </span>
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <!-- JOKER -->
-
-                <div class="question-group">
-
-                    <h3>
-                        JOKER
-                    </h3>
-
-                    <div class="joker-grid">
-
-                        <button
-                            id="question-joker"
-                            class="question-button joker-question-button"
-                            type="button"
-                        >
-                            JOKERはある？
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================
-                 GUESS
-            ================================== -->
-
-            <section
-                id="guess-section"
-                class="guess-section hidden"
-            >
-
-                <div class="section-heading">
-
-                    <p class="section-number">
-                        G
-                    </p>
-
-                    <div>
-
-                        <h2>
-                            GUESS
-                        </h2>
-
-                        <p class="section-jp">
-                            相手のカードを予想
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <p class="guess-description">
-                    スートとランクを選んで、
-                    相手のカードを1枚予想してください。
-                </p>
-
-
-                <p
-                    id="found-count"
-                    class="found-count"
+                <button
+                    id="rematch-button"
+                    class="primary-button rematch-button"
+                    type="button"
                 >
-                    現在 0 / 3 枚正解
-                </p>
-
-
-                <div class="guess-input-group">
-
-                    <label for="guess-suit">
-                        SUIT
-                    </label>
-
-                    <select
-                        id="guess-suit"
-                        class="guess-select"
-                    >
-
-                        <option
-                            value=""
-                            selected
-                            disabled
-                        >
-                            スートを選択
-                        </option>
-
-                        <option value="スペード">
-                            ♠ スペード
-                        </option>
-
-                        <option value="ハート">
-                            ♥ ハート
-                        </option>
-
-                        <option value="ダイヤ">
-                            ♦ ダイヤ
-                        </option>
-
-                        <option value="クラブ">
-                            ♣ クラブ
-                        </option>
-
-                        <option value="JOKER">
-                            JOKER
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="guess-input-group">
-
-                    <label for="guess-rank">
-                        RANK
-                    </label>
-
-                    <select
-                        id="guess-rank"
-                        class="guess-select"
-                    >
-
-                        <option
-                            value=""
-                            selected
-                            disabled
-                        >
-                            ランクを選択
-                        </option>
-
-                        <option value="A">A</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                        <option value="J">J</option>
-                        <option value="Q">Q</option>
-                        <option value="K">K</option>
-
-                    </select>
-
-                </div>
-
-
-                <p class="guess-help">
-                    JOKERを選択した場合、
-                    ランクの指定は必要ありません。
-                </p>
+                    再戦する
+                </button>
 
 
                 <button
-                    id="guess-card-button"
-                    class="primary-button guess-card-button"
+                    id="leave-game-button"
+                    class="leave-game-button"
                     type="button"
                 >
-                    このカードで予想する
+                    ゲームを終了
                 </button>
 
-            </section>
-
-
-            <!-- =================================
-                 RESULT
-            ================================== -->
-
-            <section
-                id="guess-result-section"
-                class="guess-result-section hidden"
-            >
-
-                <p class="status-label">
-                    GUESS RESULT
-                </p>
-
-                <h2>
-                    RESULT
-                </h2>
-
-
-                <p
-                    id="guess-result-text"
-                    class="guess-result-text"
-                >
-                </p>
-
-
-                <p
-                    id="guess-result-count"
-                    class="guess-result-count"
-                >
-                    現在 0 / 3 枚正解
-                </p>
-
-
-                <button
-                    id="next-turn-button"
-                    class="primary-button next-turn-button"
-                    type="button"
-                >
-                    次へ
-                </button>
-
-            </section>
-
-
-            <!-- =================================
-                 GAME OVER
-            ================================== -->
-
-            <section
-                id="game-over-section"
-                class="game-over-section hidden"
-            >
-
-                <p class="status-label">
-                    MATCH COMPLETE
-                </p>
-
-
-                <h2
-                    id="game-over-title"
-                    class="game-over-title"
-                >
-                    GAME OVER
-                </h2>
-
-
-                <p
-                    id="game-over-message"
-                    class="game-over-message"
-                >
-                </p>
-
-
-                <div class="revealed-player">
-
-                    <div class="revealed-player-title">
-
-                        <span class="player-chip">
-                            P1
-                        </span>
-
-                        <h3>
-                            PLAYER 1
-                        </h3>
-
-                    </div>
-
-
-                    <div
-                        id="player1-revealed-hand"
-                        class="hand-container revealed-hand"
-                    >
-                    </div>
-
-                </div>
-
-
-                <div class="revealed-player">
-
-                    <div class="revealed-player-title">
-
-                        <span class="player-chip">
-                            P2
-                        </span>
-
-                        <h3 id="player2-title">
-                            PLAYER 2
-                        </h3>
-
-                    </div>
-
-
-                    <div
-                        id="player2-revealed-hand"
-                        class="hand-container revealed-hand"
-                    >
-                    </div>
-
-                </div>
-
-
-                <div class="game-over-buttons">
-
-                    <button
-                        id="rematch-button"
-                        class="primary-button rematch-button"
-                        type="button"
-                    >
-                        もう一度遊ぶ
-                    </button>
-
-
-                    <button
-                        id="leave-game-button"
-                        class="leave-game-button"
-                        type="button"
-                    >
-                        ゲームを終了
-                    </button>
-
-                </div>
-
-            </section>
+            </div>
 
         </section>
 
-
-        <!-- =====================================
-             MESSAGE
-        ====================================== -->
-
-        <p
-            id="message"
-            class="system-message"
-        >
-            VEIL 53 ONLINE
-        </p>
+    </section>
 
 
-        <!-- =====================================
-             FOOTER
-        ====================================== -->
+    <!-- =====================================
+         MESSAGE
+    ====================================== -->
 
-        <footer class="game-footer">
-
-            <span>
-                VEIL 53
-            </span>
-
-            <span class="footer-dot">
-                ·
-            </span>
-
-            <span>
-                ONLINE DEDUCTION CARD GAME
-            </span>
-
-        </footer>
-
-    </main>
+    <p
+        id="message"
+        class="system-message"
+    >
+        対戦方法を選んでください。
+    </p>
 
 
-    <script src="/static/app.js"></script>
+    <!-- =====================================
+         FOOTER
+    ====================================== -->
+
+    <footer class="game-footer">
+
+        <span>
+            VEIL 53
+        </span>
+
+        <span class="footer-dot">
+            •
+        </span>
+
+        <span>
+            READ THE HAND
+        </span>
+
+        <span class="footer-dot">
+            •
+        </span>
+
+        <span>
+            BREAK THE VEIL
+        </span>
+
+    </footer>
+
+
+</main>
+
+
+<script src="/static/app.js"></script>
 
 </body>
 

@@ -1,13 +1,14 @@
 import asyncio
 import random
 import secrets
+
+from itertools import combinations
 from pathlib import Path
 
-from fastapi import (
-    FastAPI,
-    WebSocket,
-    WebSocketDisconnect,
-)
+from fastapi import FastAPI
+from fastapi import HTTPException
+from fastapi import WebSocket
+from fastapi import WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -22,10 +23,6 @@ from card import Card
 app = FastAPI()
 
 
-# =============================================
-# Webファイル
-# =============================================
-
 BASE_DIR = Path(__file__).resolve().parent
 WEB_DIR = BASE_DIR / "web"
 
@@ -33,12 +30,16 @@ WEB_DIR = BASE_DIR / "web"
 app.mount(
     "/static",
     StaticFiles(directory=WEB_DIR),
-    name="static",
+    name="static"
 )
 
 
+# =============================================
+# 静的ページ
+# =============================================
+
 @app.get("/")
-async def web_index():
+async def root():
 
     return FileResponse(
         WEB_DIR / "index.html"
@@ -47,41 +48,39 @@ async def web_index():
 
 @app.get(
     "/robots.txt",
-    include_in_schema=False,
+    include_in_schema=False
 )
-async def robots_txt():
+async def robots():
 
     return FileResponse(
-        WEB_DIR / "robots.txt",
-        media_type="text/plain",
+        WEB_DIR / "robots.txt"
     )
 
 
 @app.get(
     "/sitemap.xml",
-    include_in_schema=False,
+    include_in_schema=False
 )
-async def sitemap_xml():
+async def sitemap():
 
     return FileResponse(
-        WEB_DIR / "sitemap.xml",
-        media_type="application/xml",
+        WEB_DIR / "sitemap.xml"
     )
 
 
 # =============================================
-# 定数
+# カード
 # =============================================
 
-ROOM_ID_CHARACTERS = (
-    "ABCDEFGHJKLMNPQRSTUVWXYZ"
-    "23456789"
-)
+SUITS = [
+    "スペード",
+    "ハート",
+    "ダイヤ",
+    "クラブ"
+]
 
-ROOM_ID_LENGTH = 4
 
-
-VALID_RANKS = [
+RANKS = [
     "A",
     "2",
     "3",
@@ -94,16 +93,20 @@ VALID_RANKS = [
     "10",
     "J",
     "Q",
-    "K",
+    "K"
 ]
 
 
-VALID_SUITS = [
-    "スペード",
-    "ハート",
-    "ダイヤ",
-    "クラブ",
-]
+# =============================================
+# ルームID
+# =============================================
+
+ROOM_ID_CHARACTERS = (
+    "ABCDEFGHJKLMNPQRSTUVWXYZ"
+    "23456789"
+)
+
+ROOM_ID_LENGTH = 4
 
 
 # =============================================
@@ -112,6 +115,39 @@ VALID_SUITS = [
 
 rooms = {}
 
+
+def create_room(
+    mode="pvp",
+    cpu_level=None
+):
+
+    return {
+        "players": [],
+
+        "game": None,
+
+        "current_turn": 1,
+
+        "current_phase": "question",
+
+        "rematch_requests": set(),
+
+        "mode": mode,
+
+        "cpu_level": cpu_level,
+
+        # CPU Lv.2用
+        "cpu_candidate_hands": [],
+
+        "cpu_question_history": [],
+
+        "cpu_wrong_guesses": set(),
+    }
+
+
+# =============================================
+# ルームID生成
+# =============================================
 
 def generate_room_id():
 
@@ -126,62 +162,54 @@ def generate_room_id():
             )
         )
 
+
         if room_id not in rooms:
 
             return room_id
 
 
 def is_valid_room_id(
-    room_id,
+    room_id
 ):
 
-    if len(room_id) != ROOM_ID_LENGTH:
+    if len(
+        room_id
+    ) != ROOM_ID_LENGTH:
 
         return False
 
-    for character in room_id:
 
-        if character not in ROOM_ID_CHARACTERS:
+    for char in room_id:
+
+        if char not in ROOM_ID_CHARACTERS:
 
             return False
+
 
     return True
 
 
-def create_room(
-    mode="pvp",
-):
-
-    return {
-        "players": [],
-        "game": None,
-        "current_turn": 1,
-        "current_phase": "question",
-        "rematch_requests": set(),
-        "mode": mode,
-    }
-
-
 # =============================================
-# 対人ルーム作成
+# PvPルーム作成
 # =============================================
 
 @app.post("/rooms")
-async def create_room_endpoint():
+async def create_pvp_room():
 
     room_id = generate_room_id()
 
-    rooms[room_id] = create_room(
+
+    rooms[
+        room_id
+    ] = create_room(
         mode="pvp"
     )
 
-    print(
-        f"ルーム {room_id} "
-        "を作成しました"
-    )
 
     return {
-        "room_id": room_id
+        "room_id": room_id,
+
+        "mode": "pvp"
     }
 
 
@@ -190,33 +218,356 @@ async def create_room_endpoint():
 # =============================================
 
 @app.post("/cpu-rooms")
-async def create_cpu_room_endpoint():
+async def create_cpu_room(
+    level: int = 1
+):
+
+    if level not in [
+        1,
+        2
+    ]:
+
+        raise HTTPException(
+            status_code=400,
+            detail="CPUレベルは1または2を指定してください。"
+        )
+
 
     room_id = generate_room_id()
 
-    rooms[room_id] = create_room(
-        mode="cpu"
+
+    rooms[
+        room_id
+    ] = create_room(
+        mode="cpu",
+        cpu_level=level
     )
 
-    print(
-        f"CPU対戦ルーム {room_id} "
-        "を作成しました"
-    )
 
     return {
-        "room_id": room_id
+        "room_id": room_id,
+
+        "mode": "cpu",
+
+        "cpu_level": level
     }
 
 
 # =============================================
-# 質問処理
+# 全カード生成
+# =============================================
+
+def create_all_cards():
+
+    cards = []
+
+
+    for suit in SUITS:
+
+        for rank in RANKS:
+
+            cards.append(
+                Card(
+                    suit,
+                    rank
+                )
+            )
+
+
+    cards.append(
+        Card(
+            "JOKER"
+        )
+    )
+
+
+    return cards
+
+
+# =============================================
+# CPU Lv.2
+# 初期候補手札
+# =============================================
+
+def initialize_cpu_candidates(
+    room
+):
+
+    game = room[
+        "game"
+    ]
+
+
+    cpu_player = (
+        game.player2
+    )
+
+
+    cpu_hand = set(
+        cpu_player.hand
+    )
+
+
+    possible_cards = [
+        card
+        for card
+        in create_all_cards()
+        if card not in cpu_hand
+    ]
+
+
+    room[
+        "cpu_candidate_hands"
+    ] = [
+        tuple(
+            hand
+        )
+        for hand
+        in combinations(
+            possible_cards,
+            3
+        )
+    ]
+
+
+    room[
+        "cpu_question_history"
+    ] = []
+
+
+    room[
+        "cpu_wrong_guesses"
+    ] = set()
+
+
+# =============================================
+# CPU状態初期化
+# =============================================
+
+def initialize_cpu_state(
+    room
+):
+
+    room[
+        "cpu_candidate_hands"
+    ] = []
+
+
+    room[
+        "cpu_question_history"
+    ] = []
+
+
+    room[
+        "cpu_wrong_guesses"
+    ] = set()
+
+
+    if room[
+        "cpu_level"
+    ] == 2:
+
+        initialize_cpu_candidates(
+            room
+        )
+
+
+# =============================================
+# 質問評価
+# =============================================
+
+def evaluate_question_on_hand(
+    question_manager,
+    hand,
+    found_cards,
+    question_id,
+    rank=None,
+    number=None
+):
+
+    if question_id == 1:
+
+        return question_manager.ask_even(
+            hand,
+            found_cards
+        )
+
+
+    if question_id == 2:
+
+        return question_manager.ask_odd(
+            hand,
+            found_cards
+        )
+
+
+    if question_id == 3:
+
+        return question_manager.ask_face(
+            hand,
+            found_cards
+        )
+
+
+    if question_id == 4:
+
+        return question_manager.ask_rank(
+            hand,
+            found_cards,
+            rank
+        )
+
+
+    if question_id == 5:
+
+        return question_manager.ask_more_than(
+            hand,
+            found_cards,
+            number
+        )
+
+
+    if question_id == 6:
+
+        return question_manager.ask_less_than(
+            hand,
+            found_cards,
+            number
+        )
+
+
+    if question_id == 7:
+
+        return question_manager.ask_suit(
+            hand,
+            found_cards,
+            "スペード"
+        )
+
+
+    if question_id == 8:
+
+        return question_manager.ask_suit(
+            hand,
+            found_cards,
+            "ハート"
+        )
+
+
+    if question_id == 9:
+
+        return question_manager.ask_suit(
+            hand,
+            found_cards,
+            "ダイヤ"
+        )
+
+
+    if question_id == 10:
+
+        return question_manager.ask_suit(
+            hand,
+            found_cards,
+            "クラブ"
+        )
+
+
+    if question_id == 11:
+
+        return question_manager.ask_joker(
+            hand,
+            found_cards
+        )
+
+
+    raise ValueError(
+        "質問IDが正しくありません。"
+    )
+
+
+# =============================================
+# 質問文章
+# =============================================
+
+def create_question_text(
+    question_id,
+    rank=None,
+    number=None
+):
+
+    if question_id == 1:
+
+        return "偶数のカードはありますか？"
+
+
+    if question_id == 2:
+
+        return "奇数のカードはありますか？"
+
+
+    if question_id == 3:
+
+        return "絵札はありますか？"
+
+
+    if question_id == 4:
+
+        return (
+            f"{rank} はありますか？"
+        )
+
+
+    if question_id == 5:
+
+        return (
+            f"{number}以上のカードはありますか？"
+        )
+
+
+    if question_id == 6:
+
+        return (
+            f"{number}以下のカードはありますか？"
+        )
+
+
+    if question_id == 7:
+
+        return "スペードはありますか？"
+
+
+    if question_id == 8:
+
+        return "ハートはありますか？"
+
+
+    if question_id == 9:
+
+        return "ダイヤはありますか？"
+
+
+    if question_id == 10:
+
+        return "クラブはありますか？"
+
+
+    if question_id == 11:
+
+        return "JOKERはありますか？"
+
+
+    return "不明な質問"
+
+
+# =============================================
+# 人間の質問
 # =============================================
 
 def evaluate_question(
     game,
     asking_player,
     opponent,
-    data,
+    data
 ):
 
     question_id = data.get(
@@ -224,296 +575,103 @@ def evaluate_question(
     )
 
 
-    # =========================================
-    # 1 偶数
-    # =========================================
+    rank = None
+    number = None
 
-    if question_id == 1:
 
-        question_text = (
-            "偶数はある？"
-        )
-
-        answer = (
-            game.question_manager.ask_even(
-                opponent.hand,
-                asking_player.found_cards,
-            )
-        )
-
-
-    # =========================================
-    # 2 奇数
-    # =========================================
-
-    elif question_id == 2:
-
-        question_text = (
-            "奇数はある？"
-        )
-
-        answer = (
-            game.question_manager.ask_odd(
-                opponent.hand,
-                asking_player.found_cards,
-            )
-        )
-
-
-    # =========================================
-    # 3 絵札
-    # =========================================
-
-    elif question_id == 3:
-
-        question_text = (
-            "絵札はある？"
-        )
-
-        answer = (
-            game.question_manager.ask_face(
-                opponent.hand,
-                asking_player.found_cards,
-            )
-        )
-
-
-    # =========================================
-    # 4 ランク
-    # =========================================
-
-    elif question_id == 4:
-
-        rank = data.get(
-            "rank"
-        )
-
-        if rank not in VALID_RANKS:
-
-            raise ValueError(
-                "指定したランクが"
-                "正しくありません。"
-            )
-
-        question_text = (
-            f"{rank} はある？"
-        )
-
-        answer = (
-            game.question_manager.ask_rank(
-                opponent.hand,
-                asking_player.found_cards,
-                rank,
-            )
-        )
-
-
-    # =========================================
-    # 5 以上
-    # =========================================
-
-    elif question_id == 5:
-
-        number = data.get(
-            "number"
-        )
-
-        if (
-            not isinstance(
-                number,
-                int,
-            )
-            or number < 1
-            or number > 13
-        ):
-
-            raise ValueError(
-                "数字は1～13で"
-                "指定してください。"
-            )
-
-        question_text = (
-            f"{number} 以上の"
-            "カードはある？"
-        )
-
-        answer = (
-            game.question_manager.ask_more_than(
-                opponent.hand,
-                asking_player.found_cards,
-                number,
-            )
-        )
-
-
-    # =========================================
-    # 6 以下
-    # =========================================
-
-    elif question_id == 6:
-
-        number = data.get(
-            "number"
-        )
-
-        if (
-            not isinstance(
-                number,
-                int,
-            )
-            or number < 1
-            or number > 13
-        ):
-
-            raise ValueError(
-                "数字は1～13で"
-                "指定してください。"
-            )
-
-        question_text = (
-            f"{number} 以下の"
-            "カードはある？"
-        )
-
-        answer = (
-            game.question_manager.ask_less_than(
-                opponent.hand,
-                asking_player.found_cards,
-                number,
-            )
-        )
-
-
-    # =========================================
-    # 7 スペード
-    # =========================================
-
-    elif question_id == 7:
-
-        question_text = (
-            "スペードはある？"
-        )
-
-        answer = (
-            game.question_manager.ask_suit(
-                opponent.hand,
-                asking_player.found_cards,
-                "スペード",
-            )
-        )
-
-
-    # =========================================
-    # 8 ハート
-    # =========================================
-
-    elif question_id == 8:
-
-        question_text = (
-            "ハートはある？"
-        )
-
-        answer = (
-            game.question_manager.ask_suit(
-                opponent.hand,
-                asking_player.found_cards,
-                "ハート",
-            )
-        )
-
-
-    # =========================================
-    # 9 ダイヤ
-    # =========================================
-
-    elif question_id == 9:
-
-        question_text = (
-            "ダイヤはある？"
-        )
-
-        answer = (
-            game.question_manager.ask_suit(
-                opponent.hand,
-                asking_player.found_cards,
-                "ダイヤ",
-            )
-        )
-
-
-    # =========================================
-    # 10 クラブ
-    # =========================================
-
-    elif question_id == 10:
-
-        question_text = (
-            "クラブはある？"
-        )
-
-        answer = (
-            game.question_manager.ask_suit(
-                opponent.hand,
-                asking_player.found_cards,
-                "クラブ",
-            )
-        )
-
-
-    # =========================================
-    # 11 JOKER
-    # =========================================
-
-    elif question_id == 11:
-
-        question_text = (
-            "JOKERはある？"
-        )
-
-        answer = (
-            game.question_manager.ask_joker(
-                opponent.hand,
-                asking_player.found_cards,
-            )
-        )
-
-
-    # =========================================
-    # 不正
-    # =========================================
-
-    else:
+    if question_id not in range(
+        1,
+        12
+    ):
 
         raise ValueError(
-            "質問番号が"
-            "正しくありません。"
+            "質問IDが正しくありません。"
         )
+
+
+    if question_id == 4:
+
+        rank = str(
+            data.get(
+                "rank",
+                ""
+            )
+        ).upper()
+
+
+        if rank not in RANKS:
+
+            raise ValueError(
+                "ランクが正しくありません。"
+            )
+
+
+    if question_id in [
+        5,
+        6
+    ]:
+
+        number = data.get(
+            "number"
+        )
+
+
+        if not isinstance(
+            number,
+            int
+        ):
+
+            raise ValueError(
+                "数字が正しくありません。"
+            )
+
+
+        if (
+            number < 1
+            or
+            number > 13
+        ):
+
+            raise ValueError(
+                "数字は1〜13で指定してください。"
+            )
+
+
+    answer = evaluate_question_on_hand(
+        game.question_manager,
+        opponent.hand,
+        asking_player.found_cards,
+        question_id,
+        rank,
+        number
+    )
+
+
+    question_text = create_question_text(
+        question_id,
+        rank,
+        number
+    )
 
 
     return (
-        question_text,
         answer,
+        question_text
     )
 
 
 # =============================================
-# 予想カード作成
+# 予想カード生成
 # =============================================
 
 def create_guess_card(
-    data,
+    data
 ):
 
     suit = data.get(
         "suit"
     )
 
-    rank = data.get(
-        "rank"
-    )
-
-
-    # JOKER
 
     if suit == "JOKER":
 
@@ -522,179 +680,673 @@ def create_guess_card(
         )
 
 
-    # 通常カード
+    if suit not in SUITS:
 
-    if suit not in VALID_SUITS:
+        return None
 
-        raise ValueError(
-            "スートが"
-            "正しくありません。"
+
+    rank = str(
+        data.get(
+            "rank",
+            ""
         )
+    ).upper()
 
 
-    if rank not in VALID_RANKS:
+    if rank not in RANKS:
 
-        raise ValueError(
-            "ランクが"
-            "正しくありません。"
-        )
+        return None
 
 
     return Card(
         suit,
-        rank,
+        rank
     )
 
 
 # =============================================
-# CPU用予想候補
+# CPU質問一覧
 # =============================================
 
-def create_cpu_guess_candidates(
-    cpu_player,
-):
+def create_cpu_question_pool():
 
-    cards = []
+    questions = []
 
 
-    # 通常52枚
+    # 偶数 / 奇数 / 絵札 / スート / JOKER
+    for question_id in [
+        1,
+        2,
+        3,
+        7,
+        8,
+        9,
+        10,
+        11
+    ]:
 
-    for suit in VALID_SUITS:
-
-        for rank in VALID_RANKS:
-
-            card = Card(
-                suit,
-                rank,
-            )
-
-
-            # CPU自身の手札は
-            # 人間の手札には存在しない
-            if card in cpu_player.hand:
-
-                continue
-
-
-            # すでに当てたカードも除外
-            if card in cpu_player.found_cards:
-
-                continue
+        questions.append({
+            "question_id":
+                question_id
+        })
 
 
-            cards.append(
-                card
-            )
+    # ランク
+    for rank in RANKS:
+
+        questions.append({
+            "question_id":
+                4,
+
+            "rank":
+                rank
+        })
 
 
-    # JOKER
-
-    joker = Card(
-        "JOKER"
-    )
-
-
-    if (
-        joker not in cpu_player.hand
-        and
-        joker not in cpu_player.found_cards
+    # 以上
+    for number in range(
+        1,
+        14
     ):
 
-        cards.append(
-            joker
+        questions.append({
+            "question_id":
+                5,
+
+            "number":
+                number
+        })
+
+
+    # 以下
+    for number in range(
+        1,
+        14
+    ):
+
+        questions.append({
+            "question_id":
+                6,
+
+            "number":
+                number
+        })
+
+
+    return questions
+
+
+# =============================================
+# CPU質問キー
+# =============================================
+
+def cpu_question_key(
+    question
+):
+
+    return (
+        question.get(
+            "question_id"
+        ),
+
+        question.get(
+            "rank"
+        ),
+
+        question.get(
+            "number"
+        )
+    )
+
+
+# =============================================
+# CPU質問選択
+# =============================================
+
+def choose_cpu_question(
+    room
+):
+
+    pool = (
+        create_cpu_question_pool()
+    )
+
+
+    # =========================================
+    # Lv.1
+    # 完全ランダム
+    # =========================================
+
+    if room[
+        "cpu_level"
+    ] == 1:
+
+        return random.choice(
+            pool
         )
 
 
-    return cards
+    # =========================================
+    # Lv.2
+    # 一度使った質問はなるべく避ける
+    # =========================================
+
+    used_keys = {
+        cpu_question_key(
+            item
+        )
+        for item
+        in room[
+            "cpu_question_history"
+        ]
+    }
+
+
+    unused_questions = [
+        question
+        for question
+        in pool
+        if cpu_question_key(
+            question
+        )
+        not in used_keys
+    ]
+
+
+    if unused_questions:
+
+        return random.choice(
+            unused_questions
+        )
+
+
+    return random.choice(
+        pool
+    )
 
 
 # =============================================
-# CPUランダム質問
+# Lv.2
+# 質問結果から候補を絞る
 # =============================================
 
-def cpu_random_question(
+def filter_cpu_candidates_by_question(
     room,
+    question,
+    answer
 ):
 
-    game = room["game"]
+    if room[
+        "cpu_level"
+    ] != 2:
+
+        return
+
+
+    game = room[
+        "game"
+    ]
+
 
     cpu_player = (
         game.player2
     )
+
+
+    question_id = question[
+        "question_id"
+    ]
+
+
+    rank = question.get(
+        "rank"
+    )
+
+
+    number = question.get(
+        "number"
+    )
+
+
+    filtered = []
+
+
+    for candidate_hand in room[
+        "cpu_candidate_hands"
+    ]:
+
+        candidate_answer = (
+            evaluate_question_on_hand(
+                game.question_manager,
+                list(
+                    candidate_hand
+                ),
+                cpu_player.found_cards,
+                question_id,
+                rank,
+                number
+            )
+        )
+
+
+        if candidate_answer == answer:
+
+            filtered.append(
+                candidate_hand
+            )
+
+
+    room[
+        "cpu_candidate_hands"
+    ] = filtered
+
+
+# =============================================
+# Lv.2
+# 予想結果から候補を絞る
+# =============================================
+
+def filter_cpu_candidates_by_guess(
+    room,
+    guess,
+    correct
+):
+
+    if room[
+        "cpu_level"
+    ] != 2:
+
+        return
+
+
+    current_candidates = room[
+        "cpu_candidate_hands"
+    ]
+
+
+    if correct:
+
+        room[
+            "cpu_candidate_hands"
+        ] = [
+            hand
+            for hand
+            in current_candidates
+            if guess in hand
+        ]
+
+
+    else:
+
+        room[
+            "cpu_candidate_hands"
+        ] = [
+            hand
+            for hand
+            in current_candidates
+            if guess not in hand
+        ]
+
+
+        room[
+            "cpu_wrong_guesses"
+        ].add(
+            guess
+        )
+
+
+# =============================================
+# Lv.1
+# ランダム予想
+# =============================================
+
+def choose_cpu_level1_guess(
+    room
+):
+
+    game = room[
+        "game"
+    ]
+
+
+    cpu_player = (
+        game.player2
+    )
+
+
+    cpu_hand = set(
+        cpu_player.hand
+    )
+
+
+    found_cards = set(
+        cpu_player.found_cards
+    )
+
+
+    candidates = [
+        card
+        for card
+        in create_all_cards()
+        if (
+            card not in cpu_hand
+            and
+            card not in found_cards
+        )
+    ]
+
+
+    if not candidates:
+
+        return None
+
+
+    return random.choice(
+        candidates
+    )
+
+
+# =============================================
+# Lv.2
+# 推理予想
+# =============================================
+
+def choose_cpu_level2_guess(
+    room
+):
+
+    game = room[
+        "game"
+    ]
+
+
+    cpu_player = (
+        game.player2
+    )
+
+
+    found_cards = set(
+        cpu_player.found_cards
+    )
+
+
+    wrong_guesses = room[
+        "cpu_wrong_guesses"
+    ]
+
+
+    counts = {}
+
+
+    # =========================================
+    # 残っている候補手札に
+    # 何回カードが登場するか数える
+    # =========================================
+
+    for candidate_hand in room[
+        "cpu_candidate_hands"
+    ]:
+
+        for card in candidate_hand:
+
+            if card in found_cards:
+
+                continue
+
+
+            if card in wrong_guesses:
+
+                continue
+
+
+            counts[
+                card
+            ] = (
+                counts.get(
+                    card,
+                    0
+                )
+                + 1
+            )
+
+
+    if counts:
+
+        max_count = max(
+            counts.values()
+        )
+
+
+        best_cards = [
+            card
+            for card, count
+            in counts.items()
+            if count == max_count
+        ]
+
+
+        return random.choice(
+            best_cards
+        )
+
+
+    # =========================================
+    # 候補が万が一0になった場合の保険
+    # =========================================
+
+    cpu_hand = set(
+        cpu_player.hand
+    )
+
+
+    fallback = [
+        card
+        for card
+        in create_all_cards()
+        if (
+            card not in cpu_hand
+            and
+            card not in found_cards
+            and
+            card not in wrong_guesses
+        )
+    ]
+
+
+    if not fallback:
+
+        return None
+
+
+    return random.choice(
+        fallback
+    )
+
+
+# =============================================
+# CPU予想選択
+# =============================================
+
+def choose_cpu_guess(
+    room
+):
+
+    if room[
+        "cpu_level"
+    ] == 1:
+
+        return choose_cpu_level1_guess(
+            room
+        )
+
+
+    return choose_cpu_level2_guess(
+        room
+    )
+
+
+# =============================================
+# CPU質問実行
+# =============================================
+
+def cpu_ask_question(
+    room
+):
+
+    game = room[
+        "game"
+    ]
+
 
     human_player = (
         game.player1
     )
 
 
-    question_id = random.randint(
-        1,
-        11,
+    cpu_player = (
+        game.player2
     )
 
 
-    data = {
-        "question_id": question_id
+    question = choose_cpu_question(
+        room
+    )
+
+
+    question_id = question[
+        "question_id"
+    ]
+
+
+    rank = question.get(
+        "rank"
+    )
+
+
+    number = question.get(
+        "number"
+    )
+
+
+    # =========================================
+    # 実際のプレイヤー手札へ質問
+    # =========================================
+
+    answer = evaluate_question_on_hand(
+        game.question_manager,
+        human_player.hand,
+        cpu_player.found_cards,
+        question_id,
+        rank,
+        number
+    )
+
+
+    question_text = create_question_text(
+        question_id,
+        rank,
+        number
+    )
+
+
+    # =========================================
+    # Lv.2だけ履歴を利用
+    # =========================================
+
+    if room[
+        "cpu_level"
+    ] == 2:
+
+        history = {
+            "question_id":
+                question_id,
+
+            "rank":
+                rank,
+
+            "number":
+                number,
+
+            "question":
+                question_text,
+
+            "answer":
+                answer
+        }
+
+
+        room[
+            "cpu_question_history"
+        ].append(
+            history
+        )
+
+
+        filter_cpu_candidates_by_question(
+            room,
+            question,
+            answer
+        )
+
+
+        candidate_count = len(
+            room[
+                "cpu_candidate_hands"
+            ]
+        )
+
+
+    else:
+
+        candidate_count = None
+
+
+    return {
+        "question":
+            question_text,
+
+        "answer":
+            answer,
+
+        "candidate_count":
+            candidate_count
     }
 
 
-    # ランク指定質問
+# =============================================
+# 安全送信
+# =============================================
 
-    if question_id == 4:
+async def send_json_safe(
+    websocket,
+    data
+):
 
-        data["rank"] = (
-            random.choice(
-                VALID_RANKS
-            )
+    try:
+
+        await websocket.send_json(
+            data
         )
 
-
-    # 以上 / 以下
-
-    elif question_id in (
-        5,
-        6,
-    ):
-
-        data["number"] = (
-            random.randint(
-                1,
-                13,
-            )
-        )
+        return True
 
 
-    return evaluate_question(
-        game,
-        cpu_player,
-        human_player,
-        data,
-    )
+    except Exception:
+
+        return False
 
 
 # =============================================
-# ゲーム終了
+# GAME OVER
 # =============================================
 
 async def finish_game(
     room,
-    winner,
+    winner
 ):
 
-    game = room["game"]
-
-
-    player1_hand = [
-        str(card)
-        for card
-        in game.player1.hand
-    ]
-
-
-    player2_hand = [
-        str(card)
-        for card
-        in game.player2.hand
+    game = room[
+        "game"
     ]
 
 
@@ -703,27 +1355,140 @@ async def finish_game(
     ] = "finished"
 
 
-    room[
-        "rematch_requests"
-    ].clear()
+    message = {
+        "type":
+            "game_over",
+
+        "winner":
+            winner,
+
+        "player1_hand": [
+            str(
+                card
+            )
+            for card
+            in game.player1.hand
+        ],
+
+        "player2_hand": [
+            str(
+                card
+            )
+            for card
+            in game.player2.hand
+        ]
+    }
 
 
-    for player_socket in list(
-        room["players"]
+    for websocket in list(
+        room[
+            "players"
+        ]
     ):
 
-        try:
+        await send_json_safe(
+            websocket,
+            message
+        )
 
-            await player_socket.send_json({
-                "type": "game_over",
-                "winner": winner,
-                "player1_hand": player1_hand,
-                "player2_hand": player2_hand,
-            })
 
-        except Exception:
+# =============================================
+# ターン変更通知
+# =============================================
 
-            pass
+async def send_turn_changed(
+    room
+):
+
+    current_turn = room[
+        "current_turn"
+    ]
+
+
+    phase = room[
+        "current_phase"
+    ]
+
+
+    # =========================================
+    # CPU戦
+    # =========================================
+
+    if room[
+        "mode"
+    ] == "cpu":
+
+        if not room[
+            "players"
+        ]:
+
+            return
+
+
+        await send_json_safe(
+            room[
+                "players"
+            ][0],
+
+            {
+                "type":
+                    "turn_changed",
+
+                "current_turn":
+                    current_turn,
+
+                "your_turn":
+                    current_turn == 1,
+
+                "phase":
+                    phase,
+
+                "mode":
+                    "cpu",
+
+                "cpu_level":
+                    room[
+                        "cpu_level"
+                    ]
+            }
+        )
+
+
+        return
+
+
+    # =========================================
+    # PvP
+    # =========================================
+
+    for index, websocket in enumerate(
+        list(
+            room[
+                "players"
+            ]
+        ),
+        start=1
+    ):
+
+        await send_json_safe(
+            websocket,
+            {
+                "type":
+                    "turn_changed",
+
+                "current_turn":
+                    current_turn,
+
+                "your_turn":
+                    current_turn == index,
+
+                "phase":
+                    phase,
+
+                "mode":
+                    "pvp"
+            }
+        )
 
 
 # =============================================
@@ -731,200 +1496,202 @@ async def finish_game(
 # =============================================
 
 async def start_new_game(
-    room_id,
+    room_id
 ):
 
-    room = rooms.get(
+    if room_id not in rooms:
+
+        return
+
+
+    room = rooms[
         room_id
-    )
+    ]
 
 
-    if room is None:
-
-        raise ValueError(
-            f"ルーム {room_id} が"
-            "存在しません。"
-        )
+    room[
+        "game"
+    ] = Game()
 
 
-    # =========================================
-    # 人数確認
-    # =========================================
+    room[
+        "current_turn"
+    ] = 1
 
-    if room["mode"] == "cpu":
-
-        if len(
-            room["players"]
-        ) != 1:
-
-            raise ValueError(
-                "CPU対戦には"
-                "Player 1が必要です。"
-            )
-
-
-    else:
-
-        if len(
-            room["players"]
-        ) != 2:
-
-            raise ValueError(
-                f"ルーム {room_id} に"
-                "2人揃っていません。"
-            )
-
-
-    # =========================================
-    # ゲーム初期化
-    # =========================================
-
-    room["game"] = Game()
-
-    room["current_turn"] = 1
 
     room[
         "current_phase"
     ] = "question"
 
+
     room[
         "rematch_requests"
-    ].clear()
+    ] = set()
 
 
-    player1_hand = [
-        str(card)
-        for card
-        in room["game"].player1.hand
+    game = room[
+        "game"
     ]
-
-
-    player2_hand = [
-        str(card)
-        for card
-        in room["game"].player2.hand
-    ]
-
-
-    # =========================================
-    # Player 1
-    # =========================================
-
-    await room["players"][0].send_json({
-        "type": "game_start",
-        "player": 1,
-        "hand": player1_hand,
-        "your_turn": True,
-        "phase": "question",
-        "mode": room["mode"],
-    })
-
-
-    # =========================================
-    # Player 2
-    # 対人戦だけ送信
-    # =========================================
-
-    if room["mode"] == "pvp":
-
-        await room["players"][1].send_json({
-            "type": "game_start",
-            "player": 2,
-            "hand": player2_hand,
-            "your_turn": False,
-            "phase": "waiting",
-            "mode": "pvp",
-        })
-
-
-    print(
-        f"ルーム {room_id}: "
-        "新しいゲームを開始しました"
-    )
-
-    print(
-        f"ルーム {room_id}: "
-        "Player 1 のターンです"
-    )
-
-
-# =============================================
-# ターン情報送信
-# =============================================
-
-async def send_turn_changed(
-    room,
-):
-
-    current_turn = (
-        room["current_turn"]
-    )
 
 
     # =========================================
     # CPU戦
     # =========================================
 
-    if room["mode"] == "cpu":
+    if room[
+        "mode"
+    ] == "cpu":
 
-        if not room["players"]:
+        initialize_cpu_state(
+            room
+        )
+
+
+        if not room[
+            "players"
+        ]:
 
             return
 
 
-        await room["players"][0].send_json({
-            "type": "turn_changed",
-            "current_turn": current_turn,
-            "your_turn": (
-                current_turn == 1
-            ),
-            "phase": (
-                "question"
-                if current_turn == 1
-                else "waiting"
-            ),
-        })
+        websocket = room[
+            "players"
+        ][0]
+
+
+        candidate_count = None
+
+
+        if room[
+            "cpu_level"
+        ] == 2:
+
+            candidate_count = len(
+                room[
+                    "cpu_candidate_hands"
+                ]
+            )
+
+
+        await send_json_safe(
+            websocket,
+            {
+                "type":
+                    "game_start",
+
+                "player":
+                    1,
+
+                "hand": [
+                    str(
+                        card
+                    )
+                    for card
+                    in game.player1.hand
+                ],
+
+                "your_turn":
+                    True,
+
+                "phase":
+                    "question",
+
+                "mode":
+                    "cpu",
+
+                "cpu_level":
+                    room[
+                        "cpu_level"
+                    ],
+
+                "candidate_count":
+                    candidate_count
+            }
+        )
+
 
         return
 
 
     # =========================================
-    # 対人戦
+    # PvP
     # =========================================
 
     if len(
-        room["players"]
+        room[
+            "players"
+        ]
     ) < 2:
 
         return
 
 
-    await room["players"][0].send_json({
-        "type": "turn_changed",
-        "current_turn": current_turn,
-        "your_turn": (
-            current_turn == 1
-        ),
-        "phase": (
-            "question"
-            if current_turn == 1
-            else "waiting"
-        ),
-    })
+    player1_socket = room[
+        "players"
+    ][0]
 
 
-    await room["players"][1].send_json({
-        "type": "turn_changed",
-        "current_turn": current_turn,
-        "your_turn": (
-            current_turn == 2
-        ),
-        "phase": (
-            "question"
-            if current_turn == 2
-            else "waiting"
-        ),
-    })
+    player2_socket = room[
+        "players"
+    ][1]
+
+
+    await send_json_safe(
+        player1_socket,
+        {
+            "type":
+                "game_start",
+
+            "player":
+                1,
+
+            "hand": [
+                str(
+                    card
+                )
+                for card
+                in game.player1.hand
+            ],
+
+            "your_turn":
+                True,
+
+            "phase":
+                "question",
+
+            "mode":
+                "pvp"
+        }
+    )
+
+
+    await send_json_safe(
+        player2_socket,
+        {
+            "type":
+                "game_start",
+
+            "player":
+                2,
+
+            "hand": [
+                str(
+                    card
+                )
+                for card
+                in game.player2.hand
+            ],
+
+            "your_turn":
+                False,
+
+            "phase":
+                "question",
+
+            "mode":
+                "pvp"
+        }
+    )
 
 
 # =============================================
@@ -932,56 +1699,57 @@ async def send_turn_changed(
 # =============================================
 
 async def cpu_take_turn(
-    room_id,
+    room_id
 ):
 
-    room = rooms.get(
+    if room_id not in rooms:
+
+        return
+
+
+    room = rooms[
         room_id
-    )
+    ]
 
 
-    if room is None:
-
-        return
-
-
-    if room["mode"] != "cpu":
+    if room[
+        "mode"
+    ] != "cpu":
 
         return
 
 
-    if room["game"] is None:
+    if not room[
+        "players"
+    ]:
 
         return
 
 
-    if room["current_turn"] != 2:
+    game = room[
+        "game"
+    ]
+
+
+    if game is None:
 
         return
 
 
-    if not room["players"]:
+    if room[
+        "current_turn"
+    ] != 2:
 
         return
 
 
-    human_socket = (
-        room["players"][0]
-    )
-
-    game = room["game"]
-
-    cpu_player = (
-        game.player2
-    )
-
-    human_player = (
-        game.player1
-    )
+    cpu_level = room[
+        "cpu_level"
+    ]
 
 
     # =========================================
-    # CPUが考えているように少し待つ
+    # CPU思考
     # =========================================
 
     await asyncio.sleep(
@@ -989,12 +1757,7 @@ async def cpu_take_turn(
     )
 
 
-    # 待っている間に
-    # ルームが消えていないか確認
-
-    if rooms.get(
-        room_id
-    ) is not room:
+    if room_id not in rooms:
 
         return
 
@@ -1003,135 +1766,143 @@ async def cpu_take_turn(
     # CPU質問
     # =========================================
 
-    room[
-        "current_phase"
-    ] = "question"
+    question_result = (
+        cpu_ask_question(
+            room
+        )
+    )
 
 
-    (
-        question_text,
-        answer,
-    ) = cpu_random_question(
+    if not room[
+        "players"
+    ]:
+
+        return
+
+
+    await send_json_safe(
+        room[
+            "players"
+        ][0],
+
+        {
+            "type":
+                "cpu_question",
+
+            "question":
+                question_result[
+                    "question"
+                ],
+
+            "answer":
+                question_result[
+                    "answer"
+                ],
+
+            "candidate_count":
+                question_result[
+                    "candidate_count"
+                ],
+
+            "cpu_level":
+                cpu_level
+        }
+    )
+
+
+    await asyncio.sleep(
+        1.5
+    )
+
+
+    if room_id not in rooms:
+
+        return
+
+
+    # =========================================
+    # CPU予想
+    # =========================================
+
+    guess = choose_cpu_guess(
         room
     )
 
 
-    print(
-        f"ルーム {room_id}: "
-        f"CPU質問 "
-        f"{question_text} "
-        f"→ {answer}"
-    )
-
-
-    try:
-
-        await human_socket.send_json({
-            "type": "cpu_question",
-            "question": question_text,
-            "answer": answer,
-        })
-
-    except Exception:
+    if guess is None:
 
         return
 
 
-    # =========================================
-    # CPU予想まで少し待つ
-    # =========================================
-
-    room[
-        "current_phase"
-    ] = "guess"
-
-
-    await asyncio.sleep(
-        1.5
+    correct = game.guess_card(
+        game.player2,
+        game.player1,
+        guess
     )
 
 
-    if rooms.get(
-        room_id
-    ) is not room:
-
-        return
-
-
     # =========================================
-    # CPUランダム予想
+    # Lv.2だけ結果を記憶
     # =========================================
 
-    candidates = (
-        create_cpu_guess_candidates(
-            cpu_player
-        )
-    )
+    if cpu_level == 2:
 
-
-    if not candidates:
-
-        return
-
-
-    guess = random.choice(
-        candidates
-    )
-
-
-    result = (
-        game.guess_card(
-            cpu_player,
-            human_player,
+        filter_cpu_candidates_by_guess(
+            room,
             guess,
+            correct
         )
+
+
+        candidate_count = len(
+            room[
+                "cpu_candidate_hands"
+            ]
+        )
+
+
+    else:
+
+        candidate_count = None
+
+
+    await send_json_safe(
+        room[
+            "players"
+        ][0],
+
+        {
+            "type":
+                "cpu_guess_result",
+
+            "guess":
+                str(
+                    guess
+                ),
+
+            "correct":
+                correct,
+
+            "found_count":
+                len(
+                    game.player2.found_cards
+                ),
+
+            "candidate_count":
+                candidate_count,
+
+            "cpu_level":
+                cpu_level
+        }
     )
 
-
-    found_count = len(
-        cpu_player.found_cards
-    )
-
-
-    print(
-        f"ルーム {room_id}: "
-        f"CPU予想 "
-        f"{guess} "
-        f"→ {result}"
-    )
-
-
-    try:
-
-        await human_socket.send_json({
-            "type": "cpu_guess_result",
-            "guess": str(guess),
-            "correct": result,
-            "found_count": found_count,
-        })
-
-    except Exception:
-
-        return
-
-
-    room[
-        "current_phase"
-    ] = "result"
-
-
-    # =========================================
-    # 結果を少し表示
-    # =========================================
 
     await asyncio.sleep(
         1.5
     )
 
 
-    if rooms.get(
-        room_id
-    ) is not room:
+    if room_id not in rooms:
 
         return
 
@@ -1140,50 +1911,33 @@ async def cpu_take_turn(
     # CPU勝利
     # =========================================
 
-    if cpu_player.is_winner():
-
-        print(
-            f"ルーム {room_id}: "
-            "CPUの勝ち！"
-        )
-
+    if game.player2.is_winner():
 
         await finish_game(
             room,
-            winner=2,
+            2
         )
 
         return
 
 
     # =========================================
-    # Player 1へターンを戻す
+    # 人間ターン
     # =========================================
 
     room[
         "current_turn"
     ] = 1
 
+
     room[
         "current_phase"
     ] = "question"
 
 
-    print(
-        f"ルーム {room_id}: "
-        "Player 1 のターンです"
+    await send_turn_changed(
+        room
     )
-
-
-    try:
-
-        await send_turn_changed(
-            room
-        )
-
-    except Exception:
-
-        return
 
 
 # =============================================
@@ -1195,15 +1949,8 @@ async def cpu_take_turn(
 )
 async def websocket_endpoint(
     websocket: WebSocket,
-    room_id: str,
+    room_id: str
 ):
-
-    await websocket.accept()
-
-
-    # =========================================
-    # ルームID整形
-    # =========================================
 
     room_id = (
         room_id
@@ -1212,8 +1959,11 @@ async def websocket_endpoint(
     )
 
 
+    await websocket.accept()
+
+
     # =========================================
-    # ルームID形式
+    # ID形式
     # =========================================
 
     if not is_valid_room_id(
@@ -1221,41 +1971,41 @@ async def websocket_endpoint(
     ):
 
         await websocket.send_json({
-            "type": "error",
-            "code": "INVALID_ROOM_ID",
-            "message": (
-                "ルームIDの形式が"
-                "正しくありません。"
-            ),
+            "type":
+                "error",
+
+            "code":
+                "INVALID_ROOM_ID",
+
+            "message":
+                "ルームIDの形式が正しくありません。"
         })
 
 
-        await websocket.close(
-            code=4400
-        )
+        await websocket.close()
 
         return
 
 
     # =========================================
-    # ルーム存在確認
+    # 存在しない
     # =========================================
 
     if room_id not in rooms:
 
         await websocket.send_json({
-            "type": "error",
-            "code": "ROOM_NOT_FOUND",
-            "message": (
-                f"ルーム {room_id} は"
-                "存在しません。"
-            ),
+            "type":
+                "error",
+
+            "code":
+                "ROOM_NOT_FOUND",
+
+            "message":
+                "ルームが見つかりません。"
         })
 
 
-        await websocket.close(
-            code=4404
-        )
+        await websocket.close()
 
         return
 
@@ -1266,117 +2016,139 @@ async def websocket_endpoint(
 
 
     # =========================================
-    # 最大人数
+    # 満員
     # =========================================
 
-    if room["mode"] == "cpu":
-
-        max_players = 1
-
-    else:
-
-        max_players = 2
-
-
-    if len(
-        room["players"]
-    ) >= max_players:
+    if (
+        room[
+            "mode"
+        ] == "pvp"
+        and
+        len(
+            room[
+                "players"
+            ]
+        ) >= 2
+    ):
 
         await websocket.send_json({
-            "type": "error",
-            "code": "ROOM_FULL",
-            "message": (
-                f"ルーム {room_id} は"
-                "すでに満員です。"
-            ),
+            "type":
+                "error",
+
+            "code":
+                "ROOM_FULL",
+
+            "message":
+                "ルームは満員です。"
         })
 
 
-        await websocket.close(
-            code=4409
-        )
+        await websocket.close()
+
+        return
+
+
+    if (
+        room[
+            "mode"
+        ] == "cpu"
+        and
+        len(
+            room[
+                "players"
+            ]
+        ) >= 1
+    ):
+
+        await websocket.send_json({
+            "type":
+                "error",
+
+            "code":
+                "ROOM_FULL",
+
+            "message":
+                "CPUルームは使用中です。"
+        })
+
+
+        await websocket.close()
 
         return
 
 
     # =========================================
-    # プレイヤー登録
+    # プレイヤー追加
     # =========================================
 
-    room["players"].append(
+    room[
+        "players"
+    ].append(
         websocket
     )
 
 
-    player_number = len(
-        room["players"]
-    )
+    if room[
+        "mode"
+    ] == "cpu":
+
+        player_number = 1
 
 
-    print(
-        f"ルーム {room_id}: "
-        f"Player {player_number} "
-        "が接続しました"
-    )
+    else:
+
+        player_number = len(
+            room[
+                "players"
+            ]
+        )
 
 
     await websocket.send_json({
-        "type": "player_number",
-        "player": player_number,
-        "room_id": room_id,
-        "mode": room["mode"],
+        "type":
+            "player_number",
+
+        "player":
+            player_number,
+
+        "room_id":
+            room_id,
+
+        "mode":
+            room[
+                "mode"
+            ],
+
+        "cpu_level":
+            room[
+                "cpu_level"
+            ]
     })
 
 
     # =========================================
-    # CPU戦開始
+    # 開始
     # =========================================
 
-    if (
-        room["mode"] == "cpu"
-        and
-        len(
-            room["players"]
-        ) == 1
-    ):
-
-        print(
-            f"ルーム {room_id}: "
-            "CPU対戦を開始します"
-        )
-
+    if room[
+        "mode"
+    ] == "cpu":
 
         await start_new_game(
             room_id
         )
 
 
-    # =========================================
-    # 対人戦開始
-    # =========================================
-
-    elif (
-        room["mode"] == "pvp"
-        and
-        len(
-            room["players"]
-        ) == 2
-    ):
-
-        print(
-            f"ルーム {room_id}: "
-            "2人揃いました！"
-        )
-
+    elif len(
+        room[
+            "players"
+        ]
+    ) == 2:
 
         await start_new_game(
             room_id
         )
 
-
-    # =============================================
-    # メイン受信ループ
-    # =============================================
 
     try:
 
@@ -1387,416 +2159,103 @@ async def websocket_endpoint(
             )
 
 
-            # 途中でルームが削除された
-            if rooms.get(
+            if room_id not in rooms:
+
+                break
+
+
+            room = rooms[
                 room_id
-            ) is not room:
+            ]
 
-                return
 
+            game = room[
+                "game"
+            ]
 
-            # =====================================
-            # Player番号更新
-            # =====================================
 
-            if websocket in room["players"]:
-
-                player_number = (
-                    room["players"].index(
-                        websocket
-                    )
-                    + 1
-                )
-
-
-            print(
-                f"ルーム {room_id} / "
-                f"Player {player_number} "
-                f"から受信：{data}"
-            )
-
-
-            message_type = data.get(
-                "type"
-            )
-
-
-            # =====================================
-            # 再戦
-            # =====================================
-
-            if message_type == (
-                "rematch_request"
-            ):
-
-                if (
-                    room["current_phase"]
-                    != "finished"
-                ):
-
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": (
-                            "今は再戦を"
-                            "選択できません。"
-                        ),
-                    })
-
-                    continue
-
-
-                # =================================
-                # CPU戦は相手の承認不要
-                # =================================
-
-                if room["mode"] == "cpu":
-
-                    print(
-                        f"ルーム {room_id}: "
-                        "CPUと再戦します"
-                    )
-
-
-                    await start_new_game(
-                        room_id
-                    )
-
-                    continue
-
-
-                # =================================
-                # 対人戦
-                # =================================
-
-                room[
-                    "rematch_requests"
-                ].add(
-                    player_number
-                )
-
-
-                print(
-                    f"ルーム {room_id}: "
-                    f"Player {player_number} "
-                    "が再戦希望"
-                )
-
-
-                if (
-                    room[
-                        "rematch_requests"
-                    ]
-                    == {1, 2}
-                ):
-
-                    await start_new_game(
-                        room_id
-                    )
-
-
-                else:
-
-                    await websocket.send_json({
-                        "type": (
-                            "rematch_waiting"
-                        ),
-                    })
-
-
-                continue
-
-
-            # =====================================
-            # ゲーム終了
-            # =====================================
-
-            elif message_type == (
-                "leave_game"
-            ):
-
-                print(
-                    f"ルーム {room_id}: "
-                    f"Player {player_number} "
-                    "がゲームを終了しました"
-                )
-
-
-                sockets = list(
-                    room["players"]
-                )
-
-
-                # 対人戦なら相手へ通知
-
-                for player_socket in sockets:
-
-                    if (
-                        player_socket
-                        != websocket
-                    ):
-
-                        try:
-
-                            await player_socket.send_json({
-                                "type": (
-                                    "opponent_left"
-                                ),
-                            })
-
-                        except Exception:
-
-                            pass
-
-
-                rooms.pop(
-                    room_id,
-                    None,
-                )
-
-
-                room[
-                    "players"
-                ].clear()
-
-
-                for player_socket in sockets:
-
-                    try:
-
-                        await player_socket.close()
-
-                    except Exception:
-
-                        pass
-
-
-                return
-
-
-            # =====================================
-            # ゲーム未開始
-            # =====================================
-
-            if room["game"] is None:
-
-                await websocket.send_json({
-                    "type": "error",
-                    "message": (
-                        "まだゲームが"
-                        "開始されていません。"
-                    ),
-                })
-
-                continue
-
-
-            # =====================================
-            # ゲーム終了後
-            # =====================================
-
-            if (
-                room["current_phase"]
-                == "finished"
-            ):
-
-                await websocket.send_json({
-                    "type": "error",
-                    "message": (
-                        "ゲームは終了しています。"
-                        "再戦または終了を"
-                        "選択してください。"
-                    ),
-                })
-
-                continue
-
-
-            # =====================================
-            # 自分のターンか
-            # =====================================
-
-            if (
-                player_number
-                != room["current_turn"]
-            ):
-
-                await websocket.send_json({
-                    "type": "error",
-                    "message": (
-                        "今はあなたの"
-                        "ターンではありません。"
-                    ),
-                })
-
-                continue
-
-
-            # =====================================
+            # =================================
             # 質問
-            # =====================================
+            # =================================
 
-            if message_type == "question":
+            if data.get(
+                "type"
+            ) == "question":
 
-                if (
-                    room["current_phase"]
-                    != "question"
-                ):
+                if game is None:
 
                     await websocket.send_json({
-                        "type": "error",
-                        "message": (
-                            "今はカードを"
-                            "予想する番です。"
-                        ),
+                        "type":
+                            "error",
+
+                        "message":
+                            "ゲームが開始していません。"
                     })
 
                     continue
 
 
-                # =================================
-                # プレイヤー
-                # =================================
+                if room[
+                    "current_turn"
+                ] != player_number:
+
+                    await websocket.send_json({
+                        "type":
+                            "error",
+
+                        "message":
+                            "あなたのターンではありません。"
+                    })
+
+                    continue
+
+
+                if room[
+                    "current_phase"
+                ] != "question":
+
+                    await websocket.send_json({
+                        "type":
+                            "error",
+
+                        "message":
+                            "今は質問できません。"
+                    })
+
+                    continue
+
 
                 if player_number == 1:
 
                     asking_player = (
-                        room["game"].player1
+                        game.player1
                     )
 
                     opponent = (
-                        room["game"].player2
+                        game.player2
                     )
 
 
                 else:
 
                     asking_player = (
-                        room["game"].player2
+                        game.player2
                     )
 
                     opponent = (
-                        room["game"].player1
+                        game.player1
                     )
 
-
-                # =================================
-                # 質問判定
-                # =================================
 
                 try:
 
                     (
-                        question_text,
                         answer,
+                        question_text
                     ) = evaluate_question(
-                        room["game"],
+                        game,
                         asking_player,
                         opponent,
-                        data,
-                    )
-
-
-                except ValueError as error:
-
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": str(
-                            error
-                        ),
-                    })
-
-                    continue
-
-
-                # =================================
-                # 質問結果
-                # =================================
-
-                await websocket.send_json({
-                    "type": "question_result",
-                    "question": question_text,
-                    "answer": answer,
-                })
-
-
-                # =================================
-                # 予想フェーズ
-                # =================================
-
-                room[
-                    "current_phase"
-                ] = "guess"
-
-
-                await websocket.send_json({
-                    "type": "phase_changed",
-                    "phase": "guess",
-                })
-
-
-                print(
-                    f"Player "
-                    f"{player_number} "
-                    "のカード予想フェーズ"
-                )
-
-
-            # =====================================
-            # カード予想
-            # =====================================
-
-            elif message_type == (
-                "guess_card"
-            ):
-
-                if (
-                    room["current_phase"]
-                    != "guess"
-                ):
-
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": (
-                            "先に質問してください。"
-                        ),
-                    })
-
-                    continue
-
-
-                # =================================
-                # プレイヤー
-                # =================================
-
-                if player_number == 1:
-
-                    guessing_player = (
-                        room["game"].player1
-                    )
-
-                    opponent = (
-                        room["game"].player2
-                    )
-
-
-                else:
-
-                    guessing_player = (
-                        room["game"].player2
-                    )
-
-                    opponent = (
-                        room["game"].player1
-                    )
-
-
-                # =================================
-                # カード作成
-                # =================================
-
-                try:
-
-                    guess = create_guess_card(
                         data
                     )
 
@@ -1804,146 +2263,234 @@ async def websocket_endpoint(
                 except ValueError as error:
 
                     await websocket.send_json({
-                        "type": "error",
-                        "message": str(
-                            error
-                        ),
+                        "type":
+                            "error",
+
+                        "message":
+                            str(
+                                error
+                            )
                     })
 
                     continue
 
 
-                # =================================
-                # 正解判定
-                # =================================
+                room[
+                    "current_phase"
+                ] = "guess"
 
-                result = (
-                    room["game"].guess_card(
-                        guessing_player,
-                        opponent,
-                        guess,
-                    )
-                )
-
-
-                found_count = len(
-                    guessing_player.found_cards
-                )
-
-
-                # =================================
-                # 予想結果
-                # =================================
 
                 await websocket.send_json({
-                    "type": "guess_result",
-                    "guess": str(
-                        guess
-                    ),
-                    "correct": result,
-                    "found_count": found_count,
+                    "type":
+                        "question_result",
+
+                    "question":
+                        question_text,
+
+                    "answer":
+                        answer
                 })
 
 
-                # =================================
-                # 「次へ」待ち
-                # =================================
+                continue
+
+
+            # =================================
+            # 予想
+            # =================================
+
+            if data.get(
+                "type"
+            ) == "guess_card":
+
+                if game is None:
+
+                    await websocket.send_json({
+                        "type":
+                            "error",
+
+                        "message":
+                            "ゲームが開始していません。"
+                    })
+
+                    continue
+
+
+                if room[
+                    "current_turn"
+                ] != player_number:
+
+                    await websocket.send_json({
+                        "type":
+                            "error",
+
+                        "message":
+                            "あなたのターンではありません。"
+                    })
+
+                    continue
+
+
+                if room[
+                    "current_phase"
+                ] != "guess":
+
+                    await websocket.send_json({
+                        "type":
+                            "error",
+
+                        "message":
+                            "今は予想できません。"
+                    })
+
+                    continue
+
+
+                guess = create_guess_card(
+                    data
+                )
+
+
+                if guess is None:
+
+                    await websocket.send_json({
+                        "type":
+                            "error",
+
+                        "message":
+                            "カード指定が正しくありません。"
+                    })
+
+                    continue
+
+
+                if player_number == 1:
+
+                    asking_player = (
+                        game.player1
+                    )
+
+                    opponent = (
+                        game.player2
+                    )
+
+
+                else:
+
+                    asking_player = (
+                        game.player2
+                    )
+
+                    opponent = (
+                        game.player1
+                    )
+
+
+                correct = game.guess_card(
+                    asking_player,
+                    opponent,
+                    guess
+                )
+
 
                 room[
                     "current_phase"
                 ] = "result"
 
 
-                print(
-                    f"ルーム {room_id}: "
-                    f"Player {player_number} "
-                    "の予想結果確認待ち"
-                )
+                await websocket.send_json({
+                    "type":
+                        "guess_result",
 
-
-            # =====================================
-            # 「次へ」
-            # =====================================
-
-            elif message_type == (
-                "continue_after_guess"
-            ):
-
-                if (
-                    room["current_phase"]
-                    != "result"
-                ):
-
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": (
-                            "今は「次へ」を"
-                            "押すタイミングでは"
-                            "ありません。"
+                    "guess":
+                        str(
+                            guess
                         ),
-                    })
+
+                    "correct":
+                        correct,
+
+                    "found_count":
+                        len(
+                            asking_player.found_cards
+                        )
+                })
+
+
+                continue
+
+
+            # =================================
+            # 次へ
+            # =================================
+
+            if data.get(
+                "type"
+            ) == "continue_after_guess":
+
+                if game is None:
 
                     continue
 
 
-                # =================================
-                # 現在プレイヤー
-                # =================================
+                if room[
+                    "current_turn"
+                ] != player_number:
+
+                    continue
+
+
+                if room[
+                    "current_phase"
+                ] != "result":
+
+                    continue
+
 
                 if player_number == 1:
 
                     current_player = (
-                        room["game"].player1
+                        game.player1
                     )
 
 
                 else:
 
                     current_player = (
-                        room["game"].player2
+                        game.player2
                     )
 
 
-                # =================================
-                # 勝利判定
-                # =================================
+                # =============================
+                # 勝利
+                # =============================
 
                 if current_player.is_winner():
 
-                    print(
-                        f"ルーム {room_id}: "
-                        f"Player {player_number} "
-                        "の勝ち！"
-                    )
-
-
                     await finish_game(
                         room,
-                        winner=player_number,
+                        player_number
                     )
 
                     continue
 
 
-                # =================================
-                # CPU対戦
-                # =================================
+                # =============================
+                # CPU戦
+                # =============================
 
-                if room["mode"] == "cpu":
+                if room[
+                    "mode"
+                ] == "cpu":
 
                     room[
                         "current_turn"
                     ] = 2
 
+
                     room[
                         "current_phase"
                     ] = "question"
-
-
-                    print(
-                        f"ルーム {room_id}: "
-                        "CPUのターンです"
-                    )
 
 
                     await send_turn_changed(
@@ -1959,25 +2506,17 @@ async def websocket_endpoint(
                     continue
 
 
-                # =================================
-                # 対人戦ターン交代
-                # =================================
+                # =============================
+                # PvP
+                # =============================
 
-                if (
-                    room["current_turn"]
-                    == 1
-                ):
-
-                    room[
-                        "current_turn"
-                    ] = 2
-
-
-                else:
-
-                    room[
-                        "current_turn"
-                    ] = 1
+                room[
+                    "current_turn"
+                ] = (
+                    2
+                    if player_number == 1
+                    else 1
+                )
 
 
                 room[
@@ -1985,155 +2524,204 @@ async def websocket_endpoint(
                 ] = "question"
 
 
-                print(
-                    f"ルーム {room_id}: "
-                    f"Player "
-                    f"{room['current_turn']} "
-                    "のターンです"
-                )
-
-
                 await send_turn_changed(
                     room
                 )
 
 
-            # =====================================
+                continue
+
+
+            # =================================
+            # 再戦
+            # =================================
+
+            if data.get(
+                "type"
+            ) == "rematch_request":
+
+                # CPUは即再戦
+                if room[
+                    "mode"
+                ] == "cpu":
+
+                    await start_new_game(
+                        room_id
+                    )
+
+                    continue
+
+
+                room[
+                    "rematch_requests"
+                ].add(
+                    player_number
+                )
+
+
+                if len(
+                    room[
+                        "rematch_requests"
+                    ]
+                ) >= 2:
+
+                    await start_new_game(
+                        room_id
+                    )
+
+
+                else:
+
+                    await websocket.send_json({
+                        "type":
+                            "rematch_waiting"
+                    })
+
+
+                continue
+
+
+            # =================================
+            # 終了
+            # =================================
+
+            if data.get(
+                "type"
+            ) == "leave_game":
+
+                if room[
+                    "mode"
+                ] == "pvp":
+
+                    for other_socket in list(
+                        room[
+                            "players"
+                        ]
+                    ):
+
+                        if other_socket is websocket:
+
+                            continue
+
+
+                        await send_json_safe(
+                            other_socket,
+                            {
+                                "type":
+                                    "opponent_left"
+                            }
+                        )
+
+
+                if room_id in rooms:
+
+                    del rooms[
+                        room_id
+                    ]
+
+
+                try:
+
+                    await websocket.close()
+
+
+                except Exception:
+
+                    pass
+
+
+                break
+
+
+            # =================================
             # 不明
-            # =====================================
+            # =================================
 
-            else:
+            await websocket.send_json({
+                "type":
+                    "error",
 
-                await websocket.send_json({
-                    "type": "error",
-                    "message": (
-                        "不明な操作です。"
-                    ),
-                })
+                "message":
+                    "不明なメッセージです。"
+            })
 
-
-    # =============================================
-    # 切断
-    # =============================================
 
     except WebSocketDisconnect:
 
+        pass
+
+
+    except Exception as error:
+
         print(
-            f"ルーム {room_id}: "
-            f"Player {player_number} "
-            "が切断しました"
+            "WebSocket error:",
+            error
         )
 
 
-        # すでに削除済みなら終了
+    finally:
 
-        if (
-            rooms.get(
-                room_id
-            )
-            is not room
-        ):
+        if room_id not in rooms:
 
             return
 
 
-        if websocket in room["players"]:
+        room = rooms[
+            room_id
+        ]
 
-            room["players"].remove(
+
+        if websocket in room[
+            "players"
+        ]:
+
+            room[
+                "players"
+            ].remove(
                 websocket
             )
 
 
-        # =========================================
-        # CPU戦
-        # =========================================
+        # =====================================
+        # CPU
+        # =====================================
 
-        if room["mode"] == "cpu":
+        if room[
+            "mode"
+        ] == "cpu":
 
-            rooms.pop(
-                room_id,
-                None,
-            )
+            if room_id in rooms:
+
+                del rooms[
+                    room_id
+                ]
 
 
+            return
+
+
+        # =====================================
+        # PvP
+        # =====================================
+
+        for other_socket in list(
             room[
                 "players"
-            ].clear()
-
-
-            print(
-                f"CPUルーム {room_id} "
-                "を削除しました"
-            )
-
-            return
-
-
-        # =========================================
-        # 対人戦
-        # 誰も残っていない
-        # =========================================
-
-        if len(
-            room["players"]
-        ) == 0:
-
-            rooms.pop(
-                room_id,
-                None,
-            )
-
-
-            print(
-                f"ルーム {room_id} "
-                "を削除しました"
-            )
-
-            return
-
-
-        # =========================================
-        # 対人戦
-        # 相手が残っている
-        # =========================================
-
-        remaining_players = list(
-            room["players"]
-        )
-
-
-        rooms.pop(
-            room_id,
-            None,
-        )
-
-
-        room[
-            "players"
-        ].clear()
-
-
-        for remaining_player in (
-            remaining_players
+            ]
         ):
 
-            try:
-
-                await remaining_player.send_json({
-                    "type": (
+            await send_json_safe(
+                other_socket,
+                {
+                    "type":
                         "opponent_disconnected"
-                    ),
-                })
-
-
-            except Exception:
-
-                pass
+                }
+            )
 
 
             try:
 
-                await remaining_player.close()
+                await other_socket.close()
 
 
             except Exception:
@@ -2141,8 +2729,8 @@ async def websocket_endpoint(
                 pass
 
 
-        print(
-            f"ルーム {room_id}: "
-            "対戦を終了し、"
-            "ルームを削除しました"
-        )
+        if room_id in rooms:
+
+            del rooms[
+                room_id
+            ]
