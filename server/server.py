@@ -4762,153 +4762,145 @@ async def websocket_endpoint(
 
     finally:
 
-        # leave_game / cancel などで
-        # 既に削除済み
-        if (
-            rooms.get(
-                room_id
+        # leave_game / cancel などで既に削除済みなら、
+        # 追加の切断処理は行わない。
+        if rooms.get(room_id) is room:
+
+            # =========================================
+            # PLAYER REMOVE
+            # =========================================
+
+            if (
+                websocket
+                in room[
+                    "players"
+                ]
+            ):
+
+                index = (
+                    room[
+                        "players"
+                    ]
+                    .index(
+                        websocket
+                    )
+                )
+
+
+                room[
+                    "players"
+                ].pop(
+                    index
+                )
+
+
+                if (
+                    index
+                    <
+                    len(
+                        room[
+                            "player_names"
+                        ]
+                    )
+                ):
+
+                    room[
+                        "player_names"
+                    ].pop(
+                        index
+                    )
+
+
+                if (
+                    index
+                    <
+                    len(
+                        room[
+                            "player_user_ids"
+                        ]
+                    )
+                ):
+
+                    room[
+                        "player_user_ids"
+                    ].pop(
+                        index
+                    )
+
+
+            # =========================================
+            # QUICK MATCH待機を解除
+            # =========================================
+
+            await (
+                clear_waiting_room_if_needed(
+                    room_id
+                )
             )
-            is not room
-        ):
-
-            return
 
 
-        # =========================================
-        # PLAYER REMOVE
-        # =========================================
+            # =========================================
+            # 残ったプレイヤー
+            # =========================================
 
-        if (
-            websocket
-            in room[
-                "players"
-            ]
-        ):
-
-            index = (
+            remaining_sockets = list(
                 room[
                     "players"
                 ]
-                .index(
-                    websocket
-                )
+            )
+
+
+            # =========================================
+            # ROOM DELETE
+            # =========================================
+
+            rooms.pop(
+                room_id,
+                None
             )
 
 
             room[
                 "players"
-            ].pop(
-                index
-            )
+            ].clear()
 
 
-            if (
-                index
-                <
-                len(
-                    room[
-                        "player_names"
-                    ]
-                )
-            ):
-
-                room[
-                    "player_names"
-                ].pop(
-                    index
-                )
-
-
-            if (
-                index
-                <
-                len(
-                    room[
-                        "player_user_ids"
-                    ]
-                )
-            ):
-
-                room[
-                    "player_user_ids"
-                ].pop(
-                    index
-                )
-
-
-        # =========================================
-        # QUICK MATCH待機を解除
-        # =========================================
-
-        await (
-            clear_waiting_room_if_needed(
-                room_id
-            )
-        )
-
-
-        # =========================================
-        # 残ったプレイヤー
-        # =========================================
-
-        remaining_sockets = list(
             room[
-                "players"
-            ]
-        )
+                "player_names"
+            ].clear()
 
 
-        # =========================================
-        # ROOM DELETE
-        # =========================================
-
-        rooms.pop(
-            room_id,
-            None
-        )
+            room[
+                "player_user_ids"
+            ].clear()
 
 
-        room[
-            "players"
-        ].clear()
+            # =========================================
+            # 相手に切断通知
+            # =========================================
+
+            for player_socket in (
+                remaining_sockets
+            ):
+
+                try:
+
+                    await (
+                        player_socket
+                        .send_json({
+
+                            "type":
+                                "opponent_disconnected"
+                        })
+                    )
+
+                except Exception:
+
+                    pass
 
 
-        room[
-            "player_names"
-        ].clear()
-
-
-        room[
-            "player_user_ids"
-        ].clear()
-
-
-        # =========================================
-        # 相手に切断通知
-        # =========================================
-
-        for player_socket in (
-            remaining_sockets
-        ):
-
-            try:
-
-                await (
-                    player_socket
-                    .send_json({
-
-                        "type":
-                            "opponent_disconnected"
-                    })
-                )
-
-            except Exception:
-
-                pass
-
-
-        print(
-            f"ルーム "
-            f"{room_id} "
-            "を削除しました"
-        )
+            print(
+                f"ルーム "
+                f"{room_id} "
+                "を削除しました"
+            )
