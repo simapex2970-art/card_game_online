@@ -22,6 +22,61 @@ const playerNameInput =
         "player-name"
     );
 
+const playerPasswordInput =
+    document.getElementById(
+        "player-password"
+    );
+
+const userRegisterButton =
+    document.getElementById(
+        "user-register-button"
+    );
+
+const userLoginButton =
+    document.getElementById(
+        "user-login-button"
+    );
+
+const userProfile =
+    document.getElementById(
+        "user-profile"
+    );
+
+const profileName =
+    document.getElementById(
+        "profile-name"
+    );
+
+const profileRank =
+    document.getElementById(
+        "profile-rank"
+    );
+
+const profileRating =
+    document.getElementById(
+        "profile-rating"
+    );
+
+const profileWins =
+    document.getElementById(
+        "profile-wins"
+    );
+
+const profileLosses =
+    document.getElementById(
+        "profile-losses"
+    );
+
+const profileWinRate =
+    document.getElementById(
+        "profile-win-rate"
+    );
+
+const userLogoutButton =
+    document.getElementById(
+        "user-logout-button"
+    );
+
 const createRoomButton =
     document.getElementById(
         "create-room-button"
@@ -325,6 +380,21 @@ let currentCpuLevel =
 let currentPlayerName =
     "";
 
+
+// =============================================
+// ACCOUNT
+// =============================================
+
+const SESSION_TOKEN_STORAGE_KEY =
+    "veil53_session_token";
+
+let currentUser =
+    null;
+
+let userRequestPending =
+    false;
+
+
 let player1Name =
     "PLAYER 1";
 
@@ -448,10 +518,10 @@ function getSelectedCpuLevel() {
 
 
 // =============================================
-// NAME
+// ACCOUNT
 // =============================================
 
-function getValidatedPlayerName() {
+function getValidatedAccountName() {
 
     const name =
         playerNameInput
@@ -489,6 +559,812 @@ function getValidatedPlayerName() {
 }
 
 
+function getValidatedPassword() {
+
+    const password =
+        playerPasswordInput.value;
+
+
+    if (
+        password.length === 0
+    ) {
+
+        message.textContent =
+            "パスワードを入力してください。";
+
+        playerPasswordInput.focus();
+
+        return null;
+    }
+
+
+    if (
+        password.length < 8
+    ) {
+
+        message.textContent =
+            "パスワードは8文字以上で入力してください。";
+
+        playerPasswordInput.focus();
+
+        return null;
+    }
+
+
+    if (
+        password.length > 128
+    ) {
+
+        message.textContent =
+            "パスワードは128文字以内で入力してください。";
+
+        playerPasswordInput.focus();
+
+        return null;
+    }
+
+
+    return password;
+}
+
+
+function getValidatedPlayerName() {
+
+    if (
+        currentUser === null
+    ) {
+
+        message.textContent =
+            "対戦するにはログインしてください。";
+
+        playerNameInput.focus();
+
+        return null;
+    }
+
+
+    return currentUser.name;
+}
+
+
+function getSessionToken() {
+
+    return localStorage.getItem(
+        SESSION_TOKEN_STORAGE_KEY
+    );
+}
+
+
+function showUserProfile(
+    user
+) {
+
+    currentUser =
+        user;
+
+
+    currentPlayerName =
+        user.name;
+
+
+    playerNameInput.value =
+        user.name;
+
+
+    playerPasswordInput.value =
+        "";
+
+
+    profileName.textContent =
+        user.name;
+
+
+    profileRank.textContent =
+        user.rank;
+
+
+    profileRating.textContent =
+        formatNumber(
+            user.rating
+        );
+
+
+    profileWins.textContent =
+        formatNumber(
+            user.wins
+        );
+
+
+    profileLosses.textContent =
+        formatNumber(
+            user.losses
+        );
+
+
+    profileWinRate.textContent =
+        `${Number(
+            user.win_rate
+        ).toFixed(1)}%`;
+
+
+    userProfile.classList.remove(
+        "hidden"
+    );
+
+
+    userRegisterButton.textContent =
+        "新規登録";
+
+
+    userLoginButton.textContent =
+        "ログイン";
+
+
+    updateRoomControls();
+}
+
+
+function hideUserProfile() {
+
+    currentUser =
+        null;
+
+
+    currentPlayerName =
+        "";
+
+
+    userProfile.classList.add(
+        "hidden"
+    );
+
+
+    profileName.textContent =
+        "-";
+
+    profileRank.textContent =
+        "-";
+
+    profileRating.textContent =
+        "-";
+
+    profileWins.textContent =
+        "0";
+
+    profileLosses.textContent =
+        "0";
+
+    profileWinRate.textContent =
+        "0.0%";
+
+
+    userRegisterButton.textContent =
+        "新規登録";
+
+
+    userLoginButton.textContent =
+        "ログイン";
+
+
+    updateRoomControls();
+}
+
+
+async function registerUser() {
+
+    if (
+        userRequestPending
+        ||
+        roomConnectionState !== "idle"
+        ||
+        currentUser !== null
+    ) {
+
+        return;
+    }
+
+
+    const name =
+        getValidatedAccountName();
+
+
+    if (
+        name === null
+    ) {
+
+        return;
+    }
+
+
+    const password =
+        getValidatedPassword();
+
+
+    if (
+        password === null
+    ) {
+
+        return;
+    }
+
+
+    userRequestPending =
+        true;
+
+
+    userRegisterButton.textContent =
+        "登録中...";
+
+
+    updateRoomControls();
+
+
+    message.textContent =
+        "ユーザーを登録しています...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/users/register",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            name:
+                                name,
+
+                            password:
+                                password
+                        })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                data.detail
+                ||
+                "ユーザー登録に失敗しました。"
+            );
+        }
+
+
+        localStorage.removeItem(
+            "veil53_user_id"
+        );
+
+
+        localStorage.setItem(
+            SESSION_TOKEN_STORAGE_KEY,
+            data.session_token
+        );
+
+
+        showUserProfile(
+            data.user
+        );
+
+
+        message.textContent =
+            `${data.user.name} を登録しました。\n`
+            +
+            `RANK：${data.user.rank} / `
+            +
+            `RATING：${data.user.rating}`;
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        message.textContent =
+            error.message
+            ||
+            "ユーザー登録に失敗しました。";
+    }
+
+    finally {
+
+        userRequestPending =
+            false;
+
+
+        updateRoomControls();
+    }
+}
+
+
+async function loginUser() {
+
+    if (
+        userRequestPending
+        ||
+        roomConnectionState !== "idle"
+        ||
+        currentUser !== null
+    ) {
+
+        return;
+    }
+
+
+    const name =
+        getValidatedAccountName();
+
+
+    if (
+        name === null
+    ) {
+
+        return;
+    }
+
+
+    const password =
+        getValidatedPassword();
+
+
+    if (
+        password === null
+    ) {
+
+        return;
+    }
+
+
+    userRequestPending =
+        true;
+
+
+    userLoginButton.textContent =
+        "ログイン中...";
+
+
+    updateRoomControls();
+
+
+    message.textContent =
+        "ログインしています...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/users/login",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            name:
+                                name,
+
+                            password:
+                                password
+                        })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                data.detail
+                ||
+                "ログインに失敗しました。"
+            );
+        }
+
+
+        localStorage.removeItem(
+            "veil53_user_id"
+        );
+
+
+        localStorage.setItem(
+            SESSION_TOKEN_STORAGE_KEY,
+            data.session_token
+        );
+
+
+        showUserProfile(
+            data.user
+        );
+
+
+        message.textContent =
+            `${data.user.name} でログインしました。`;
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        message.textContent =
+            error.message
+            ||
+            "ログインに失敗しました。";
+    }
+
+    finally {
+
+        userRequestPending =
+            false;
+
+
+        updateRoomControls();
+    }
+}
+
+
+async function loadSavedUser() {
+
+    const sessionToken =
+        getSessionToken();
+
+
+    if (
+        !sessionToken
+    ) {
+
+        hideUserProfile();
+
+        return;
+    }
+
+
+    userRequestPending =
+        true;
+
+
+    updateRoomControls();
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/users/me",
+                {
+                    headers: {
+                        "Authorization":
+                            `Bearer ${sessionToken}`
+                    }
+                }
+            );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            localStorage.removeItem(
+                SESSION_TOKEN_STORAGE_KEY
+            );
+
+
+            hideUserProfile();
+
+
+            message.textContent =
+                "ログインの有効期限が切れました。\n"
+                +
+                "もう一度ログインしてください。";
+
+
+            return;
+        }
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                "ユーザー情報を取得できませんでした。"
+            );
+        }
+
+
+        const user =
+            await response.json();
+
+
+        showUserProfile(
+            user
+        );
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        hideUserProfile();
+
+
+        message.textContent =
+            "ユーザー情報を読み込めませんでした。\n"
+            +
+            "サーバー接続を確認してください。";
+    }
+
+    finally {
+
+        userRequestPending =
+            false;
+
+
+        updateRoomControls();
+    }
+}
+
+
+async function refreshCurrentUser() {
+
+    const sessionToken =
+        getSessionToken();
+
+
+    if (
+        currentUser === null
+        ||
+        !sessionToken
+    ) {
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/users/me",
+                {
+                    headers: {
+                        "Authorization":
+                            `Bearer ${sessionToken}`
+                    }
+                }
+            );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            localStorage.removeItem(
+                SESSION_TOKEN_STORAGE_KEY
+            );
+
+
+            hideUserProfile();
+
+
+            message.textContent =
+                "ログインの有効期限が切れました。\n"
+                +
+                "もう一度ログインしてください。";
+
+
+            return;
+        }
+
+
+        if (
+            !response.ok
+        ) {
+
+            return;
+        }
+
+
+        const user =
+            await response.json();
+
+
+        showUserProfile(
+            user
+        );
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+    }
+}
+
+
+async function logoutUser() {
+
+    if (
+        userRequestPending
+        ||
+        roomConnectionState !== "idle"
+        ||
+        currentUser === null
+    ) {
+
+        return;
+    }
+
+
+    const sessionToken =
+        getSessionToken();
+
+
+    userRequestPending =
+        true;
+
+
+    userLogoutButton.textContent =
+        "ログアウト中...";
+
+
+    updateRoomControls();
+
+
+    try {
+
+        if (
+            sessionToken
+        ) {
+
+            await fetch(
+                "/users/logout",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Authorization":
+                            `Bearer ${sessionToken}`
+                    }
+                }
+            );
+        }
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+    }
+
+    finally {
+
+        localStorage.removeItem(
+            SESSION_TOKEN_STORAGE_KEY
+        );
+
+
+        localStorage.removeItem(
+            "veil53_user_id"
+        );
+
+
+        userRequestPending =
+            false;
+
+
+        hideUserProfile();
+
+
+        playerNameInput.value =
+            "";
+
+
+        playerPasswordInput.value =
+            "";
+
+
+        userLogoutButton.textContent =
+            "ログアウト";
+
+
+        updateRoomControls();
+
+
+        playerNameInput.focus();
+
+
+        message.textContent =
+            "ログアウトしました。";
+    }
+}
+
+
+userRegisterButton.addEventListener(
+    "click",
+    registerUser
+);
+
+
+userLoginButton.addEventListener(
+    "click",
+    loginUser
+);
+
+
+userLogoutButton.addEventListener(
+    "click",
+    logoutUser
+);
+
+
+playerNameInput.addEventListener(
+    "keydown",
+    (event) => {
+
+        if (
+            event.key === "Enter"
+            &&
+            currentUser === null
+        ) {
+
+            playerPasswordInput.focus();
+        }
+    }
+);
+
+
+playerPasswordInput.addEventListener(
+    "keydown",
+    (event) => {
+
+        if (
+            event.key === "Enter"
+            &&
+            currentUser === null
+        ) {
+
+            loginUser();
+        }
+    }
+);
+
+
 // =============================================
 // FORMAT
 // =============================================
@@ -512,6 +1388,101 @@ function formatNumber(
     ).toLocaleString(
         "ja-JP"
     );
+}
+
+
+// =============================================
+// RANKED RATING RESULT
+// =============================================
+
+function getMyRankedRatingResult(
+    data
+) {
+
+    if (
+        data.ranked !== true
+        ||
+        !data.ranked_result
+    ) {
+
+        return null;
+    }
+
+
+    const result =
+        data.ranked_result;
+
+
+    const iWon =
+        data.winner ===
+        playerNumber;
+
+
+    let ratingBefore;
+    let ratingAfter;
+    let ratingChange;
+
+
+    if (
+        iWon
+    ) {
+
+        ratingBefore =
+            result.winner_rating_before;
+
+        ratingAfter =
+            result.winner_rating_after;
+
+        ratingChange =
+            result.winner_rating_change;
+    }
+
+    else {
+
+        ratingBefore =
+            result.loser_rating_before;
+
+        ratingAfter =
+            result.loser_rating_after;
+
+        ratingChange =
+            result.loser_rating_change;
+    }
+
+
+    if (
+        ratingBefore === undefined
+        ||
+        ratingAfter === undefined
+        ||
+        ratingChange === undefined
+    ) {
+
+        return null;
+    }
+
+
+    const changeText =
+        ratingChange > 0
+            ?
+            `+${ratingChange}`
+            :
+            `${ratingChange}`;
+
+
+    return {
+        before:
+            ratingBefore,
+
+        after:
+            ratingAfter,
+
+        change:
+            ratingChange,
+
+        text:
+            `${ratingBefore} → ${ratingAfter}（${changeText}）`
+    };
 }
 
 
@@ -644,29 +1615,82 @@ function updateRoomControls() {
         "idle";
 
 
+    const loggedIn =
+        currentUser !== null;
+
+
     createRoomButton.disabled =
-        busy;
+        busy
+        ||
+        !loggedIn;
 
     joinRoomButton.disabled =
-        busy;
+        busy
+        ||
+        !loggedIn;
 
     cpuGameButton.disabled =
-        busy;
+        busy
+        ||
+        !loggedIn;
 
     roomIdInput.disabled =
-        busy;
+        busy
+        ||
+        !loggedIn;
 
     cpuLevelSelect.disabled =
-        busy;
+        busy
+        ||
+        !loggedIn;
 
     playerNameInput.disabled =
-        busy;
+        busy
+        ||
+        loggedIn
+        ||
+        userRequestPending;
+
+    playerPasswordInput.disabled =
+        busy
+        ||
+        loggedIn
+        ||
+        userRequestPending;
+
+
+    userRegisterButton.disabled =
+        busy
+        ||
+        loggedIn
+        ||
+        userRequestPending;
+
+
+    userLoginButton.disabled =
+        busy
+        ||
+        loggedIn
+        ||
+        userRequestPending;
+
+
+    userLogoutButton.disabled =
+        busy
+        ||
+        !loggedIn
+        ||
+        userRequestPending;
 
 
     quickMatchButton.disabled =
-        busy
-        &&
-        !isQuickMatchWaiting;
+        !loggedIn
+        ||
+        (
+            busy
+            &&
+            !isQuickMatchWaiting
+        );
 
 
     createRoomButton.textContent =
@@ -1175,7 +2199,7 @@ async function cancelQuickMatch() {
 
 
         message.textContent =
-            "QUICK MATCHをキャンセルしました。";
+            "QUICK MATCHをキャンセルしました.";
 
     }
 
@@ -1550,6 +2574,39 @@ function connectWebSocket(
             }
 
 
+            const sessionToken =
+                getSessionToken();
+
+
+            if (
+                !sessionToken
+            ) {
+
+                message.textContent =
+                    "ログイン情報がありません.";
+
+
+                newSocket.close();
+
+                return;
+            }
+
+
+            // =====================================
+            // WebSocket AUTH
+            // =====================================
+
+            newSocket.send(
+                JSON.stringify({
+                    type:
+                        "authenticate",
+
+                    session_token:
+                        sessionToken
+                })
+            );
+
+
             if (
                 isQuickMatchWaiting
             ) {
@@ -1569,11 +2626,11 @@ function connectWebSocket(
                 gameMode ===
                 "cpu"
                     ?
-                    `${getCpuName()}に接続しました。`
+                    `${getCpuName()}に接続しています...`
                     :
                     `ルームID：${roomId}\n`
                     +
-                    "サーバーに接続しました。";
+                    "認証しています...";
         }
     );
 
@@ -2746,6 +3803,37 @@ function handleServerMessage(
         );
 
 
+        // =====================================
+        // 自分のレーティング結果
+        // =====================================
+
+        const ratingResult =
+            getMyRankedRatingResult(
+                data
+            );
+
+
+        let ratingText =
+            "";
+
+
+        if (
+            ratingResult !== null
+        ) {
+
+            ratingText =
+                "\n\n"
+                +
+                "RATING\n"
+                +
+                ratingResult.text;
+        }
+
+
+        // =====================================
+        // WIN
+        // =====================================
+
         if (
             data.winner ===
             playerNumber
@@ -2758,7 +3846,9 @@ function handleServerMessage(
             gameOverMessage.textContent =
                 `${currentPlayerName}の勝利！\n`
                 +
-                "相手の3枚すべてを見破りました。";
+                "相手の3枚すべてを見破りました。"
+                +
+                ratingText;
 
 
             gameStatus.textContent =
@@ -2768,6 +3858,11 @@ function handleServerMessage(
             message.textContent =
                 `🎉 ${currentPlayerName}の勝ちです！`;
         }
+
+
+        // =====================================
+        // LOSE
+        // =====================================
 
         else {
 
@@ -2789,7 +3884,9 @@ function handleServerMessage(
 
 
             gameOverMessage.textContent =
-                `${winnerName}が3枚すべてを見破りました。`;
+                `${winnerName}が3枚すべてを見破りました。`
+                +
+                ratingText;
 
 
             gameStatus.textContent =
@@ -2802,6 +3899,19 @@ function handleServerMessage(
 
 
         updateControls();
+
+
+        // =====================================
+        // QUICK MATCH PROFILE REFRESH
+        // =====================================
+
+        if (
+            data.ranked ===
+            true
+        ) {
+
+            refreshCurrentUser();
+        }
 
 
         return;
@@ -2913,6 +4023,7 @@ function updateQuestionControls() {
         );
     }
 
+
     else {
 
         questionSection.classList.add(
@@ -2966,6 +4077,7 @@ function updateGuessControls() {
         );
     }
 
+
     else {
 
         guessSection.classList.add(
@@ -2985,6 +4097,7 @@ function updateGuessControls() {
         guessRank.disabled =
             true;
     }
+
 
     else {
 
@@ -3014,6 +4127,7 @@ function updateResultControls() {
             "hidden"
         );
     }
+
 
     else {
 
@@ -3544,7 +4658,6 @@ function sendGuess() {
         message.textContent =
             "スートを選択してください。";
 
-
         return;
     }
 
@@ -3566,6 +4679,7 @@ function sendGuess() {
         };
     }
 
+
     else {
 
         const rank =
@@ -3583,7 +4697,6 @@ function sendGuess() {
 
             message.textContent =
                 "ランクを選択してください。";
-
 
             return;
         }
@@ -3866,9 +4979,9 @@ function resetBattleState() {
 
 
     currentPlayerName =
-        playerNameInput
-        .value
-        .trim();
+        currentUser !== null
+            ? currentUser.name
+            : "";
 
 
     player1Name =
@@ -4108,6 +5221,7 @@ function createCardElement(
             "card-red"
         );
     }
+
 
     else {
 
@@ -4435,4 +5549,10 @@ function getSuitSymbol(
 // INITIALIZE
 // =============================================
 
+localStorage.removeItem(
+    "veil53_user_id"
+);
+
 resetBattleState();
+
+loadSavedUser();

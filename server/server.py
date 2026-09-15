@@ -6,15 +6,27 @@ from pathlib import Path
 
 from fastapi import (
     FastAPI,
+    Header,
     HTTPException,
     WebSocket,
     WebSocketDisconnect
 )
+from pydantic import BaseModel
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from game import Game
 from card import Card
+
+from database import (
+    init_db,
+    create_user,
+    authenticate_user,
+    create_session,
+    get_user_by_session_token,
+    delete_session,
+    record_ranked_match
+)
 
 
 # =============================================
@@ -22,6 +34,152 @@ from card import Card
 # =============================================
 
 app = FastAPI()
+
+init_db()
+
+
+# =============================================
+# USER API
+# =============================================
+
+class UserRegisterRequest(BaseModel):
+    name: str
+    password: str
+
+
+class UserLoginRequest(BaseModel):
+    name: str
+    password: str
+
+
+def get_bearer_token(
+    authorization: str | None
+):
+    if not authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="ログインが必要です"
+        )
+
+    parts = authorization.split(
+        " ",
+        1
+    )
+
+    if (
+        len(parts) != 2
+        or
+        parts[0].lower() != "bearer"
+        or
+        not parts[1].strip()
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="認証情報が正しくありません"
+        )
+
+    return parts[1].strip()
+
+
+@app.post("/users/register")
+async def register_user_api(
+    request: UserRegisterRequest
+):
+    try:
+        user = create_user(
+            request.name,
+            request.password
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    session_token = create_session(
+        user["user_id"]
+    )
+
+    return {
+        "user": user,
+        "session_token": session_token
+    }
+
+
+@app.post("/users/login")
+async def login_user_api(
+    request: UserLoginRequest
+):
+    user = authenticate_user(
+        request.name,
+        request.password
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                "プレイヤー名または"
+                "パスワードが正しくありません"
+            )
+        )
+
+    session_token = create_session(
+        user["user_id"]
+    )
+
+    return {
+        "user": user,
+        "session_token": session_token
+    }
+
+
+@app.get("/users/me")
+async def get_current_user_api(
+    authorization: str | None = Header(
+        default=None
+    )
+):
+    session_token = get_bearer_token(
+        authorization
+    )
+
+    user = get_user_by_session_token(
+        session_token
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                "セッションの有効期限が"
+                "切れているか、"
+                "認証情報が正しくありません"
+            )
+        )
+
+    return user
+
+
+@app.post("/users/logout")
+async def logout_user_api(
+    authorization: str | None = Header(
+        default=None
+    )
+):
+    session_token = get_bearer_token(
+        authorization
+    )
+
+    delete_session(
+        session_token
+    )
+
+    return {
+        "message":
+            "ログアウトしました"
+    }
 
 
 # =============================================
@@ -239,7 +397,8 @@ def is_valid_room_id(
 
 def create_room(
     mode="pvp",
-    cpu_level=None
+    cpu_level=None,
+    ranked=False
 ):
 
     return {
@@ -248,6 +407,9 @@ def create_room(
             [],
 
         "player_names":
+            [],
+
+        "player_user_ids":
             [],
 
         "game":
@@ -264,6 +426,12 @@ def create_room(
 
         "mode":
             mode,
+
+        "ranked":
+            ranked,
+
+        "current_match_id":
+            None,
 
         "cpu_level":
             cpu_level,
@@ -410,7 +578,8 @@ async def matchmaking():
         rooms[
             room_id
         ] = create_room(
-            mode="pvp"
+            mode="pvp",
+            ranked=True
         )
 
 
@@ -1762,6 +1931,35 @@ async def start_new_game(
     ] = Game()
 
 
+    # =========================================
+    # RANKED MATCH ID
+    # =========================================
+
+    if (
+        room[
+            "mode"
+        ]
+        ==
+        "pvp"
+
+        and
+
+        room[
+            "ranked"
+        ]
+    ):
+
+        room[
+            "current_match_id"
+        ] = secrets.token_urlsafe(24)
+
+    else:
+
+        room[
+            "current_match_id"
+        ] = None
+
+
     room[
         "current_turn"
     ] = 1
@@ -1965,6 +2163,11 @@ async def start_new_game(
             "mode":
                 "pvp",
 
+            "ranked":
+                room[
+                    "ranked"
+                ],
+
             "player1_name":
                 player1_name,
 
@@ -1999,6 +2202,11 @@ async def start_new_game(
 
             "mode":
                 "pvp",
+
+            "ranked":
+                room[
+                    "ranked"
+                ],
 
             "player1_name":
                 player1_name,
@@ -2133,6 +2341,119 @@ async def finish_game(
         )
 
 
+    # =========================================
+    # RANKED RESULT
+    # =========================================
+
+    ranked_result = None
+
+
+    if (
+        room[
+            "mode"
+        ]
+        ==
+        "pvp"
+
+        and
+
+        room[
+            "ranked"
+        ]
+
+        and
+
+        winner
+        in [
+            1,
+            2
+        ]
+
+        and
+
+        len(
+            room[
+                "player_user_ids"
+            ]
+        )
+        >=
+        2
+
+        and
+
+        room.get(
+            "current_match_id"
+        )
+    ):
+
+        if (
+            winner
+            ==
+            1
+        ):
+
+            winner_user_id = (
+                room[
+                    "player_user_ids"
+                ][
+                    0
+                ]
+            )
+
+            loser_user_id = (
+                room[
+                    "player_user_ids"
+                ][
+                    1
+                ]
+            )
+
+        else:
+
+            winner_user_id = (
+                room[
+                    "player_user_ids"
+                ][
+                    1
+                ]
+            )
+
+            loser_user_id = (
+                room[
+                    "player_user_ids"
+                ][
+                    0
+                ]
+            )
+
+
+        try:
+
+            ranked_result = await asyncio.to_thread(
+                record_ranked_match,
+                room[
+                    "current_match_id"
+                ],
+                winner_user_id,
+                loser_user_id
+            )
+
+
+            print(
+                "RANKED MATCH: "
+                f"{player1_name} vs {player2_name} / "
+                f"winner=Player {winner} / "
+                f"match_id={room['current_match_id']}"
+            )
+
+        except Exception as error:
+
+            print(
+                "RANKED RESULT ERROR: "
+                f"{error}"
+            )
+
+
     data = {
 
         "type":
@@ -2157,6 +2478,14 @@ async def finish_game(
             room[
                 "mode"
             ],
+
+        "ranked":
+            room[
+                "ranked"
+            ],
+
+        "ranked_result":
+            ranked_result,
 
         "cpu_level":
             room[
@@ -3535,45 +3864,93 @@ async def websocket_endpoint(
 
 
     # =========================================
-    # PLAYER NAME
+    # WEBSOCKET AUTH
     # =========================================
 
-    player_name = (
-        normalize_player_name(
-            websocket
-            .query_params
-            .get(
-                "name"
-            )
+    try:
+
+        auth_data = await asyncio.wait_for(
+            websocket.receive_json(),
+            timeout=10
+        )
+
+    except Exception:
+
+        try:
+            await websocket.send_json({
+                "type": "error",
+                "code": "AUTH_REQUIRED",
+                "message": "ログイン認証に失敗しました。"
+            })
+        except Exception:
+            pass
+
+        try:
+            await websocket.close()
+        except Exception:
+            pass
+
+        return
+
+
+    if (
+        not isinstance(auth_data, dict)
+        or
+        auth_data.get("type") != "authenticate"
+    ):
+
+        await websocket.send_json({
+            "type": "error",
+            "code": "AUTH_REQUIRED",
+            "message": "最初にログイン認証が必要です。"
+        })
+
+        await websocket.close()
+
+        return
+
+
+    session_token = (
+        auth_data.get("session_token")
+        or
+        ""
+    )
+
+
+    authenticated_user = (
+        get_user_by_session_token(
+            session_token
         )
     )
 
 
-    if (
-        not is_valid_player_name(
-            player_name
-        )
-    ):
+    if authenticated_user is None:
 
         await websocket.send_json({
-
-            "type":
-                "error",
-
-            "code":
-                "INVALID_PLAYER_NAME",
-
-            "message":
-                "プレイヤー名は"
-                "1〜12文字で"
-                "入力してください。"
+            "type": "error",
+            "code": "INVALID_SESSION",
+            "message": (
+                "ログイン情報が無効です。"
+                "もう一度ログインしてください。"
+            )
         })
-
 
         await websocket.close()
 
-
         return
+
+
+    player_user_id = (
+        authenticated_user[
+            "user_id"
+        ]
+    )
+
+    player_name = (
+        authenticated_user[
+            "name"
+        ]
+    )
 
 
     # =========================================
@@ -3701,6 +4078,32 @@ async def websocket_endpoint(
 
 
     # =========================================
+    # SAME ACCOUNT CHECK
+    # =========================================
+
+    if (
+        player_user_id
+        in
+        room[
+            "player_user_ids"
+        ]
+    ):
+
+        await websocket.send_json({
+            "type": "error",
+            "code": "SAME_ACCOUNT",
+            "message": (
+                "同じアカウントで同じルームに"
+                "2人参加することはできません。"
+            )
+        })
+
+        await websocket.close()
+
+        return
+
+
+    # =========================================
     # PLAYER REGISTER
     # =========================================
 
@@ -3715,6 +4118,13 @@ async def websocket_endpoint(
         "player_names"
     ].append(
         player_name
+    )
+
+
+    room[
+        "player_user_ids"
+    ].append(
+        player_user_id
     )
 
 
@@ -3744,6 +4154,11 @@ async def websocket_endpoint(
         "mode":
             room[
                 "mode"
+            ],
+
+        "ranked":
+            room[
+                "ranked"
             ],
 
         "cpu_level":
@@ -3990,6 +4405,11 @@ async def websocket_endpoint(
 
                 room[
                     "player_names"
+                ].clear()
+
+
+                room[
+                    "player_user_ids"
                 ].clear()
 
 
@@ -4399,6 +4819,23 @@ async def websocket_endpoint(
                 )
 
 
+            if (
+                index
+                <
+                len(
+                    room[
+                        "player_user_ids"
+                    ]
+                )
+            ):
+
+                room[
+                    "player_user_ids"
+                ].pop(
+                    index
+                )
+
+
         # =========================================
         # QUICK MATCH待機を解除
         # =========================================
@@ -4438,6 +4875,11 @@ async def websocket_endpoint(
 
         room[
             "player_names"
+        ].clear()
+
+
+        room[
+            "player_user_ids"
         ].clear()
 
 

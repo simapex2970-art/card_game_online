@@ -2,7 +2,6 @@
 <html lang="ja">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -43,12 +42,10 @@
         rel="stylesheet"
         href="/static/style.css"
     >
-
 </head>
 
 
 <body>
-
 
 <main class="game-container">
 
@@ -88,26 +85,124 @@
     >
 
 
+    <!-- =================================
+        ACCOUNT
+    ================================== -->
+
+    <section class="panel room-panel">
+
+        <div class="section-heading">
+
+            <p class="section-number">
+                YOU
+            </p>
+
+            <div>
+
+                <h2>
+                    ACCOUNT
+                </h2>
+
+                <p class="section-jp">
+                    新規登録 / ログイン
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <p class="panel-description">
+            プレイヤー名とパスワードを入力してください。
+            パスワードは8文字以上です。
+        </p>
+
+
+        <label for="player-name">
+            PLAYER NAME
+        </label>
+
+        <input
+            id="player-name"
+            class="room-id-input"
+            type="text"
+            maxlength="12"
+            autocomplete="username"
+            placeholder="名前を入力"
+        >
+
+
+        <label for="player-password">
+            PASSWORD
+        </label>
+
+        <input
+            id="player-password"
+            class="room-id-input"
+            type="password"
+            minlength="8"
+            maxlength="128"
+            autocomplete="current-password"
+            placeholder="8文字以上"
+        >
+
+
+        <button
+            id="user-register-button"
+            class="primary-button"
+            type="button"
+        >
+            新規登録
+        </button>
+
+
+        <button
+            id="user-login-button"
+            class="primary-button"
+            type="button"
+        >
+            ログイン
+        </button>
+
+
         <!-- =================================
-             PLAYER NAME
+            PROFILE
         ================================== -->
 
-        <section class="panel room-panel">
+        <div
+            id="user-profile"
+            class="user-profile hidden"
+        >
 
-            <div class="section-heading">
-
-                <p class="section-number">
-                    YOU
-                </p>
+            <div class="user-profile-main">
 
                 <div>
 
-                    <h2>
-                        PLAYER NAME
-                    </h2>
+                    <p class="user-profile-label">
+                        PLAYER
+                    </p>
 
-                    <p class="section-jp">
-                        プレイヤー名を入力
+                    <p
+                        id="profile-name"
+                        class="user-profile-name"
+                    >
+                        -
+                    </p>
+
+                </div>
+
+
+                <div class="user-rank-area">
+
+                    <p class="user-profile-label">
+                        RANK
+                    </p>
+
+                    <p
+                        id="profile-rank"
+                        class="user-profile-rank"
+                    >
+                        -
                     </p>
 
                 </div>
@@ -115,27 +210,73 @@
             </div>
 
 
-            <p class="panel-description">
-                対戦で使用する名前を入力してください。
-                1〜12文字まで使用できます。
-            </p>
+            <div class="user-rating-row">
+
+                <span>
+                    RATING
+                </span>
+
+                <strong id="profile-rating">
+                    -
+                </strong>
+
+            </div>
 
 
-            <label for="player-name">
-                NAME
-            </label>
+            <div class="user-stats-grid">
+
+                <div>
+
+                    <span>
+                        WINS
+                    </span>
+
+                    <strong id="profile-wins">
+                        0
+                    </strong>
+
+                </div>
 
 
-            <input
-                id="player-name"
-                class="room-id-input"
-                type="text"
-                maxlength="12"
-                autocomplete="nickname"
-                placeholder="名前を入力"
+                <div>
+
+                    <span>
+                        LOSSES
+                    </span>
+
+                    <strong id="profile-losses">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        WIN RATE
+                    </span>
+
+                    <strong id="profile-win-rate">
+                        0.0%
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="user-logout-button"
+                class="user-change-button"
+                type="button"
             >
+                ログアウト
+            </button>
 
-        </section>
+        </div>
+
+    </section>
 
 
         <!-- =================================
@@ -178,8 +319,6 @@
                 QUICK MATCH
             </button>
 
-
-            <!-- QUICK MATCH WAITING TIMER -->
 
             <p
                 id="quick-match-timer"
@@ -602,7 +741,9 @@
     >
 
 
-        <!-- GAME INFO -->
+        <!-- =================================
+             GAME INFO
+        ================================== -->
 
         <div class="game-info">
 
@@ -924,11 +1065,13 @@
                         class="question-button suit-button"
                         type="button"
                     >
+
                         <span class="question-suit-symbol black-suit">
                             ♠
                         </span>
 
                         SPADE
+
                     </button>
 
 
@@ -937,11 +1080,13 @@
                         class="question-button suit-button"
                         type="button"
                     >
+
                         <span class="question-suit-symbol red-suit">
                             ♥
                         </span>
 
                         HEART
+
                     </button>
 
 
@@ -950,11 +1095,13 @@
                         class="question-button suit-button"
                         type="button"
                     >
+
                         <span class="question-suit-symbol red-suit">
                             ♦
                         </span>
 
                         DIAMOND
+
                     </button>
 
 
@@ -963,11 +1110,13 @@
                         class="question-button suit-button"
                         type="button"
                     >
+
                         <span class="question-suit-symbol black-suit">
                             ♣
                         </span>
 
                         CLUB
+
                     </button>
 
                 </div>
@@ -1328,7 +1477,6 @@
 
 
 <script src="/static/app.js"></script>
-
 
 </body>
 
