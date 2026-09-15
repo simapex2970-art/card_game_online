@@ -4,11 +4,11 @@
 //
 // PvP
 // QUICK MATCH
+// QUICK MATCH CANCEL
 // CPU Lv.1 - RANDOM
 // CPU Lv.2 - THINKER
 // CPU Lv.3 - ANALYST
-//
-// PLAYER NAME対応
+// PLAYER NAME
 // =============================================
 
 
@@ -38,7 +38,7 @@ const playerNameInput =
 
 
 // =============================================
-// ROOM BUTTONS
+// ROOM
 // =============================================
 
 const createRoomButton =
@@ -46,16 +46,10 @@ const createRoomButton =
         "create-room-button"
     );
 
-
-// =============================================
-// ★ QUICK MATCH
-// =============================================
-
 const quickMatchButton =
     document.getElementById(
         "quick-match-button"
     );
-
 
 const joinRoomButton =
     document.getElementById(
@@ -199,16 +193,27 @@ const questionJokerButton =
 
 
 const questionButtons = [
+
     questionEvenButton,
+
     questionOddButton,
+
     questionFaceButton,
+
     questionRankButton,
+
     questionMoreThanButton,
+
     questionLessThanButton,
+
     questionSpadeButton,
+
     questionHeartButton,
+
     questionDiamondButton,
+
     questionClubButton,
+
     questionJokerButton
 ];
 
@@ -322,13 +327,17 @@ const leaveGameButton =
 // STATE
 // =============================================
 
-let socket = null;
+let socket =
+    null;
 
-let currentRoomId = null;
+let currentRoomId =
+    null;
 
-let playerNumber = null;
+let playerNumber =
+    null;
 
-let myTurn = false;
+let myTurn =
+    false;
 
 let currentPhase =
     "waiting";
@@ -361,6 +370,14 @@ let player1Name =
 
 let player2Name =
     "PLAYER 2";
+
+
+// =============================================
+// QUICK MATCH STATE
+// =============================================
+
+let isQuickMatchWaiting =
+    false;
 
 
 // =============================================
@@ -412,7 +429,9 @@ function getCpuName() {
 function getCpuLevelName() {
 
     if (
-        currentCpuLevel === 1
+        currentCpuLevel
+        ===
+        1
     ) {
 
         return "RANDOM";
@@ -420,7 +439,9 @@ function getCpuLevelName() {
 
 
     if (
-        currentCpuLevel === 2
+        currentCpuLevel
+        ===
+        2
     ) {
 
         return "THINKER";
@@ -428,7 +449,9 @@ function getCpuLevelName() {
 
 
     if (
-        currentCpuLevel === 3
+        currentCpuLevel
+        ===
+        3
     ) {
 
         return "ANALYST";
@@ -440,7 +463,7 @@ function getCpuLevelName() {
 
 
 // =============================================
-// SELECT CPU LEVEL
+// CPU LEVEL
 // =============================================
 
 function getSelectedCpuLevel() {
@@ -452,7 +475,9 @@ function getSelectedCpuLevel() {
 
 
     if (
-        level === 3
+        level
+        ===
+        3
     ) {
 
         return 3;
@@ -460,7 +485,9 @@ function getSelectedCpuLevel() {
 
 
     if (
-        level === 2
+        level
+        ===
+        2
     ) {
 
         return 2;
@@ -484,7 +511,9 @@ function getValidatedPlayerName() {
 
 
     if (
-        name.length === 0
+        name.length
+        ===
+        0
     ) {
 
         message.textContent =
@@ -499,7 +528,9 @@ function getValidatedPlayerName() {
 
 
     if (
-        name.length > 12
+        name.length
+        >
+        12
     ) {
 
         message.textContent =
@@ -526,9 +557,15 @@ function formatNumber(
 ) {
 
     if (
-        value === null
+        value
+        ===
+        null
+
         ||
-        value === undefined
+
+        value
+        ===
+        undefined
     ) {
 
         return "-";
@@ -544,116 +581,125 @@ function formatNumber(
 
 
 // =============================================
-// 初期化
-// =============================================
-
-resetBattleState();
-
-
-// =============================================
-// CPU LEVEL CHANGE
-// =============================================
-
-cpuLevelSelect.addEventListener(
-    "change",
-    () => {
-
-        if (
-            roomConnectionState !==
-            "idle"
-        ) {
-
-            return;
-        }
-
-
-        currentCpuLevel =
-            getSelectedCpuLevel();
-
-
-        updateRoomControls();
-    }
-);
-
-
-// =============================================
 // ROOM UI
 // =============================================
 
 function updateRoomControls() {
 
     const busy =
-        roomConnectionState !==
+        roomConnectionState
+        !==
         "idle";
 
 
     createRoomButton.disabled =
         busy;
 
-    // ★ QUICK MATCH
-    quickMatchButton.disabled =
-        busy;
 
     joinRoomButton.disabled =
         busy;
 
+
     cpuGameButton.disabled =
         busy;
+
 
     roomIdInput.disabled =
         busy;
 
+
     cpuLevelSelect.disabled =
         busy;
+
 
     playerNameInput.disabled =
         busy;
 
 
     // =========================================
-    // 通常表示を一度セット
+    // QUICK MATCH
+    //
+    // 待機中の場合だけ
+    // キャンセルボタンとして押せる
+    // =========================================
+
+    quickMatchButton.disabled =
+        busy
+        &&
+        !isQuickMatchWaiting;
+
+
+    // =========================================
+    // NORMAL TEXT
     // =========================================
 
     createRoomButton.textContent =
         "ルームを作る";
 
+
     quickMatchButton.textContent =
         "QUICK MATCH";
 
+
     joinRoomButton.textContent =
         "ルームに参加";
+
 
     cpuGameButton.textContent =
         `CPU Lv.${getSelectedCpuLevel()}と対戦する`;
 
 
     // =========================================
-    // CREATE ROOM
+    // QUICK MATCH WAITING
     // =========================================
 
     if (
-        roomConnectionState ===
-        "creating"
+        isQuickMatchWaiting
     ) {
 
-        createRoomButton.textContent =
-            "ルーム作成中...";
+        quickMatchButton.disabled =
+            false;
+
+
+        quickMatchButton.textContent =
+            "マッチングをキャンセル";
+
 
         return;
     }
 
 
     // =========================================
-    // ★ QUICK MATCH
+    // CREATE
     // =========================================
 
     if (
-        roomConnectionState ===
+        roomConnectionState
+        ===
+        "creating"
+    ) {
+
+        createRoomButton.textContent =
+            "ルーム作成中...";
+
+
+        return;
+    }
+
+
+    // =========================================
+    // MATCHMAKING
+    // =========================================
+
+    if (
+        roomConnectionState
+        ===
         "matchmaking"
     ) {
 
         quickMatchButton.textContent =
             "対戦相手を検索中...";
+
 
         return;
     }
@@ -664,12 +710,14 @@ function updateRoomControls() {
     // =========================================
 
     if (
-        roomConnectionState ===
+        roomConnectionState
+        ===
         "cpu-creating"
     ) {
 
         cpuGameButton.textContent =
             "CPU準備中...";
+
 
         return;
     }
@@ -680,21 +728,26 @@ function updateRoomControls() {
     // =========================================
 
     if (
-        roomConnectionState ===
+        roomConnectionState
+        ===
         "connecting"
     ) {
 
         createRoomButton.textContent =
             "接続中...";
 
+
         quickMatchButton.textContent =
             "接続中...";
+
 
         joinRoomButton.textContent =
             "接続中...";
 
+
         cpuGameButton.textContent =
             "接続中...";
+
 
         return;
     }
@@ -705,29 +758,31 @@ function updateRoomControls() {
     // =========================================
 
     if (
-        roomConnectionState ===
+        roomConnectionState
+        ===
         "joined"
     ) {
 
         createRoomButton.textContent =
             "参加済み";
 
+
         quickMatchButton.textContent =
             "対戦中";
+
 
         joinRoomButton.textContent =
             "参加済み";
 
+
         cpuGameButton.textContent =
             "対戦中";
-
-        return;
     }
 }
 
 
 // =============================================
-// PvP ROOM CREATE
+// CREATE ROOM
 // =============================================
 
 createRoomButton.addEventListener(
@@ -735,7 +790,8 @@ createRoomButton.addEventListener(
     async () => {
 
         if (
-            roomConnectionState !==
+            roomConnectionState
+            !==
             "idle"
         ) {
 
@@ -748,7 +804,9 @@ createRoomButton.addEventListener(
 
 
         if (
-            name === null
+            name
+            ===
+            null
         ) {
 
             return;
@@ -761,6 +819,10 @@ createRoomButton.addEventListener(
 
         gameMode =
             "pvp";
+
+
+        isQuickMatchWaiting =
+            false;
 
 
         roomConnectionState =
@@ -806,7 +868,8 @@ createRoomButton.addEventListener(
 
             message.textContent =
                 `ルームID：${currentRoomId}\n`
-                + "接続しています...";
+                +
+                "接続しています...";
 
 
             roomConnectionState =
@@ -848,15 +911,37 @@ createRoomButton.addEventListener(
 
 
 // =============================================
-// ★ QUICK MATCH
+// QUICK MATCH
 // =============================================
 
 quickMatchButton.addEventListener(
     "click",
     async () => {
 
+        // =====================================
+        // WAITING
+        //
+        // → CANCEL
+        // =====================================
+
         if (
-            roomConnectionState !==
+            isQuickMatchWaiting
+        ) {
+
+            await cancelQuickMatch();
+
+
+            return;
+        }
+
+
+        // =====================================
+        // START MATCHMAKING
+        // =====================================
+
+        if (
+            roomConnectionState
+            !==
             "idle"
         ) {
 
@@ -864,16 +949,14 @@ quickMatchButton.addEventListener(
         }
 
 
-        // =====================================
-        // 名前チェック
-        // =====================================
-
         const name =
             getValidatedPlayerName();
 
 
         if (
-            name === null
+            name
+            ===
+            null
         ) {
 
             return;
@@ -887,10 +970,6 @@ quickMatchButton.addEventListener(
         gameMode =
             "pvp";
 
-
-        // =====================================
-        // マッチング開始
-        // =====================================
 
         roomConnectionState =
             "matchmaking";
@@ -934,32 +1013,48 @@ quickMatchButton.addEventListener(
 
 
             // =================================
-            // WebSocketへ接続
+            // FIRST PLAYER
             // =================================
+
+            if (
+                !data.matched
+            ) {
+
+                isQuickMatchWaiting =
+                    true;
+
+
+                message.textContent =
+                    "対戦相手を探しています...\n\n"
+                    +
+                    "キャンセルする場合は"
+                    +
+                    "ボタンを押してください。";
+            }
+
+
+            // =================================
+            // SECOND PLAYER
+            // =================================
+
+            else {
+
+                isQuickMatchWaiting =
+                    false;
+
+
+                message.textContent =
+                    "対戦相手が見つかりました！\n"
+                    +
+                    "接続しています...";
+            }
+
 
             roomConnectionState =
                 "connecting";
 
 
             updateRoomControls();
-
-
-            if (
-                data.matched
-            ) {
-
-                message.textContent =
-                    "対戦相手が見つかりました！\n"
-                    + "接続しています...";
-
-            }
-
-            else {
-
-                message.textContent =
-                    "対戦相手を探しています...\n"
-                    + "そのままお待ちください。";
-            }
 
 
             connectWebSocket(
@@ -973,6 +1068,10 @@ quickMatchButton.addEventListener(
             console.error(
                 error
             );
+
+
+            isQuickMatchWaiting =
+                false;
 
 
             roomConnectionState =
@@ -994,7 +1093,163 @@ quickMatchButton.addEventListener(
 
 
 // =============================================
-// CPU ROOM CREATE
+// QUICK MATCH CANCEL
+// =============================================
+
+async function cancelQuickMatch() {
+
+    if (
+        !isQuickMatchWaiting
+
+        ||
+
+        currentRoomId
+        ===
+        null
+    ) {
+
+        return;
+    }
+
+
+    const cancellingRoomId =
+        currentRoomId;
+
+
+    quickMatchButton.disabled =
+        true;
+
+
+    quickMatchButton.textContent =
+        "キャンセル中...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/matchmaking/cancel/${encodeURIComponent(
+                    cancellingRoomId
+                )}`,
+                {
+                    method:
+                        "POST"
+                }
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                "キャンセル失敗"
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        // =====================================
+        // 押した瞬間に
+        // 2人目が見つかった
+        // =====================================
+
+        if (
+            !data.cancelled
+        ) {
+
+            isQuickMatchWaiting =
+                false;
+
+
+            updateRoomControls();
+
+
+            message.textContent =
+                "対戦相手が見つかったため、"
+                +
+                "キャンセルできませんでした。";
+
+
+            return;
+        }
+
+
+        // =====================================
+        // CANCEL SUCCESS
+        // =====================================
+
+        isQuickMatchWaiting =
+            false;
+
+
+        closeSocketWithoutLeave();
+
+
+        currentRoomId =
+            null;
+
+
+        playerNumber =
+            null;
+
+
+        roomConnectionState =
+            "idle";
+
+
+        waitingForServer =
+            false;
+
+
+        myTurn =
+            false;
+
+
+        currentPhase =
+            "waiting";
+
+
+        updateRoomControls();
+
+
+        updateControls();
+
+
+        message.textContent =
+            "QUICK MATCHをキャンセルしました.";
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        // 通信失敗時は
+        // 待機状態を維持
+        isQuickMatchWaiting =
+            true;
+
+
+        updateRoomControls();
+
+
+        message.textContent =
+            "キャンセルできませんでした。\n"
+            +
+            "もう一度試してください。";
+    }
+}
+
+
+// =============================================
+// CPU ROOM
 // =============================================
 
 cpuGameButton.addEventListener(
@@ -1002,7 +1257,8 @@ cpuGameButton.addEventListener(
     async () => {
 
         if (
-            roomConnectionState !==
+            roomConnectionState
+            !==
             "idle"
         ) {
 
@@ -1015,7 +1271,9 @@ cpuGameButton.addEventListener(
 
 
         if (
-            name === null
+            name
+            ===
+            null
         ) {
 
             return;
@@ -1032,6 +1290,10 @@ cpuGameButton.addEventListener(
 
         gameMode =
             "cpu";
+
+
+        isQuickMatchWaiting =
+            false;
 
 
         roomConnectionState =
@@ -1141,7 +1403,8 @@ joinRoomButton.addEventListener(
     () => {
 
         if (
-            roomConnectionState !==
+            roomConnectionState
+            !==
             "idle"
         ) {
 
@@ -1154,7 +1417,9 @@ joinRoomButton.addEventListener(
 
 
         if (
-            name === null
+            name
+            ===
+            null
         ) {
 
             return;
@@ -1173,7 +1438,9 @@ joinRoomButton.addEventListener(
 
 
         if (
-            roomId === ""
+            roomId
+            ===
+            ""
         ) {
 
             message.textContent =
@@ -1188,7 +1455,9 @@ joinRoomButton.addEventListener(
 
 
         if (
-            roomId.length !== 4
+            roomId.length
+            !==
+            4
         ) {
 
             message.textContent =
@@ -1223,6 +1492,10 @@ joinRoomButton.addEventListener(
             "pvp";
 
 
+        isQuickMatchWaiting =
+            false;
+
+
         currentRoomId =
             roomId;
 
@@ -1254,12 +1527,40 @@ roomIdInput.addEventListener(
     (event) => {
 
         if (
-            event.key ===
+            event.key
+            ===
             "Enter"
         ) {
 
             joinRoomButton.click();
         }
+    }
+);
+
+
+// =============================================
+// CPU LEVEL CHANGE
+// =============================================
+
+cpuLevelSelect.addEventListener(
+    "change",
+    () => {
+
+        if (
+            roomConnectionState
+            !==
+            "idle"
+        ) {
+
+            return;
+        }
+
+
+        currentCpuLevel =
+            getSelectedCpuLevel();
+
+
+        updateRoomControls();
     }
 );
 
@@ -1276,10 +1577,18 @@ function connectWebSocket(
 
 
     const protocol =
-        location.protocol ===
+
+        location.protocol
+        ===
         "https:"
-            ? "wss"
-            : "ws";
+
+        ?
+
+        "wss"
+
+        :
+
+        "ws";
 
 
     const encodedName =
@@ -1290,8 +1599,10 @@ function connectWebSocket(
 
     const socketUrl =
         `${protocol}://${location.host}`
-        + `/ws/${roomId}`
-        + `?name=${encodedName}`;
+        +
+        `/ws/${roomId}`
+        +
+        `?name=${encodedName}`;
 
 
     console.log(
@@ -1319,7 +1630,8 @@ function connectWebSocket(
         () => {
 
             if (
-                socket !==
+                socket
+                !==
                 newSocket
             ) {
 
@@ -1327,11 +1639,37 @@ function connectWebSocket(
             }
 
 
+            if (
+                isQuickMatchWaiting
+            ) {
+
+                message.textContent =
+                    "対戦相手を探しています...\n\n"
+                    +
+                    "キャンセルする場合は"
+                    +
+                    "ボタンを押してください。";
+
+
+                return;
+            }
+
+
             message.textContent =
-                gameMode === "cpu"
-                    ? `${getCpuName()}に接続しました。`
-                    : `ルームID：${roomId}\n`
-                      + "サーバーに接続しました。";
+
+                gameMode
+                ===
+                "cpu"
+
+                ?
+
+                `${getCpuName()}に接続しました。`
+
+                :
+
+                `ルームID：${roomId}\n`
+                +
+                "サーバーに接続しました。";
         }
     );
 
@@ -1345,7 +1683,8 @@ function connectWebSocket(
         (event) => {
 
             if (
-                socket !==
+                socket
+                !==
                 newSocket
             ) {
 
@@ -1403,7 +1742,8 @@ function connectWebSocket(
         () => {
 
             if (
-                socket !==
+                socket
+                !==
                 newSocket
             ) {
 
@@ -1415,10 +1755,16 @@ function connectWebSocket(
                 null;
 
 
+            // 接続途中で失敗
             if (
-                roomConnectionState ===
+                roomConnectionState
+                ===
                 "connecting"
             ) {
+
+                isQuickMatchWaiting =
+                    false;
+
 
                 roomConnectionState =
                     "idle";
@@ -1446,6 +1792,7 @@ function connectWebSocket(
 
                 updateRoomControls();
 
+
                 updateControls();
 
 
@@ -1457,17 +1804,23 @@ function connectWebSocket(
             }
 
 
+            // 対戦中
             if (
-                currentPhase !==
+                currentPhase
+                !==
                 "finished"
+
                 &&
-                roomConnectionState ===
+
+                roomConnectionState
+                ===
                 "joined"
             ) {
 
                 returnToRoomScreen(
                     "サーバーとの接続が切れました。\n\n"
-                    + "もう一度対戦を開始してください。"
+                    +
+                    "もう一度対戦を開始してください。"
                 );
             }
         }
@@ -1503,21 +1856,19 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "error"
+
         &&
-        (
-            data.code ===
-            "ROOM_NOT_FOUND"
-            ||
-            data.code ===
-            "ROOM_FULL"
-            ||
-            data.code ===
-            "INVALID_ROOM_ID"
-            ||
-            data.code ===
+
+        [
+            "ROOM_NOT_FOUND",
+            "ROOM_FULL",
+            "INVALID_ROOM_ID",
             "INVALID_PLAYER_NAME"
+        ].includes(
+            data.code
         )
     ) {
 
@@ -1530,11 +1881,17 @@ function handleServerMessage(
 
 
         if (
-            oldSocket !== null
+            oldSocket
+            !==
+            null
         ) {
 
             oldSocket.close();
         }
+
+
+        isQuickMatchWaiting =
+            false;
 
 
         roomConnectionState =
@@ -1567,7 +1924,8 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "player_number"
     ) {
 
@@ -1621,15 +1979,33 @@ function handleServerMessage(
 
 
         roomInfo.textContent =
-            gameMode === "cpu"
-                ? `${getCpuName()} ${getCpuLevelName()}`
-                : `Room ${currentRoomId}`;
+
+            gameMode
+            ===
+            "cpu"
+
+            ?
+
+            `${getCpuName()} ${getCpuLevelName()}`
+
+            :
+
+            `Room ${currentRoomId}`;
 
 
         playerInfo.textContent =
-            gameMode === "cpu"
-                ? `${currentPlayerName} vs ${getCpuName()}`
-                : `${currentPlayerName} / Player ${playerNumber}`;
+
+            gameMode
+            ===
+            "cpu"
+
+            ?
+
+            `${currentPlayerName} vs ${getCpuName()}`
+
+            :
+
+            `${currentPlayerName} / Player ${playerNumber}`;
 
 
         myTurn =
@@ -1647,13 +2023,47 @@ function handleServerMessage(
         updateControls();
 
 
-        message.textContent =
-            gameMode === "cpu"
-                ? `${currentPlayerName} vs ${getCpuName()}\n`
-                  + "対戦を開始します..."
-                : `ルームID：${currentRoomId}\n`
-                  + `${currentPlayerName} / Player ${playerNumber}\n\n`
-                  + "相手を待っています...";
+        // =====================================
+        // QUICK MATCH WAITING
+        // =====================================
+
+        if (
+            isQuickMatchWaiting
+        ) {
+
+            message.textContent =
+                "対戦相手を探しています...\n\n"
+                +
+                "マッチングをやめる場合は"
+                +
+                "「マッチングをキャンセル」を"
+                +
+                "押してください。";
+        }
+
+
+        else {
+
+            message.textContent =
+
+                gameMode
+                ===
+                "cpu"
+
+                ?
+
+                `${currentPlayerName} vs ${getCpuName()}\n`
+                +
+                "対戦を開始します..."
+
+                :
+
+                `ルームID：${currentRoomId}\n`
+                +
+                `${currentPlayerName} / Player ${playerNumber}\n\n`
+                +
+                "相手を待っています...";
+        }
 
 
         return;
@@ -1665,9 +2075,21 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "game_start"
     ) {
+
+        isQuickMatchWaiting =
+            false;
+
+
+        roomConnectionState =
+            "joined";
+
+
+        updateRoomControls();
+
 
         showGameScreen();
 
@@ -1698,28 +2120,29 @@ function handleServerMessage(
 
         player1Name =
             data.player1_name
-            || "PLAYER 1";
+            ||
+            "PLAYER 1";
 
 
         player2Name =
             data.player2_name
-            || "PLAYER 2";
+            ||
+            "PLAYER 2";
 
 
-        if (
-            playerNumber === 1
-        ) {
+        currentPlayerName =
 
-            currentPlayerName =
-                player1Name;
+            playerNumber
+            ===
+            1
 
-        }
+            ?
 
-        else {
+            player1Name
 
-            currentPlayerName =
-                player2Name;
-        }
+            :
+
+            player2Name;
 
 
         myTurn =
@@ -1750,17 +2173,21 @@ function handleServerMessage(
 
         lastCpuCandidateCount =
             data.candidate_count
-            ?? null;
+            ??
+            null;
 
 
         lastCpuBeforeCandidateCount =
             null;
 
+
         lastCpuYesPredictionCount =
             null;
 
+
         lastCpuNoPredictionCount =
             null;
+
 
         lastCpuSplitScore =
             null;
@@ -1776,9 +2203,18 @@ function handleServerMessage(
 
 
         roomInfo.textContent =
-            gameMode === "cpu"
-                ? `${getCpuName()} ${getCpuLevelName()}`
-                : `Room ${currentRoomId}`;
+
+            gameMode
+            ===
+            "cpu"
+
+            ?
+
+            `${getCpuName()} ${getCpuLevelName()}`
+
+            :
+
+            `Room ${currentRoomId}`;
 
 
         playerInfo.textContent =
@@ -1822,19 +2258,34 @@ function handleServerMessage(
 
         updateFoundCount();
 
+
         updateGameStatus();
+
 
         updateControls();
 
 
         message.textContent =
+
             myTurn
-                ? `${currentPlayerName}のターンです。\n`
-                  + "質問を1つ選んでください。"
-                : `${playerNumber === 1
-                    ? player2Name
-                    : player1Name}`
-                  + "のターンです。";
+
+            ?
+
+            `${currentPlayerName}のターンです。\n`
+            +
+            "質問を1つ選んでください。"
+
+            :
+
+            `${
+                playerNumber
+                ===
+                1
+                ?
+                player2Name
+                :
+                player1Name
+            }のターンです。`;
 
 
         return;
@@ -1846,7 +2297,8 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "question_result"
     ) {
 
@@ -1859,17 +2311,26 @@ function handleServerMessage(
 
 
         const answerText =
+
             data.answer
-                ? "YES"
-                : "NO";
+
+            ?
+
+            "YES"
+
+            :
+
+            "NO";
 
 
         message.textContent =
             `${data.question}\n\n`
-            + `答え：${answerText}`;
+            +
+            `答え：${answerText}`;
 
 
         updateGameStatus();
+
 
         updateControls();
 
@@ -1883,7 +2344,8 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "guess_result"
     ) {
 
@@ -1903,9 +2365,16 @@ function handleServerMessage(
 
 
         guessResultText.textContent =
+
             data.correct
-                ? `${data.guess}\n\n🎉 当たり！`
-                : `${data.guess}\n\nはずれ！`;
+
+            ?
+
+            `${data.guess}\n\n🎉 当たり！`
+
+            :
+
+            `${data.guess}\n\nはずれ！`;
 
 
         guessResultCount.textContent =
@@ -1918,7 +2387,8 @@ function handleServerMessage(
 
         message.textContent =
             "結果を確認したら"
-            + "「次へ」を押してください。";
+            +
+            "「次へ」を押してください。";
 
 
         updateControls();
@@ -1933,7 +2403,8 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "cpu_question"
     ) {
 
@@ -1953,34 +2424,46 @@ function handleServerMessage(
 
 
         lastCpuAnswer =
+
             data.answer
-                ? "YES"
-                : "NO";
+
+            ?
+
+            "YES"
+
+            :
+
+            "NO";
 
 
         lastCpuCandidateCount =
             data.candidate_count
-            ?? null;
+            ??
+            null;
 
 
         lastCpuBeforeCandidateCount =
             data.before_candidate_count
-            ?? null;
+            ??
+            null;
 
 
         lastCpuYesPredictionCount =
             data.yes_prediction_count
-            ?? null;
+            ??
+            null;
 
 
         lastCpuNoPredictionCount =
             data.no_prediction_count
-            ?? null;
+            ??
+            null;
 
 
         lastCpuSplitScore =
             data.split_score
-            ?? null;
+            ??
+            null;
 
 
         cpuActionSection.classList.remove(
@@ -1989,17 +2472,21 @@ function handleServerMessage(
 
 
         // =====================================
-        // CPU Lv.1
+        // Lv.1
         // =====================================
 
         if (
-            currentCpuLevel === 1
+            currentCpuLevel
+            ===
+            1
         ) {
 
             cpuActionText.textContent =
                 `CPU Lv.1の質問\n\n`
-                + `${lastCpuQuestion}\n\n`
-                + `答え：${lastCpuAnswer}`;
+                +
+                `${lastCpuQuestion}\n\n`
+                +
+                `答え：${lastCpuAnswer}`;
 
 
             gameStatus.textContent =
@@ -2008,7 +2495,8 @@ function handleServerMessage(
 
             message.textContent =
                 "CPU Lv.1がランダムに"
-                + "カードを予想します...";
+                +
+                "カードを予想します...";
 
 
             return;
@@ -2016,11 +2504,13 @@ function handleServerMessage(
 
 
         // =====================================
-        // CPU Lv.2
+        // Lv.2
         // =====================================
 
         if (
-            currentCpuLevel === 2
+            currentCpuLevel
+            ===
+            2
         ) {
 
             let candidateText =
@@ -2028,13 +2518,15 @@ function handleServerMessage(
 
 
             if (
-                lastCpuCandidateCount !==
+                lastCpuCandidateCount
+                !==
                 null
             ) {
 
                 candidateText =
                     "\n\n推理候補："
-                    + `${formatNumber(
+                    +
+                    `${formatNumber(
                         lastCpuCandidateCount
                     )} 通り`;
             }
@@ -2042,9 +2534,12 @@ function handleServerMessage(
 
             cpuActionText.textContent =
                 `CPU Lv.2の質問\n\n`
-                + `${lastCpuQuestion}\n\n`
-                + `答え：${lastCpuAnswer}`
-                + candidateText;
+                +
+                `${lastCpuQuestion}\n\n`
+                +
+                `答え：${lastCpuAnswer}`
+                +
+                candidateText;
 
 
             gameStatus.textContent =
@@ -2053,7 +2548,8 @@ function handleServerMessage(
 
             message.textContent =
                 "質問結果から候補手札を"
-                + "絞り込んでいます...";
+                +
+                "絞り込んでいます...";
 
 
             return;
@@ -2061,11 +2557,13 @@ function handleServerMessage(
 
 
         // =====================================
-        // CPU Lv.3
+        // Lv.3
         // =====================================
 
         if (
-            currentCpuLevel === 3
+            currentCpuLevel
+            ===
+            3
         ) {
 
             let analysisText =
@@ -2073,46 +2571,57 @@ function handleServerMessage(
 
 
             if (
-                lastCpuBeforeCandidateCount !==
+                lastCpuBeforeCandidateCount
+                !==
                 null
             ) {
 
                 analysisText +=
                     "\n\n質問前候補："
-                    + `${formatNumber(
+                    +
+                    `${formatNumber(
                         lastCpuBeforeCandidateCount
                     )} 通り`;
             }
 
 
             if (
-                lastCpuYesPredictionCount !==
+                lastCpuYesPredictionCount
+                !==
                 null
+
                 &&
-                lastCpuNoPredictionCount !==
+
+                lastCpuNoPredictionCount
+                !==
                 null
             ) {
 
                 analysisText +=
-                    "\n"
-                    + `YES予測：${formatNumber(
+                    "\nYES予測："
+                    +
+                    `${formatNumber(
                         lastCpuYesPredictionCount
                     )} 通り`
-                    + "\n"
-                    + `NO予測：${formatNumber(
+                    +
+                    "\nNO予測："
+                    +
+                    `${formatNumber(
                         lastCpuNoPredictionCount
                     )} 通り`;
             }
 
 
             if (
-                lastCpuSplitScore !==
+                lastCpuSplitScore
+                !==
                 null
             ) {
 
                 analysisText +=
-                    "\n"
-                    + `分割差：${formatNumber(
+                    "\n分割差："
+                    +
+                    `${formatNumber(
                         lastCpuSplitScore
                     )}`;
             }
@@ -2120,17 +2629,20 @@ function handleServerMessage(
 
             let afterText =
                 "\n\n答え："
-                + `${lastCpuAnswer}`;
+                +
+                `${lastCpuAnswer}`;
 
 
             if (
-                lastCpuCandidateCount !==
+                lastCpuCandidateCount
+                !==
                 null
             ) {
 
                 afterText +=
                     "\n\n残り候補："
-                    + `${formatNumber(
+                    +
+                    `${formatNumber(
                         lastCpuCandidateCount
                     )} 通り`;
             }
@@ -2138,10 +2650,14 @@ function handleServerMessage(
 
             cpuActionText.textContent =
                 "CPU Lv.3 ANALYST\n\n"
-                + "最も情報量の高い質問を選択\n\n"
-                + `${lastCpuQuestion}`
-                + analysisText
-                + afterText;
+                +
+                "最も情報量の高い質問を選択\n\n"
+                +
+                `${lastCpuQuestion}`
+                +
+                analysisText
+                +
+                afterText;
 
 
             gameStatus.textContent =
@@ -2150,7 +2666,8 @@ function handleServerMessage(
 
             message.textContent =
                 "候補を最も半分に近づける質問を"
-                + "計算して推理しています...";
+                +
+                "計算して推理しています...";
 
 
             return;
@@ -2166,7 +2683,8 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "cpu_guess_result"
     ) {
 
@@ -2182,14 +2700,22 @@ function handleServerMessage(
 
 
         const resultText =
+
             data.correct
-                ? "🎯 当たり！"
-                : "はずれ！";
+
+            ?
+
+            "🎯 当たり！"
+
+            :
+
+            "はずれ！";
 
 
         lastCpuCandidateCount =
             data.candidate_count
-            ?? lastCpuCandidateCount;
+            ??
+            lastCpuCandidateCount;
 
 
         cpuActionSection.classList.remove(
@@ -2203,18 +2729,28 @@ function handleServerMessage(
 
         if (
             (
-                currentCpuLevel === 2
+                currentCpuLevel
+                ===
+                2
+
                 ||
-                currentCpuLevel === 3
+
+                currentCpuLevel
+                ===
+                3
             )
+
             &&
-            lastCpuCandidateCount !==
+
+            lastCpuCandidateCount
+            !==
             null
         ) {
 
             candidateText =
                 "\n\n残り候補："
-                + `${formatNumber(
+                +
+                `${formatNumber(
                     lastCpuCandidateCount
                 )} 通り`;
         }
@@ -2225,38 +2761,50 @@ function handleServerMessage(
 
 
         if (
-            currentCpuLevel === 3
+            currentCpuLevel
+            ===
+            3
         ) {
 
             if (
-                lastCpuBeforeCandidateCount !==
+                lastCpuBeforeCandidateCount
+                !==
                 null
             ) {
 
                 level3AnalysisText +=
                     "\n\n質問時の分析"
-                    + "\n"
-                    + `質問前：${formatNumber(
+                    +
+                    "\n質問前："
+                    +
+                    `${formatNumber(
                         lastCpuBeforeCandidateCount
                     )} 通り`;
             }
 
 
             if (
-                lastCpuYesPredictionCount !==
+                lastCpuYesPredictionCount
+                !==
                 null
+
                 &&
-                lastCpuNoPredictionCount !==
+
+                lastCpuNoPredictionCount
+                !==
                 null
             ) {
 
                 level3AnalysisText +=
-                    "\n"
-                    + `YES予測：${formatNumber(
+                    "\nYES予測："
+                    +
+                    `${formatNumber(
                         lastCpuYesPredictionCount
                     )}`
-                    + "\n"
-                    + `NO予測：${formatNumber(
+                    +
+                    "\nNO予測："
+                    +
+                    `${formatNumber(
                         lastCpuNoPredictionCount
                     )}`;
             }
@@ -2265,16 +2813,26 @@ function handleServerMessage(
 
         cpuActionText.textContent =
             `${getCpuName()}の質問\n\n`
-            + `${lastCpuQuestion}\n`
-            + `答え：${lastCpuAnswer}`
-            + level3AnalysisText
-            + "\n\n"
-            + `${getCpuName()}の予想\n\n`
-            + `${data.guess}\n\n`
-            + resultText
-            + "\n\n"
-            + `CPU：${data.found_count} / 3 枚正解`
-            + candidateText;
+            +
+            `${lastCpuQuestion}\n`
+            +
+            `答え：${lastCpuAnswer}`
+            +
+            level3AnalysisText
+            +
+            "\n\n"
+            +
+            `${getCpuName()}の予想\n\n`
+            +
+            `${data.guess}\n\n`
+            +
+            resultText
+            +
+            "\n\n"
+            +
+            `CPU：${data.found_count} / 3 枚正解`
+            +
+            candidateText;
 
 
         gameStatus.textContent =
@@ -2282,9 +2840,16 @@ function handleServerMessage(
 
 
         message.textContent =
+
             data.correct
-                ? `${getCpuName()}がカードを1枚当てました。`
-                : `${getCpuName()}の予想は外れました。`;
+
+            ?
+
+            `${getCpuName()}がカードを1枚当てました。`
+
+            :
+
+            `${getCpuName()}の予想は外れました。`;
 
 
         return;
@@ -2296,7 +2861,8 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "turn_changed"
     ) {
 
@@ -2330,6 +2896,7 @@ function handleServerMessage(
 
         updateGameStatus();
 
+
         updateControls();
 
 
@@ -2339,16 +2906,26 @@ function handleServerMessage(
 
             message.textContent =
                 `${currentPlayerName}のターンです。\n`
-                + "質問を1つ選んでください。";
-
+                +
+                "質問を1つ選んでください。";
         }
+
 
         else {
 
             const opponentName =
-                playerNumber === 1
-                    ? player2Name
-                    : player1Name;
+
+                playerNumber
+                ===
+                1
+
+                ?
+
+                player2Name
+
+                :
+
+                player1Name;
 
 
             message.textContent =
@@ -2365,9 +2942,14 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "game_over"
     ) {
+
+        isQuickMatchWaiting =
+            false;
+
 
         myTurn =
             false;
@@ -2408,12 +2990,14 @@ function handleServerMessage(
 
         player1Name =
             data.player1_name
-            || player1Name;
+            ||
+            player1Name;
 
 
         player2Name =
             data.player2_name
-            || player2Name;
+            ||
+            player2Name;
 
 
         player1Title.textContent =
@@ -2437,7 +3021,8 @@ function handleServerMessage(
 
 
         if (
-            data.winner ===
+            data.winner
+            ===
             playerNumber
         ) {
 
@@ -2447,7 +3032,8 @@ function handleServerMessage(
 
             gameOverMessage.textContent =
                 `${currentPlayerName}の勝利！\n`
-                + "相手の3枚すべてを見破りました。";
+                +
+                "相手の3枚すべてを見破りました。";
 
 
             gameStatus.textContent =
@@ -2456,21 +3042,39 @@ function handleServerMessage(
 
             message.textContent =
                 `🎉 ${currentPlayerName}の勝ちです！`;
-
         }
+
 
         else {
 
             const winnerName =
-                data.winner === 1
-                    ? player1Name
-                    : player2Name;
+
+                data.winner
+                ===
+                1
+
+                ?
+
+                player1Name
+
+                :
+
+                player2Name;
 
 
             gameOverTitle.textContent =
-                gameMode === "cpu"
-                    ? "CPU WINS"
-                    : "YOU LOSE";
+
+                gameMode
+                ===
+                "cpu"
+
+                ?
+
+                "CPU WINS"
+
+                :
+
+                "YOU LOSE";
 
 
             gameOverMessage.textContent =
@@ -2498,13 +3102,13 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "rematch_waiting"
     ) {
 
         message.textContent =
-            "相手の再戦希望を"
-            + "待っています...";
+            "相手の再戦希望を待っています...";
 
 
         return;
@@ -2512,11 +3116,12 @@ function handleServerMessage(
 
 
     // =========================================
-    // DISCONNECTED
+    // OPPONENT DISCONNECTED
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "opponent_disconnected"
     ) {
 
@@ -2525,7 +3130,8 @@ function handleServerMessage(
 
         returnToRoomScreen(
             "相手との接続が切れました。\n"
-            + "対戦を終了しました。"
+            +
+            "対戦を終了しました。"
         );
 
 
@@ -2534,11 +3140,12 @@ function handleServerMessage(
 
 
     // =========================================
-    // LEFT
+    // OPPONENT LEFT
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "opponent_left"
     ) {
 
@@ -2559,7 +3166,8 @@ function handleServerMessage(
     // =========================================
 
     if (
-        data.type ===
+        data.type
+        ===
         "error"
     ) {
 
@@ -2638,7 +3246,8 @@ function showRoomScreen() {
 function updateGameStatus() {
 
     if (
-        currentPhase ===
+        currentPhase
+        ===
         "finished"
     ) {
 
@@ -2651,13 +3260,30 @@ function updateGameStatus() {
     ) {
 
         const opponentName =
-            gameMode === "cpu"
-                ? getCpuName()
-                : (
-                    playerNumber === 1
-                        ? player2Name
-                        : player1Name
-                );
+
+            gameMode
+            ===
+            "cpu"
+
+            ?
+
+            getCpuName()
+
+            :
+
+            (
+                playerNumber
+                ===
+                1
+
+                ?
+
+                player2Name
+
+                :
+
+                player1Name
+            );
 
 
         gameStatus.textContent =
@@ -2669,13 +3295,15 @@ function updateGameStatus() {
 
 
     if (
-        currentPhase ===
+        currentPhase
+        ===
         "question"
     ) {
 
         gameStatus.textContent =
             `${currentPlayerName}のターン：`
-            + "質問を選んでください";
+            +
+            "質問を選んでください";
 
 
         return;
@@ -2683,7 +3311,8 @@ function updateGameStatus() {
 
 
     if (
-        currentPhase ===
+        currentPhase
+        ===
         "guess"
     ) {
 
@@ -2696,7 +3325,8 @@ function updateGameStatus() {
 
 
     if (
-        currentPhase ===
+        currentPhase
+        ===
         "result"
     ) {
 
@@ -2721,10 +3351,15 @@ function updateQuestionControls() {
 
     const canAsk =
         myTurn
+
         &&
-        currentPhase ===
+
+        currentPhase
+        ===
         "question"
+
         &&
+
         !waitingForServer;
 
 
@@ -2735,8 +3370,8 @@ function updateQuestionControls() {
         questionSection.classList.remove(
             "hidden"
         );
-
     }
+
 
     else {
 
@@ -2750,7 +3385,9 @@ function updateQuestionControls() {
         (button) => {
 
             if (
-                button !== null
+                button
+                !==
+                null
             ) {
 
                 button.disabled =
@@ -2781,10 +3418,15 @@ function updateGuessControls() {
 
     const canGuess =
         myTurn
+
         &&
-        currentPhase ===
+
+        currentPhase
+        ===
         "guess"
+
         &&
+
         !waitingForServer;
 
 
@@ -2795,8 +3437,8 @@ function updateGuessControls() {
         guessSection.classList.remove(
             "hidden"
         );
-
     }
+
 
     else {
 
@@ -2816,8 +3458,8 @@ function updateGuessControls() {
 
         guessRank.disabled =
             true;
-
     }
+
 
     else {
 
@@ -2838,8 +3480,11 @@ function updateResultControls() {
 
     const showResult =
         myTurn
+
         &&
-        currentPhase ===
+
+        currentPhase
+        ===
         "result";
 
 
@@ -2850,8 +3495,8 @@ function updateResultControls() {
         guessResultSection.classList.remove(
             "hidden"
         );
-
     }
+
 
     else {
 
@@ -2899,7 +3544,8 @@ guessSuit.addEventListener(
 function updateGuessRankState() {
 
     if (
-        guessSuit.value ===
+        guessSuit.value
+        ===
         "JOKER"
     ) {
 
@@ -2918,10 +3564,15 @@ function updateGuessRankState() {
     guessRank.disabled =
         !(
             myTurn
+
             &&
-            currentPhase ===
+
+            currentPhase
+            ===
             "guess"
+
             &&
+
             !waitingForServer
         );
 }
@@ -2953,9 +3604,14 @@ function resetGuessInput() {
 function canSendQuestion() {
 
     if (
-        socket === null
+        socket
+        ===
+        null
+
         ||
-        socket.readyState !==
+
+        socket.readyState
+        !==
         WebSocket.OPEN
     ) {
 
@@ -2969,10 +3625,15 @@ function canSendQuestion() {
 
     if (
         waitingForServer
+
         ||
+
         !myTurn
+
         ||
-        currentPhase !==
+
+        currentPhase
+        !==
         "question"
     ) {
 
@@ -2998,6 +3659,7 @@ function sendQuestion(
 
 
     const data = {
+
         type:
             "question",
 
@@ -3041,7 +3703,9 @@ function validateRankQuestion() {
 
 
     if (
-        rank === ""
+        rank
+        ===
+        ""
     ) {
 
         message.textContent =
@@ -3085,7 +3749,9 @@ function validateNumberQuestion(
 
 
     if (
-        rawValue === ""
+        rawValue
+        ===
+        ""
     ) {
 
         message.textContent =
@@ -3106,10 +3772,18 @@ function validateNumberQuestion(
         !Number.isInteger(
             number
         )
+
         ||
-        number < 1
+
+        number
+        <
+        1
+
         ||
-        number > 13
+
+        number
+        >
+        13
     ) {
 
         message.textContent =
@@ -3170,7 +3844,9 @@ questionRankButton.addEventListener(
 
 
         if (
-            rank === null
+            rank
+            ===
+            null
         ) {
 
             return;
@@ -3199,7 +3875,9 @@ questionMoreThanButton.addEventListener(
 
 
         if (
-            number === null
+            number
+            ===
+            null
         ) {
 
             return;
@@ -3228,7 +3906,9 @@ questionLessThanButton.addEventListener(
 
 
         if (
-            number === null
+            number
+            ===
+            null
         ) {
 
             return;
@@ -3317,9 +3997,14 @@ guessCardButton.addEventListener(
 function sendGuess() {
 
     if (
-        socket === null
+        socket
+        ===
+        null
+
         ||
-        socket.readyState !==
+
+        socket.readyState
+        !==
         WebSocket.OPEN
     ) {
 
@@ -3333,10 +4018,15 @@ function sendGuess() {
 
     if (
         waitingForServer
+
         ||
+
         !myTurn
+
         ||
-        currentPhase !==
+
+        currentPhase
+        !==
         "guess"
     ) {
 
@@ -3349,7 +4039,9 @@ function sendGuess() {
 
 
     if (
-        suit === ""
+        suit
+        ===
+        ""
     ) {
 
         message.textContent =
@@ -3363,20 +4055,30 @@ function sendGuess() {
     let data;
 
 
+    // =========================================
+    // JOKER
+    // =========================================
+
     if (
-        suit ===
+        suit
+        ===
         "JOKER"
     ) {
 
         data = {
+
             type:
                 "guess_card",
 
             suit:
                 "JOKER"
         };
-
     }
+
+
+    // =========================================
+    // NORMAL CARD
+    // =========================================
 
     else {
 
@@ -3388,7 +4090,9 @@ function sendGuess() {
 
 
         if (
-            rank === ""
+            rank
+            ===
+            ""
         ) {
 
             message.textContent =
@@ -3414,6 +4118,7 @@ function sendGuess() {
 
 
         data = {
+
             type:
                 "guess_card",
 
@@ -3461,9 +4166,14 @@ nextTurnButton.addEventListener(
 function continueAfterGuess() {
 
     if (
-        socket === null
+        socket
+        ===
+        null
+
         ||
-        socket.readyState !==
+
+        socket.readyState
+        !==
         WebSocket.OPEN
     ) {
 
@@ -3472,11 +4182,16 @@ function continueAfterGuess() {
 
 
     if (
-        currentPhase !==
+        currentPhase
+        !==
         "result"
+
         ||
+
         !myTurn
+
         ||
+
         waitingForServer
     ) {
 
@@ -3492,13 +4207,23 @@ function continueAfterGuess() {
 
 
     message.textContent =
-        gameMode === "cpu"
-            ? `${getCpuName()}のターンへ進みます...`
-            : "次のターンへ進みます...";
+
+        gameMode
+        ===
+        "cpu"
+
+        ?
+
+        `${getCpuName()}のターンへ進みます...`
+
+        :
+
+        "次のターンへ進みます...";
 
 
     socket.send(
         JSON.stringify({
+
             type:
                 "continue_after_guess"
         })
@@ -3515,9 +4240,14 @@ rematchButton.addEventListener(
     () => {
 
         if (
-            socket === null
+            socket
+            ===
+            null
+
             ||
-            socket.readyState !==
+
+            socket.readyState
+            !==
             WebSocket.OPEN
         ) {
 
@@ -3530,13 +4260,23 @@ rematchButton.addEventListener(
 
 
         message.textContent =
-            gameMode === "cpu"
-                ? `${getCpuName()}と再戦します...`
-                : "再戦をリクエストしました。";
+
+            gameMode
+            ===
+            "cpu"
+
+            ?
+
+            `${getCpuName()}と再戦します...`
+
+            :
+
+            "再戦をリクエストしました。";
 
 
         socket.send(
             JSON.stringify({
+
                 type:
                     "rematch_request"
             })
@@ -3554,9 +4294,14 @@ leaveGameButton.addEventListener(
     () => {
 
         if (
-            socket !== null
+            socket
+            !==
+            null
+
             &&
-            socket.readyState ===
+
+            socket.readyState
+            ===
             WebSocket.OPEN
         ) {
 
@@ -3564,6 +4309,7 @@ leaveGameButton.addEventListener(
 
                 socket.send(
                     JSON.stringify({
+
                         type:
                             "leave_game"
                     })
@@ -3597,7 +4343,9 @@ leaveGameButton.addEventListener(
 function closeSocketWithoutLeave() {
 
     if (
-        socket === null
+        socket
+        ===
+        null
     ) {
 
         return;
@@ -3693,6 +4441,11 @@ function resetBattleState() {
 
     currentCpuLevel =
         getSelectedCpuLevel();
+
+
+    // QUICK MATCHも解除
+    isQuickMatchWaiting =
+        false;
 
 
     currentPlayerName =
@@ -3800,9 +4553,12 @@ function resetBattleState() {
 
     updateFoundCount();
 
+
     updateGameStatus();
 
+
     updateControls();
+
 
     updateRoomControls();
 }
@@ -3866,7 +4622,8 @@ function createCardElement(
     if (
         cardText
         .toUpperCase()
-        === "JOKER"
+        ===
+        "JOKER"
     ) {
 
         return createJokerCard();
@@ -3880,7 +4637,9 @@ function createCardElement(
 
 
     if (
-        parts.length < 2
+        parts.length
+        <
+        2
     ) {
 
         return createUnknownCard(
@@ -3912,8 +4671,12 @@ function createCardElement(
 
 
     if (
-        suit === null
+        suit
+        ===
+        null
+
         ||
+
         !isValidRank(
             rank
         )
@@ -3943,18 +4706,22 @@ function createCardElement(
 
 
     if (
-        suit ===
+        suit
+        ===
         "HEART"
+
         ||
-        suit ===
+
+        suit
+        ===
         "DIAMOND"
     ) {
 
         card.classList.add(
             "card-red"
         );
-
     }
+
 
     else {
 
@@ -4167,18 +4934,31 @@ function isValidRank(
 ) {
 
     const ranks = [
+
         "A",
+
         "2",
+
         "3",
+
         "4",
+
         "5",
+
         "6",
+
         "7",
+
         "8",
+
         "9",
+
         "10",
+
         "J",
+
         "Q",
+
         "K"
     ];
 
@@ -4207,41 +4987,96 @@ function normalizeSuit(
 
     const aliases = {
 
-        "SPADE": "SPADE",
-        "SPADES": "SPADE",
-        "S": "SPADE",
-        "♠": "SPADE",
-        "♤": "SPADE",
-        "スペード": "SPADE",
+        "SPADE":
+            "SPADE",
 
-        "HEART": "HEART",
-        "HEARTS": "HEART",
-        "H": "HEART",
-        "♥": "HEART",
-        "♡": "HEART",
-        "ハート": "HEART",
+        "SPADES":
+            "SPADE",
 
-        "DIAMOND": "DIAMOND",
-        "DIAMONDS": "DIAMOND",
-        "D": "DIAMOND",
-        "♦": "DIAMOND",
-        "♢": "DIAMOND",
-        "ダイヤ": "DIAMOND",
-        "ダイヤモンド": "DIAMOND",
+        "S":
+            "SPADE",
 
-        "CLUB": "CLUB",
-        "CLUBS": "CLUB",
-        "C": "CLUB",
-        "♣": "CLUB",
-        "♧": "CLUB",
-        "クラブ": "CLUB",
-        "クローバー": "CLUB"
+        "♠":
+            "SPADE",
+
+        "♤":
+            "SPADE",
+
+        "スペード":
+            "SPADE",
+
+
+        "HEART":
+            "HEART",
+
+        "HEARTS":
+            "HEART",
+
+        "H":
+            "HEART",
+
+        "♥":
+            "HEART",
+
+        "♡":
+            "HEART",
+
+        "ハート":
+            "HEART",
+
+
+        "DIAMOND":
+            "DIAMOND",
+
+        "DIAMONDS":
+            "DIAMOND",
+
+        "D":
+            "DIAMOND",
+
+        "♦":
+            "DIAMOND",
+
+        "♢":
+            "DIAMOND",
+
+        "ダイヤ":
+            "DIAMOND",
+
+        "ダイヤモンド":
+            "DIAMOND",
+
+
+        "CLUB":
+            "CLUB",
+
+        "CLUBS":
+            "CLUB",
+
+        "C":
+            "CLUB",
+
+        "♣":
+            "CLUB",
+
+        "♧":
+            "CLUB",
+
+        "クラブ":
+            "CLUB",
+
+        "クローバー":
+            "CLUB"
     };
 
 
-    return aliases[
-        suit
-    ] || null;
+    return (
+        aliases[
+            suit
+        ]
+        ||
+        null
+    );
 }
 
 
@@ -4254,7 +5089,8 @@ function getSuitSymbol(
 ) {
 
     if (
-        suit ===
+        suit
+        ===
         "SPADE"
     ) {
 
@@ -4263,7 +5099,8 @@ function getSuitSymbol(
 
 
     if (
-        suit ===
+        suit
+        ===
         "HEART"
     ) {
 
@@ -4272,7 +5109,8 @@ function getSuitSymbol(
 
 
     if (
-        suit ===
+        suit
+        ===
         "DIAMOND"
     ) {
 
@@ -4281,7 +5119,8 @@ function getSuitSymbol(
 
 
     if (
-        suit ===
+        suit
+        ===
         "CLUB"
     ) {
 
@@ -4291,3 +5130,10 @@ function getSuitSymbol(
 
     return "?";
 }
+
+
+// =============================================
+// INITIALIZE
+// =============================================
+
+resetBattleState();
