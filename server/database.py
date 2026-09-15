@@ -1,10 +1,18 @@
 from pathlib import Path
 
+import os
 import hashlib
 import hmac
 import secrets
 import sqlite3
 import uuid
+
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+except ImportError:
+    psycopg = None
+    dict_row = None
 
 from datetime import datetime, timedelta, timezone
 
@@ -22,6 +30,27 @@ DB_PATH = (
     /
     "veil53.db"
 )
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    ""
+).strip()
+
+DATABASE_BACKEND = (
+    "postgresql"
+    if DATABASE_URL
+    else "sqlite"
+)
+
+if psycopg is not None:
+    DB_INTEGRITY_ERRORS = (
+        sqlite3.IntegrityError,
+        psycopg.IntegrityError
+    )
+else:
+    DB_INTEGRITY_ERRORS = (
+        sqlite3.IntegrityError,
+    )
 
 
 # =============================================
@@ -44,7 +73,112 @@ ELO_K_FACTOR = 32
 # CONNECTION
 # =============================================
 
+class DatabaseConnection:
+
+    def __init__(
+        self,
+        connection,
+        backend
+    ):
+
+        self._connection = connection
+        self.backend = backend
+
+
+    def _prepare_sql(
+        self,
+        sql
+    ):
+
+        if self.backend == "postgresql":
+
+            return sql.replace(
+                "?",
+                "%s"
+            )
+
+        return sql
+
+
+    def execute(
+        self,
+        sql,
+        params=()
+    ):
+
+        return self._connection.execute(
+            self._prepare_sql(
+                sql
+            ),
+            params
+        )
+
+
+    def commit(self):
+
+        self._connection.commit()
+
+
+    def rollback(self):
+
+        self._connection.rollback()
+
+
+    def close(self):
+
+        self._connection.close()
+
+
+    def __enter__(self):
+
+        return self
+
+
+    def __exit__(
+        self,
+        exc_type,
+        exc_value,
+        traceback
+    ):
+
+        try:
+
+            if exc_type is None:
+
+                self.commit()
+
+            else:
+
+                self.rollback()
+
+        finally:
+
+            self.close()
+
+        return False
+
+
 def get_connection():
+
+    if DATABASE_URL:
+
+        if psycopg is None:
+
+            raise RuntimeError(
+                "PostgreSQLを使用するには "
+                "psycopg[binary] が必要です"
+            )
+
+        conn = psycopg.connect(
+            DATABASE_URL,
+            row_factory=dict_row
+        )
+
+        return DatabaseConnection(
+            conn,
+            "postgresql"
+        )
+
 
     conn = sqlite3.connect(
         DB_PATH
@@ -58,7 +192,50 @@ def get_connection():
         "PRAGMA foreign_keys = ON"
     )
 
-    return conn
+    return DatabaseConnection(
+        conn,
+        "sqlite"
+    )
+
+
+def begin_ranked_transaction(
+    conn,
+    winner_user_id,
+    loser_user_id
+):
+
+    if conn.backend == "sqlite":
+
+        conn.execute(
+            "BEGIN IMMEDIATE"
+        )
+
+        return
+
+
+    # PostgreSQLでは対象ユーザー行を一定順序でロックする。
+    # 同時に複数のランク戦結果が記録されても、
+    # レーティング更新の競合やデッドロックが起きにくくなる。
+    first_user_id, second_user_id = sorted(
+        (
+            winner_user_id,
+            loser_user_id
+        )
+    )
+
+    conn.execute(
+        """
+        SELECT user_id
+        FROM users
+        WHERE user_id IN (?, ?)
+        ORDER BY user_id
+        FOR UPDATE
+        """,
+        (
+            first_user_id,
+            second_user_id
+        )
+    ).fetchall()
 
 
 # =============================================
@@ -96,8 +273,7 @@ def init_db():
 
                 name TEXT
                     NOT NULL
-                    UNIQUE
-                    COLLATE NOCASE,
+                    UNIQUE,
 
                 password_hash TEXT
                     NOT NULL,
@@ -125,12 +301,10 @@ def init_db():
                     DEFAULT 'BRONZE',
 
                 created_at TEXT
-                    NOT NULL
-                    DEFAULT CURRENT_TIMESTAMP,
+                    NOT NULL,
 
                 updated_at TEXT
                     NOT NULL
-                    DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -141,6 +315,15 @@ def init_db():
             CREATE INDEX IF NOT EXISTS
             idx_users_rating
             ON users(rating DESC)
+            """
+        )
+
+
+        conn.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            idx_users_name_lower_unique
+            ON users(LOWER(name))
             """
         )
 
@@ -625,7 +808,7 @@ def create_user(
             )
 
 
-    except sqlite3.IntegrityError:
+    except DB_INTEGRITY_ERRORS:
 
         raise ValueError(
             "そのプレイヤー名はすでに使われています"
@@ -695,8 +878,7 @@ def get_user_by_name(
                 created_at,
                 updated_at
             FROM users
-            WHERE name = ?
-            COLLATE NOCASE
+            WHERE LOWER(name) = LOWER(?)
             """,
             (
                 name,
@@ -734,8 +916,7 @@ def authenticate_user(
             """
             SELECT *
             FROM users
-            WHERE name = ?
-            COLLATE NOCASE
+            WHERE LOWER(name) = LOWER(?)
             """,
             (
                 name,
@@ -1088,7 +1269,7 @@ def update_user_name(
                 )
 
 
-    except sqlite3.IntegrityError:
+    except DB_INTEGRITY_ERRORS:
 
         raise ValueError(
             "そのプレイヤー名はすでに使われています"
@@ -1290,8 +1471,10 @@ def record_ranked_match(
     try:
 
         # 他のレート更新と同時に走らないようにする
-        conn.execute(
-            "BEGIN IMMEDIATE"
+        begin_ranked_transaction(
+            conn,
+            winner_user_id,
+            loser_user_id
         )
 
 
@@ -1788,6 +1971,14 @@ if __name__ == "__main__":
         "Database initialized:"
     )
 
-    print(
-        DB_PATH
-    )
+    if DATABASE_BACKEND == "postgresql":
+
+        print(
+            "PostgreSQL (DATABASE_URL)"
+        )
+
+    else:
+
+        print(
+            DB_PATH
+        )

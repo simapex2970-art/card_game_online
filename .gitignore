@@ -13,3 +13,6 @@ venv/
 .DS_Store
 Thumbs.db
 server/veil53.db
+
+server/veil53*.db
+server/database_sqlite_backup.py
