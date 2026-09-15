@@ -136,7 +136,7 @@ def create_room(
 
         "cpu_level": cpu_level,
 
-        # CPU Lv.2用
+        # CPU Lv.2 / Lv.3 共通
         "cpu_candidate_hands": [],
 
         "cpu_question_history": [],
@@ -208,7 +208,6 @@ async def create_pvp_room():
 
     return {
         "room_id": room_id,
-
         "mode": "pvp"
     }
 
@@ -222,14 +221,17 @@ async def create_cpu_room(
     level: int = 1
 ):
 
+    # ★ 変更
+    # Lv.3を許可
     if level not in [
         1,
-        2
+        2,
+        3
     ]:
 
         raise HTTPException(
             status_code=400,
-            detail="CPUレベルは1または2を指定してください。"
+            detail="CPUレベルは1〜3を指定してください。"
         )
 
 
@@ -246,9 +248,7 @@ async def create_cpu_room(
 
     return {
         "room_id": room_id,
-
         "mode": "cpu",
-
         "cpu_level": level
     }
 
@@ -285,7 +285,7 @@ def create_all_cards():
 
 
 # =============================================
-# CPU Lv.2
+# CPU Lv.2 / Lv.3
 # 初期候補手札
 # =============================================
 
@@ -315,6 +315,11 @@ def initialize_cpu_candidates(
         if card not in cpu_hand
     ]
 
+
+    # CPU自身の3枚を除いた50枚から
+    # プレイヤーの3枚を仮定する
+    #
+    # 50C3 = 19600通り
 
     room[
         "cpu_candidate_hands"
@@ -363,9 +368,14 @@ def initialize_cpu_state(
     ] = set()
 
 
+    # ★ 変更
+    # Lv.2とLv.3は候補手札を利用する
     if room[
         "cpu_level"
-    ] == 2:
+    ] in [
+        2,
+        3
+    ]:
 
         initialize_cpu_candidates(
             room
@@ -713,7 +723,11 @@ def create_cpu_question_pool():
     questions = []
 
 
-    # 偶数 / 奇数 / 絵札 / スート / JOKER
+    # 偶数
+    # 奇数
+    # 絵札
+    # スート4種類
+    # JOKER
     for question_id in [
         1,
         2,
@@ -731,7 +745,7 @@ def create_cpu_question_pool():
         })
 
 
-    # ランク
+    # ランク質問
     for rank in RANKS:
 
         questions.append({
@@ -743,7 +757,7 @@ def create_cpu_question_pool():
         })
 
 
-    # 以上
+    # ○以上
     for number in range(
         1,
         14
@@ -758,7 +772,7 @@ def create_cpu_question_pool():
         })
 
 
-    # 以下
+    # ○以下
     for number in range(
         1,
         14
@@ -800,6 +814,228 @@ def cpu_question_key(
 
 
 # =============================================
+# ★ Lv.3追加
+#
+# ある質問をしたと仮定したとき、
+# 現在の候補手札が
+#
+# YES何通り
+# NO何通り
+#
+# に分かれるかを調べる
+# =============================================
+
+def evaluate_cpu_question_split(
+    room,
+    question
+):
+
+    game = room[
+        "game"
+    ]
+
+
+    cpu_player = (
+        game.player2
+    )
+
+
+    question_id = question[
+        "question_id"
+    ]
+
+
+    rank = question.get(
+        "rank"
+    )
+
+
+    number = question.get(
+        "number"
+    )
+
+
+    yes_count = 0
+    no_count = 0
+
+
+    for candidate_hand in room[
+        "cpu_candidate_hands"
+    ]:
+
+        answer = evaluate_question_on_hand(
+            game.question_manager,
+            list(
+                candidate_hand
+            ),
+            cpu_player.found_cards,
+            question_id,
+            rank,
+            number
+        )
+
+
+        if answer:
+
+            yes_count += 1
+
+        else:
+
+            no_count += 1
+
+
+    return (
+        yes_count,
+        no_count
+    )
+
+
+# =============================================
+# ★ Lv.3追加
+#
+# YESとNOの差が小さいほど
+# 50:50に近い良い質問
+#
+# 例：
+#
+# YES 500
+# NO  500
+# score = 0
+#
+# YES 800
+# NO  200
+# score = 600
+# =============================================
+
+def calculate_question_split_score(
+    yes_count,
+    no_count
+):
+
+    return abs(
+        yes_count
+        -
+        no_count
+    )
+
+
+# =============================================
+# ★ Lv.3追加
+#
+# 現在の候補を最も半分に近く分割する
+# 質問を選択する
+# =============================================
+
+def choose_cpu_level3_question(
+    room
+):
+
+    pool = (
+        create_cpu_question_pool()
+    )
+
+
+    best_score = None
+
+    best_questions = []
+
+
+    for question in pool:
+
+        (
+            yes_count,
+            no_count
+        ) = evaluate_cpu_question_split(
+            room,
+            question
+        )
+
+
+        # =====================================
+        # YESかNOのどちらかしか存在しない
+        #
+        # 例：
+        #
+        # YES 500
+        # NO    0
+        #
+        # この質問をしても
+        # 候補は1枚も減らないので除外
+        # =====================================
+
+        if (
+            yes_count == 0
+            or
+            no_count == 0
+        ):
+
+            continue
+
+
+        score = (
+            calculate_question_split_score(
+                yes_count,
+                no_count
+            )
+        )
+
+
+        # =====================================
+        # 今までで最良
+        # =====================================
+
+        if (
+            best_score is None
+            or
+            score < best_score
+        ):
+
+            best_score = score
+
+
+            best_questions = [
+                question
+            ]
+
+
+        # =====================================
+        # 同点
+        #
+        # 同じ性能ならランダムで選ぶため
+        # 候補に追加
+        # =====================================
+
+        elif score == best_score:
+
+            best_questions.append(
+                question
+            )
+
+
+    # =========================================
+    # 良い質問が存在する
+    # =========================================
+
+    if best_questions:
+
+        return random.choice(
+            best_questions
+        )
+
+
+    # =========================================
+    # 候補が1通りなど、
+    # どの質問でも分割不能だった場合
+    #
+    # ゲームを止めないためランダム質問
+    # =========================================
+
+    return random.choice(
+        pool
+    )
+
+
+# =============================================
 # CPU質問選択
 # =============================================
 
@@ -814,7 +1050,8 @@ def choose_cpu_question(
 
     # =========================================
     # Lv.1
-    # 完全ランダム
+    #
+    # 質問を完全ランダム選択
     # =========================================
 
     if room[
@@ -827,8 +1064,26 @@ def choose_cpu_question(
 
 
     # =========================================
+    # ★ Lv.3追加
+    #
+    # 候補手札を最も50:50に分ける質問
+    # =========================================
+
+    if room[
+        "cpu_level"
+    ] == 3:
+
+        return choose_cpu_level3_question(
+            room
+        )
+
+
+    # =========================================
     # Lv.2
-    # 一度使った質問はなるべく避ける
+    #
+    # 未使用の質問からランダム
+    #
+    # ここは今までのLv.2を維持
     # =========================================
 
     used_keys = {
@@ -866,7 +1121,7 @@ def choose_cpu_question(
 
 
 # =============================================
-# Lv.2
+# Lv.2 / Lv.3
 # 質問結果から候補を絞る
 # =============================================
 
@@ -876,9 +1131,13 @@ def filter_cpu_candidates_by_question(
     answer
 ):
 
+    # ★ 変更
     if room[
         "cpu_level"
-    ] != 2:
+    ] not in [
+        2,
+        3
+    ]:
 
         return
 
@@ -942,7 +1201,7 @@ def filter_cpu_candidates_by_question(
 
 
 # =============================================
-# Lv.2
+# Lv.2 / Lv.3
 # 予想結果から候補を絞る
 # =============================================
 
@@ -952,9 +1211,13 @@ def filter_cpu_candidates_by_guess(
     correct
 ):
 
+    # ★ 変更
     if room[
         "cpu_level"
-    ] != 2:
+    ] not in [
+        2,
+        3
+    ]:
 
         return
 
@@ -963,6 +1226,12 @@ def filter_cpu_candidates_by_guess(
         "cpu_candidate_hands"
     ]
 
+
+    # =========================================
+    # 当たり
+    #
+    # そのカードを含んでいる候補だけ残す
+    # =========================================
 
     if correct:
 
@@ -975,6 +1244,12 @@ def filter_cpu_candidates_by_guess(
             if guess in hand
         ]
 
+
+    # =========================================
+    # はずれ
+    #
+    # そのカードを含む候補を消す
+    # =========================================
 
     else:
 
@@ -1048,7 +1323,11 @@ def choose_cpu_level1_guess(
 
 # =============================================
 # Lv.2
-# 推理予想
+#
+# 候補手札に最も多く出現している
+# カードを予想
+#
+# ★ Lv.3でもこの予想ロジックを再利用
 # =============================================
 
 def choose_cpu_level2_guess(
@@ -1077,11 +1356,6 @@ def choose_cpu_level2_guess(
 
     counts = {}
 
-
-    # =========================================
-    # 残っている候補手札に
-    # 何回カードが登場するか数える
-    # =========================================
 
     for candidate_hand in room[
         "cpu_candidate_hands"
@@ -1131,7 +1405,7 @@ def choose_cpu_level2_guess(
 
 
     # =========================================
-    # 候補が万が一0になった場合の保険
+    # 万一候補が0になったときの保険
     # =========================================
 
     cpu_hand = set(
@@ -1171,6 +1445,7 @@ def choose_cpu_guess(
     room
 ):
 
+    # Lv.1
     if room[
         "cpu_level"
     ] == 1:
@@ -1179,6 +1454,12 @@ def choose_cpu_guess(
             room
         )
 
+
+    # =========================================
+    # Lv.2 / Lv.3
+    #
+    # 予想ロジックは共通
+    # =========================================
 
     return choose_cpu_level2_guess(
         room
@@ -1229,7 +1510,58 @@ def cpu_ask_question(
 
 
     # =========================================
-    # 実際のプレイヤー手札へ質問
+    # ★ Lv.3追加
+    #
+    # 実際に答えを見る前に、
+    #
+    # この質問なら
+    # YES何通り / NO何通り
+    #
+    # になるとCPUが予測していたか保存
+    # =========================================
+
+    before_candidate_count = None
+
+    yes_prediction_count = None
+
+    no_prediction_count = None
+
+    split_score = None
+
+
+    if room[
+        "cpu_level"
+    ] == 3:
+
+        before_candidate_count = len(
+            room[
+                "cpu_candidate_hands"
+            ]
+        )
+
+
+        (
+            yes_prediction_count,
+            no_prediction_count
+        ) = evaluate_cpu_question_split(
+            room,
+            question
+        )
+
+
+        split_score = (
+            calculate_question_split_score(
+                yes_prediction_count,
+                no_prediction_count
+            )
+        )
+
+
+    # =========================================
+    # 実際のプレイヤーの手札に質問
+    #
+    # CPUの候補選択では
+    # 本物の手札を直接見ていない
     # =========================================
 
     answer = evaluate_question_on_hand(
@@ -1250,12 +1582,17 @@ def cpu_ask_question(
 
 
     # =========================================
-    # Lv.2だけ履歴を利用
+    # Lv.2 / Lv.3
+    #
+    # 質問履歴と候補手札を更新
     # =========================================
 
     if room[
         "cpu_level"
-    ] == 2:
+    ] in [
+        2,
+        3
+    ]:
 
         history = {
             "question_id":
@@ -1309,7 +1646,20 @@ def cpu_ask_question(
             answer,
 
         "candidate_count":
-            candidate_count
+            candidate_count,
+
+        # ★ Lv.3用
+        "before_candidate_count":
+            before_candidate_count,
+
+        "yes_prediction_count":
+            yes_prediction_count,
+
+        "no_prediction_count":
+            no_prediction_count,
+
+        "split_score":
+            split_score
     }
 
 
@@ -1562,9 +1912,14 @@ async def start_new_game(
         candidate_count = None
 
 
+        # ★ 変更
+        # Lv.2 / Lv.3は候補数を持つ
         if room[
             "cpu_level"
-        ] == 2:
+        ] in [
+            2,
+            3
+        ]:
 
             candidate_count = len(
                 room[
@@ -1805,7 +2160,34 @@ async def cpu_take_turn(
                 ],
 
             "cpu_level":
-                cpu_level
+                cpu_level,
+
+            # =================================
+            # ★ Lv.3追加
+            #
+            # app.jsがまだ対応していなくても
+            # 余分なJSON項目は無視されるので問題なし
+            # =================================
+
+            "before_candidate_count":
+                question_result[
+                    "before_candidate_count"
+                ],
+
+            "yes_prediction_count":
+                question_result[
+                    "yes_prediction_count"
+                ],
+
+            "no_prediction_count":
+                question_result[
+                    "no_prediction_count"
+                ],
+
+            "split_score":
+                question_result[
+                    "split_score"
+                ]
         }
     )
 
@@ -1842,10 +2224,14 @@ async def cpu_take_turn(
 
 
     # =========================================
-    # Lv.2だけ結果を記憶
+    # Lv.2 / Lv.3だけ結果を記憶
     # =========================================
 
-    if cpu_level == 2:
+    # ★ 変更
+    if cpu_level in [
+        2,
+        3
+    ]:
 
         filter_cpu_candidates_by_guess(
             room,

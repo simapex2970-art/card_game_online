@@ -3,8 +3,9 @@
 // Browser Client
 //
 // PvP
-// CPU Lv.1
-// CPU Lv.2
+// CPU Lv.1 - RANDOM
+// CPU Lv.2 - THINKER
+// CPU Lv.3 - ANALYST
 // =============================================
 
 
@@ -325,6 +326,30 @@ let lastCpuCandidateCount =
 
 
 // =============================================
+// ★ Lv.3追加
+// 質問前の候補数
+// =============================================
+
+let lastCpuBeforeCandidateCount =
+    null;
+
+
+// =============================================
+// ★ Lv.3追加
+// 質問をした場合の予測
+// =============================================
+
+let lastCpuYesPredictionCount =
+    null;
+
+let lastCpuNoPredictionCount =
+    null;
+
+let lastCpuSplitScore =
+    null;
+
+
+// =============================================
 // ROOM ID
 // =============================================
 
@@ -345,6 +370,40 @@ function getCpuName() {
 
 
 // =============================================
+// ★ CPU LEVEL NAME
+// =============================================
+
+function getCpuLevelName() {
+
+    if (
+        currentCpuLevel === 1
+    ) {
+
+        return "RANDOM";
+    }
+
+
+    if (
+        currentCpuLevel === 2
+    ) {
+
+        return "THINKER";
+    }
+
+
+    if (
+        currentCpuLevel === 3
+    ) {
+
+        return "ANALYST";
+    }
+
+
+    return "CPU";
+}
+
+
+// =============================================
 // 選択中のCPUレベル
 // =============================================
 
@@ -357,6 +416,14 @@ function getSelectedCpuLevel() {
 
 
     if (
+        level === 3
+    ) {
+
+        return 3;
+    }
+
+
+    if (
         level === 2
     ) {
 
@@ -365,6 +432,32 @@ function getSelectedCpuLevel() {
 
 
     return 1;
+}
+
+
+// =============================================
+// 数字表示
+// =============================================
+
+function formatNumber(
+    value
+) {
+
+    if (
+        value === null
+        ||
+        value === undefined
+    ) {
+
+        return "-";
+    }
+
+
+    return Number(
+        value
+    ).toLocaleString(
+        "ja-JP"
+    );
 }
 
 
@@ -1025,7 +1118,7 @@ function connectWebSocket(
 
 
                 message.textContent =
-                    "ルームに接続できませんでした.";
+                    "ルームに接続できませんでした。";
 
 
                 return;
@@ -1185,7 +1278,7 @@ function handleServerMessage(
 
         roomInfo.textContent =
             gameMode === "cpu"
-                ? `${getCpuName()} BATTLE`
+                ? `${getCpuName()} ${getCpuLevelName()}`
                 : `Room ${currentRoomId}`;
 
 
@@ -1289,6 +1382,23 @@ function handleServerMessage(
             ?? null;
 
 
+        // =====================================
+        // ★ Lv.3リセット
+        // =====================================
+
+        lastCpuBeforeCandidateCount =
+            null;
+
+        lastCpuYesPredictionCount =
+            null;
+
+        lastCpuNoPredictionCount =
+            null;
+
+        lastCpuSplitScore =
+            null;
+
+
         cpuActionSection.classList.add(
             "hidden"
         );
@@ -1300,7 +1410,7 @@ function handleServerMessage(
 
         roomInfo.textContent =
             gameMode === "cpu"
-                ? `${getCpuName()} BATTLE`
+                ? `${getCpuName()} ${getCpuLevelName()}`
                 : `Room ${currentRoomId}`;
 
 
@@ -1527,38 +1637,93 @@ function handleServerMessage(
             ?? null;
 
 
+        // =====================================
+        // ★ Lv.3追加
+        // =====================================
+
+        lastCpuBeforeCandidateCount =
+            data.before_candidate_count
+            ?? null;
+
+
+        lastCpuYesPredictionCount =
+            data.yes_prediction_count
+            ?? null;
+
+
+        lastCpuNoPredictionCount =
+            data.no_prediction_count
+            ?? null;
+
+
+        lastCpuSplitScore =
+            data.split_score
+            ?? null;
+
+
         cpuActionSection.classList.remove(
             "hidden"
         );
 
 
-        let candidateText =
-            "";
-
+        // =====================================
+        // Lv.1
+        // =====================================
 
         if (
-            currentCpuLevel === 2
-            &&
-            lastCpuCandidateCount !==
-            null
+            currentCpuLevel === 1
         ) {
 
-            candidateText =
-                "\n\n推理候補："
-                + `${lastCpuCandidateCount} 通り`;
+            cpuActionText.textContent =
+                `CPU Lv.1の質問\n\n`
+                + `${lastCpuQuestion}\n\n`
+                + `答え：${lastCpuAnswer}`;
+
+
+            gameStatus.textContent =
+                "CPU Lv.1が考えています...";
+
+
+            message.textContent =
+                "CPU Lv.1がランダムに"
+                + "カードを予想します...";
+
+
+            return;
         }
 
 
-        cpuActionText.textContent =
-            `${getCpuName()}の質問\n\n`
-            + `${lastCpuQuestion}\n\n`
-            + `答え：${lastCpuAnswer}`
-            + candidateText;
-
+        // =====================================
+        // Lv.2
+        // =====================================
 
         if (
             currentCpuLevel === 2
         ) {
+
+            let candidateText =
+                "";
+
+
+            if (
+                lastCpuCandidateCount !==
+                null
+            ) {
+
+                candidateText =
+                    "\n\n推理候補："
+                    + `${formatNumber(
+                        lastCpuCandidateCount
+                    )} 通り`;
+            }
+
+
+            cpuActionText.textContent =
+                `CPU Lv.2の質問\n\n`
+                + `${lastCpuQuestion}\n\n`
+                + `答え：${lastCpuAnswer}`
+                + candidateText;
+
 
             gameStatus.textContent =
                 "CPU Lv.2が推理しています...";
@@ -1568,17 +1733,121 @@ function handleServerMessage(
                 "質問結果から候補手札を"
                 + "絞り込んでいます...";
 
+
+            return;
         }
 
-        else {
+
+        // =====================================
+        // ★ Lv.3
+        //
+        // 質問前候補
+        // YES予測
+        // NO予測
+        // 実際の答え
+        // 質問後候補
+        // =====================================
+
+        if (
+            currentCpuLevel === 3
+        ) {
+
+            let analysisText =
+                "";
+
+
+            if (
+                lastCpuBeforeCandidateCount !==
+                null
+            ) {
+
+                analysisText +=
+                    "\n\n質問前候補："
+                    + `${formatNumber(
+                        lastCpuBeforeCandidateCount
+                    )} 通り`;
+            }
+
+
+            if (
+                lastCpuYesPredictionCount !==
+                null
+                &&
+                lastCpuNoPredictionCount !==
+                null
+            ) {
+
+                analysisText +=
+                    "\n"
+                    + `YES予測：${formatNumber(
+                        lastCpuYesPredictionCount
+                    )} 通り`
+                    + "\n"
+                    + `NO予測：${formatNumber(
+                        lastCpuNoPredictionCount
+                    )} 通り`;
+            }
+
+
+            if (
+                lastCpuSplitScore !==
+                null
+            ) {
+
+                analysisText +=
+                    "\n"
+                    + `分割差：${formatNumber(
+                        lastCpuSplitScore
+                    )}`;
+            }
+
+
+            let afterText =
+                "";
+
+
+            if (
+                lastCpuCandidateCount !==
+                null
+            ) {
+
+                afterText =
+                    "\n\n答え："
+                    + `${lastCpuAnswer}`
+                    + "\n\n"
+                    + "残り候補："
+                    + `${formatNumber(
+                        lastCpuCandidateCount
+                    )} 通り`;
+
+            }
+
+            else {
+
+                afterText =
+                    "\n\n答え："
+                    + `${lastCpuAnswer}`;
+            }
+
+
+            cpuActionText.textContent =
+                "CPU Lv.3 ANALYST\n\n"
+                + "最も情報量の高い質問を選択\n\n"
+                + `${lastCpuQuestion}`
+                + analysisText
+                + afterText;
+
 
             gameStatus.textContent =
-                "CPU Lv.1が考えています...";
+                "CPU Lv.3が分析しています...";
 
 
             message.textContent =
-                "CPU Lv.1がランダムに"
-                + "カードを予想します...";
+                "候補を最も半分に近づける質問を"
+                + "計算して推理しています...";
+
+
+            return;
         }
 
 
@@ -1626,8 +1895,16 @@ function handleServerMessage(
             "";
 
 
+        // =====================================
+        // Lv.2 / Lv.3は候補表示
+        // =====================================
+
         if (
-            currentCpuLevel === 2
+            (
+                currentCpuLevel === 2
+                ||
+                currentCpuLevel === 3
+            )
             &&
             lastCpuCandidateCount !==
             null
@@ -1635,18 +1912,70 @@ function handleServerMessage(
 
             candidateText =
                 "\n\n残り候補："
-                + `${lastCpuCandidateCount} 通り`;
+                + `${formatNumber(
+                    lastCpuCandidateCount
+                )} 通り`;
+        }
+
+
+        // =====================================
+        // Lv.3だけ質問分析も残す
+        // =====================================
+
+        let level3AnalysisText =
+            "";
+
+
+        if (
+            currentCpuLevel === 3
+        ) {
+
+            if (
+                lastCpuBeforeCandidateCount !==
+                null
+            ) {
+
+                level3AnalysisText +=
+                    "\n\n質問時の分析"
+                    + "\n"
+                    + `質問前：${formatNumber(
+                        lastCpuBeforeCandidateCount
+                    )} 通り`;
+            }
+
+
+            if (
+                lastCpuYesPredictionCount !==
+                null
+                &&
+                lastCpuNoPredictionCount !==
+                null
+            ) {
+
+                level3AnalysisText +=
+                    "\n"
+                    + `YES予測：${formatNumber(
+                        lastCpuYesPredictionCount
+                    )}`
+                    + "\n"
+                    + `NO予測：${formatNumber(
+                        lastCpuNoPredictionCount
+                    )}`;
+            }
         }
 
 
         cpuActionText.textContent =
             `${getCpuName()}の質問\n\n`
             + `${lastCpuQuestion}\n`
-            + `答え：${lastCpuAnswer}\n\n`
+            + `答え：${lastCpuAnswer}`
+            + level3AnalysisText
+            + "\n\n"
             + `${getCpuName()}の予想\n\n`
             + `${data.guess}\n\n`
             + resultText
-            + `\n\nCPU：${data.found_count} / 3 枚正解`
+            + "\n\n"
+            + `CPU：${data.found_count} / 3 枚正解`
             + candidateText;
 
 
@@ -1721,7 +2050,7 @@ function handleServerMessage(
             message.textContent =
                 gameMode === "cpu"
                     ? `${getCpuName()}のターンです...`
-                    : "相手のターンです。";
+                    : "相手のターンです.";
         }
 
 
@@ -3064,6 +3393,26 @@ function resetBattleState() {
 
 
     lastCpuCandidateCount =
+        null;
+
+
+    // =========================================
+    // ★ Lv.3リセット
+    // =========================================
+
+    lastCpuBeforeCandidateCount =
+        null;
+
+
+    lastCpuYesPredictionCount =
+        null;
+
+
+    lastCpuNoPredictionCount =
+        null;
+
+
+    lastCpuSplitScore =
         null;
 
 
