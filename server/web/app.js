@@ -347,6 +347,26 @@ const gameDuration =
         "game-duration"
     );
 
+const gameRankResult =
+    document.getElementById(
+        "game-rank-result"
+    );
+
+const gameRank =
+    document.getElementById(
+        "game-rank"
+    );
+
+const gameRatingResult =
+    document.getElementById(
+        "game-rating-result"
+    );
+
+const gameRatingChange =
+    document.getElementById(
+        "game-rating-change"
+    );
+
 const player1RevealedHand =
     document.getElementById(
         "player1-revealed-hand"
@@ -3580,6 +3600,14 @@ function handleServerMessage(
         gameDuration.textContent =
             "MATCH TIME 00:00";
 
+        gameRank.textContent =
+            "-";
+
+
+        gameRankResult.classList.add(
+            "hidden"
+        );
+
 
         rematchButton.disabled =
             false;
@@ -4514,6 +4542,110 @@ function handleServerMessage(
             `MATCH TIME ${formatDuration(
                 data.duration_seconds
             )}`;
+
+
+        if (
+            data.ranked === true
+            &&
+            data.ranked_result
+        ) {
+
+            const rankedUser =
+                data.winner === playerNumber
+                    ?
+                    data.ranked_result.winner_user
+                    :
+                    data.ranked_result.loser_user;
+
+
+            const ratingChange =
+                data.winner === playerNumber
+                    ?
+                    data.ranked_result.winner_rating_change
+                    :
+                    data.ranked_result.loser_rating_change;
+
+
+            // =====================================
+            // RANK
+            // =====================================
+
+            if (
+                rankedUser
+                &&
+                rankedUser.rank
+            ) {
+
+                gameRank.textContent =
+                    rankedUser.rank;
+
+
+                gameRankResult.classList.remove(
+                    "hidden"
+                );
+            }
+
+            else {
+
+                gameRankResult.classList.add(
+                    "hidden"
+                );
+            }
+
+
+            // =====================================
+            // RATING CHANGE
+            // =====================================
+
+            gameRatingChange.textContent =
+                ratingChange > 0
+                    ?
+                    `+${ratingChange}`
+                    :
+                    `${ratingChange}`;
+
+
+            gameRatingChange.classList.remove(
+                "positive",
+                "negative"
+            );
+
+
+            if (
+                ratingChange > 0
+            ) {
+
+                gameRatingChange.classList.add(
+                    "positive"
+                );
+            }
+
+            else if (
+                ratingChange < 0
+            ) {
+
+                gameRatingChange.classList.add(
+                    "negative"
+                );
+            }
+
+
+            gameRatingResult.classList.remove(
+                "hidden"
+            );
+        }
+
+        else {
+
+            gameRankResult.classList.add(
+                "hidden"
+            );
+
+
+            gameRatingResult.classList.add(
+                "hidden"
+            );
+        }
 
 
         player1Name =
@@ -5863,6 +5995,42 @@ function resetBattleState() {
 
     gameDuration.textContent =
         "MATCH TIME 00:00";
+
+    gameRank.textContent =
+        "-";
+
+
+    gameRankResult.classList.add(
+        "hidden"
+    );
+
+    gameRatingChange.textContent =
+    "+0";
+
+
+    gameRatingChange.classList.remove(
+        "positive",
+        "negative"
+    );
+
+
+    gameRatingResult.classList.add(
+        "hidden"
+    );
+
+    gameRatingChange.textContent =
+        "+0";
+
+
+    gameRatingChange.classList.remove(
+        "positive",
+        "negative"
+    );
+
+
+    gameRatingResult.classList.add(
+        "hidden"
+    );
 
 
     gameOverSection.classList.add(

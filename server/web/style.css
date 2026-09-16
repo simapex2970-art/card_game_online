@@ -1996,3 +1996,102 @@ button:disabled {
 .question-result-top-answer.no {
     color: #FF8A8A;
 }
+
+.game-duration {
+    margin: 14px 0 24px;
+
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+
+    text-align: center;
+
+    color: rgba(255, 255, 255, 0.78);
+
+    padding: 10px 16px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.game-rank-result {
+    margin: 18px 0 24px;
+
+    padding: 16px 20px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.035);
+
+    text-align: center;
+}
+
+
+.game-rank-label {
+    margin: 0 0 8px;
+
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+
+    color: rgba(255, 255, 255, 0.55);
+}
+
+
+.game-rank {
+    margin: 0;
+
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+
+    color: #ffffff;
+}
+
+.game-rating-result {
+    margin: 18px 0 24px;
+
+    padding: 16px 20px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.035);
+
+    text-align: center;
+}
+
+
+.game-rating-label {
+    margin: 0 0 8px;
+
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+
+    color: rgba(255, 255, 255, 0.55);
+}
+
+
+.game-rating-change {
+    margin: 0;
+
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+
+    color: #ffffff;
+}
+
+
+.game-rating-change.positive {
+    color: #7CFFB2;
+}
+
+
+.game-rating-change.negative {
+    color: #FF8A8A;
+}
