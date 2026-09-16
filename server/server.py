@@ -23,6 +23,7 @@ from database import (
     create_user,
     authenticate_user,
     create_session,
+    get_user_by_name,
     get_user_by_session_token,
     delete_session,
     record_ranked_match
@@ -36,6 +37,40 @@ from database import (
 app = FastAPI()
 
 init_db()
+
+
+# =============================================
+# CACHE CONTROL
+# =============================================
+
+@app.middleware("http")
+async def disable_web_file_cache(
+    request,
+    call_next
+):
+    response = await call_next(request)
+
+    no_cache_paths = {
+        "/",
+        "/static/app.js",
+        "/static/style.css",
+    }
+
+    if request.url.path in no_cache_paths:
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, "
+            "must-revalidate, max-age=0"
+        )
+
+        response.headers["Pragma"] = (
+            "no-cache"
+        )
+
+        response.headers["Expires"] = (
+            "0"
+        )
+
+    return response
 
 
 # =============================================
@@ -111,23 +146,39 @@ async def register_user_api(
 async def login_user_api(
     request: UserLoginRequest
 ):
+
+    # まずアカウント自体が存在するか確認
+    existing_user = get_user_by_name(
+        request.name
+    )
+
+    if existing_user is None:
+
+        raise HTTPException(
+            status_code=401,
+            detail="そのアカウントは存在しません。"
+        )
+
+
+    # アカウントが存在する場合は
+    # パスワードを確認
     user = authenticate_user(
         request.name,
         request.password
     )
 
     if user is None:
+
         raise HTTPException(
             status_code=401,
-            detail=(
-                "プレイヤー名または"
-                "パスワードが正しくありません"
-            )
+            detail="パスワードが正しくありません。"
         )
+
 
     session_token = create_session(
         user["user_id"]
     )
+
 
     return {
         "user": user,
@@ -242,6 +293,8 @@ ROOM_ID_CHARACTERS = (
 ROOM_ID_LENGTH = 4
 
 PLAYER_NAME_MAX_LENGTH = 12
+
+RECONNECT_GRACE_SECONDS = 30
 
 
 VALID_RANKS = [
@@ -412,6 +465,12 @@ def create_room(
         "player_user_ids":
             [],
 
+        "disconnected_players":
+            {},
+
+        "reconnect_tasks":
+            {},
+
         "game":
             None,
 
@@ -445,6 +504,382 @@ def create_room(
         "cpu_used_questions":
             set()
     }
+
+# =============================================
+# PLAYER NUMBER BY USER ID
+# =============================================
+
+def get_player_number_by_user_id(
+    room,
+    user_id
+):
+
+    try:
+
+        index = (
+            room[
+                "player_user_ids"
+            ]
+            .index(
+                user_id
+            )
+        )
+
+    except ValueError:
+
+        return None
+
+
+    return index + 1
+
+
+# =============================================
+# RECONNECT TASK CANCEL
+# =============================================
+
+def cancel_reconnect_task(
+    room,
+    player_number
+):
+
+    task = (
+        room[
+            "reconnect_tasks"
+        ].pop(
+            player_number,
+            None
+        )
+    )
+
+
+    if (
+        task is not None
+        and
+        not task.done()
+    ):
+
+        task.cancel()
+
+
+# =============================================
+# RECONNECT TIMEOUT
+# =============================================
+
+async def wait_for_reconnect_timeout(
+    room_id,
+    room,
+    player_number,
+    user_id
+):
+
+    try:
+
+        await asyncio.sleep(
+            RECONNECT_GRACE_SECONDS
+        )
+
+    except asyncio.CancelledError:
+
+        return
+
+
+    # すでにルームが削除・置換されていたら終了
+    if (
+        rooms.get(
+            room_id
+        )
+        is not room
+    ):
+
+        return
+
+
+    disconnected_player = (
+        room[
+            "disconnected_players"
+        ].get(
+            player_number
+        )
+    )
+
+
+    # すでに再接続済みなら終了
+    if (
+        disconnected_player
+        is None
+    ):
+
+        return
+
+
+    # 別のプレイヤー情報なら終了
+    if (
+        disconnected_player.get(
+            "user_id"
+        )
+        !=
+        user_id
+    ):
+
+        return
+
+
+    # このPlayerのタイマーを削除
+    room[
+        "reconnect_tasks"
+    ].pop(
+        player_number,
+        None
+    )
+
+
+    # =========================================
+    # 残っている相手のSocketを取得
+    # =========================================
+
+    remaining_sockets = [
+
+        player_socket
+
+        for index, player_socket
+        in enumerate(
+            room[
+                "players"
+            ],
+            start=1
+        )
+
+        if (
+            index
+            !=
+            player_number
+        )
+    ]
+
+
+    # =========================================
+    # ROOM DELETE
+    # =========================================
+
+    rooms.pop(
+        room_id,
+        None
+    )
+
+
+    # 他の再接続タイマーがあれば停止
+    for task in list(
+        room[
+            "reconnect_tasks"
+        ].values()
+    ):
+
+        if (
+            not task.done()
+        ):
+
+            task.cancel()
+
+
+    room[
+        "reconnect_tasks"
+    ].clear()
+
+
+    room[
+        "disconnected_players"
+    ].clear()
+
+
+    room[
+        "players"
+    ].clear()
+
+
+    room[
+        "player_names"
+    ].clear()
+
+
+    room[
+        "player_user_ids"
+    ].clear()
+
+
+    # =========================================
+    # 相手に切断確定を通知
+    # =========================================
+
+    for player_socket in (
+        remaining_sockets
+    ):
+
+        try:
+
+            await player_socket.send_json({
+
+                "type":
+                    "opponent_disconnected"
+            })
+
+        except Exception:
+
+            pass
+
+
+    print(
+        f"ルーム {room_id}: "
+        f"Player {player_number} "
+        f"{RECONNECT_GRACE_SECONDS}秒以内に"
+        "再接続しなかったため"
+        "ルームを削除しました"
+    )
+
+
+# =============================================
+# START RECONNECT WAIT
+# =============================================
+
+def start_reconnect_wait(
+    room_id,
+    room,
+    player_number,
+    user_id,
+    player_name
+):
+
+    # 同じPlayerの古いタイマーがあれば止める
+    cancel_reconnect_task(
+        room,
+        player_number
+    )
+
+
+    # 切断中プレイヤーとして記録
+    room[
+        "disconnected_players"
+    ][
+        player_number
+    ] = {
+        "user_id":
+            user_id,
+
+        "player_name":
+            player_name
+    }
+
+
+    # 再接続待ちタイマー開始
+    task = asyncio.create_task(
+        wait_for_reconnect_timeout(
+            room_id,
+            room,
+            player_number,
+            user_id
+        )
+    )
+
+
+    room[
+        "reconnect_tasks"
+    ][
+        player_number
+    ] = task
+
+
+    print(
+        f"ルーム {room_id}: "
+        f"Player {player_number} "
+        f"再接続待ち開始 "
+        f"({RECONNECT_GRACE_SECONDS}秒)"
+    )
+
+
+# =============================================
+# RECONNECT PLAYER CHECK
+# =============================================
+
+def get_reconnecting_player_number(
+    room,
+    user_id
+):
+
+    player_number = (
+        get_player_number_by_user_id(
+            room,
+            user_id
+        )
+    )
+
+
+    if (
+        player_number
+        is None
+    ):
+
+        return None
+
+
+    disconnected_player = (
+        room[
+            "disconnected_players"
+        ].get(
+            player_number
+        )
+    )
+
+
+    if (
+        disconnected_player
+        is None
+    ):
+
+        return None
+
+
+    if (
+        disconnected_player.get(
+            "user_id"
+        )
+        !=
+        user_id
+    ):
+
+        return None
+
+
+    return player_number
+
+
+# =============================================
+# RECONNECT WAITING CHECK
+# =============================================
+
+def is_reconnect_waiting(
+    room
+):
+
+    if (
+        room[
+            "mode"
+        ]
+        !=
+        "pvp"
+    ):
+
+        return False
+
+
+    return any(
+
+        player_socket
+        is None
+
+        for player_socket
+        in room[
+            "players"
+        ]
+    )
 
 
 # =============================================
@@ -480,6 +915,115 @@ async def create_pvp_room():
 
         "mode":
             "pvp"
+    }
+
+
+# =============================================
+# QUICK MATCH RECONNECT CHECK
+# =============================================
+
+@app.get("/matchmaking/reconnect")
+async def get_matchmaking_reconnect_room(
+    authorization: str | None = Header(
+        default=None
+    )
+):
+
+    session_token = (
+        get_bearer_token(
+            authorization
+        )
+    )
+
+
+    user = (
+        get_user_by_session_token(
+            session_token
+        )
+    )
+
+
+    if (
+        user is None
+    ):
+
+        raise HTTPException(
+            status_code=401,
+            detail="ログイン情報が無効です。"
+        )
+
+
+    user_id = (
+        user[
+            "user_id"
+        ]
+    )
+
+
+    for room_id, room in rooms.items():
+
+        if (
+            room[
+                "mode"
+            ]
+            !=
+            "pvp"
+        ):
+
+            continue
+
+
+        if (
+            room[
+                "ranked"
+            ]
+            is not True
+        ):
+
+            continue
+
+
+        if (
+            room[
+                "game"
+            ]
+            is None
+        ):
+
+            continue
+
+
+        for disconnected_player in (
+            room[
+                "disconnected_players"
+            ].values()
+        ):
+
+            if (
+                disconnected_player.get(
+                    "user_id"
+                )
+                ==
+                user_id
+            ):
+
+                return {
+
+                    "reconnect_available":
+                        True,
+
+                    "room_id":
+                        room_id
+                }
+
+
+    return {
+
+        "reconnect_available":
+            False,
+
+        "room_id":
+            None
     }
 
 
@@ -2224,6 +2768,157 @@ async def start_new_game(
         f"{player2_name} "
         "開始"
     )
+
+
+# =============================================
+# RECONNECT STATE
+# =============================================
+
+async def send_reconnect_state(
+    websocket,
+    room,
+    player_number
+):
+
+    game = (
+        room[
+            "game"
+        ]
+    )
+
+
+    if (
+        game is None
+    ):
+
+        return
+
+
+    if (
+        player_number
+        ==
+        1
+    ):
+
+        player = (
+            game.player1
+        )
+
+    else:
+
+        player = (
+            game.player2
+        )
+
+
+    hand = [
+
+        str(
+            card
+        )
+
+        for card
+        in player.hand
+    ]
+
+
+    if (
+        room[
+            "mode"
+        ]
+        ==
+        "cpu"
+    ):
+
+        player1_name = (
+            room[
+                "player_names"
+            ][
+                0
+            ]
+        )
+
+        player2_name = (
+            get_cpu_name(
+                room
+            )
+        )
+
+    else:
+
+        player1_name = (
+            room[
+                "player_names"
+            ][
+                0
+            ]
+        )
+
+        player2_name = (
+            room[
+                "player_names"
+            ][
+                1
+            ]
+        )
+
+
+    await websocket.send_json({
+
+        "type":
+            "reconnect_state",
+
+        "player":
+            player_number,
+
+        "hand":
+            hand,
+
+        "current_turn":
+            room[
+                "current_turn"
+            ],
+
+        "your_turn":
+            (
+                room[
+                    "current_turn"
+                ]
+                ==
+                player_number
+            ),
+
+        "phase":
+            room[
+                "current_phase"
+            ],
+
+        "found_count":
+            len(
+                player.found_cards
+            ),
+
+        "mode":
+            room[
+                "mode"
+            ],
+
+        "ranked":
+            room[
+                "ranked"
+            ],
+
+        "cpu_level":
+            room[
+                "cpu_level"
+            ],
+
+        "player1_name":
+            player1_name,
+
+        "player2_name":
+            player2_name
+    })
 
 
 # =============================================
@@ -4023,6 +4718,18 @@ async def websocket_endpoint(
 
 
     # =========================================
+    # RECONNECT CHECK
+    # =========================================
+
+    reconnecting_player_number = (
+        get_reconnecting_player_number(
+            room,
+            player_user_id
+        )
+    )
+
+
+    # =========================================
     # MAX PLAYERS
     # =========================================
 
@@ -4052,6 +4759,11 @@ async def websocket_endpoint(
         )
         >=
         max_players
+
+        and
+
+        reconnecting_player_number
+        is None
     ):
 
         await websocket.send_json({
@@ -4087,6 +4799,12 @@ async def websocket_endpoint(
         room[
             "player_user_ids"
         ]
+
+
+        and
+
+        reconnecting_player_number
+        is None
     ):
 
         await websocket.send_json({
@@ -4107,35 +4825,130 @@ async def websocket_endpoint(
     # PLAYER REGISTER
     # =========================================
 
-    room[
-        "players"
-    ].append(
-        websocket
-    )
+    if (
+        reconnecting_player_number
+        is not None
+    ):
 
+        # =====================================
+        # RECONNECT
+        # =====================================
 
-    room[
-        "player_names"
-    ].append(
-        player_name
-    )
-
-
-    room[
-        "player_user_ids"
-    ].append(
-        player_user_id
-    )
-
-
-    player_number = (
-        len(
-            room[
-                "players"
-            ]
+        player_number = (
+            reconnecting_player_number
         )
-    )
 
+
+        player_index = (
+            player_number - 1
+        )
+
+
+        # 元の席に新しいSocketを戻す
+        room[
+            "players"
+        ][
+            player_index
+        ] = websocket
+
+
+        # 再接続待ちタイマーを停止
+        cancel_reconnect_task(
+            room,
+            player_number
+        )
+
+
+        # 切断中リストから削除
+        room[
+            "disconnected_players"
+        ].pop(
+            player_number,
+            None
+        )
+
+
+        # =====================================
+        # 相手に再接続成功を通知
+        # =====================================
+
+        if (
+            room[
+                "mode"
+            ]
+            ==
+            "pvp"
+        ):
+
+            for other_socket in room[
+                "players"
+            ]:
+
+                if (
+                    other_socket
+                    is None
+                    or
+                    other_socket
+                    is websocket
+                ):
+
+                    continue
+
+
+                try:
+
+                    await other_socket.send_json({
+
+                        "type":
+                            "opponent_reconnected"
+                    })
+
+                except Exception:
+
+                    pass
+
+
+        print(
+            f"ルーム {room_id}: "
+            f"Player {player_number} "
+            "再接続"
+        )
+
+
+    else:
+
+        # =====================================
+        # NEW PLAYER
+        # =====================================
+
+        room[
+            "players"
+        ].append(
+            websocket
+        )
+
+
+        room[
+            "player_names"
+        ].append(
+            player_name
+        )
+
+
+        room[
+            "player_user_ids"
+        ].append(
+            player_user_id
+        )
+
+
+        player_number = (
+            len(
+                room[
+                    "players"
+                ]
+            )
+        )
 
     await websocket.send_json({
 
@@ -4176,41 +4989,65 @@ async def websocket_endpoint(
     )
 
 
-    # =========================================
-    # START CPU
+        # =========================================
+    # SEND RECONNECT STATE
     # =========================================
 
     if (
-        room[
-            "mode"
-        ]
-        ==
-        "cpu"
+        reconnecting_player_number
+        is not None
     ):
 
-        await start_new_game(
-            room_id
+        await send_reconnect_state(
+            websocket,
+            room,
+            player_number
         )
 
 
     # =========================================
-    # START PvP
+    # START GAME
     # =========================================
 
-    elif (
-        len(
+    if (
+        reconnecting_player_number
+        is None
+    ):
+
+        # =========================================
+        # START CPU
+        # =========================================
+
+        if (
             room[
-                "players"
+                "mode"
             ]
-        )
-        ==
-        2
-    ):
+            ==
+            "cpu"
+        ):
 
-        await start_new_game(
-            room_id
-        )
+            await start_new_game(
+                room_id
+            )
 
+
+        # =========================================
+        # START PvP
+        # =========================================
+
+        elif (
+            len(
+                room[
+                    "players"
+                ]
+            )
+            ==
+            2
+        ):
+
+            await start_new_game(
+                room_id
+            )
 
     # =============================================
     # MAIN LOOP
@@ -4491,6 +5328,32 @@ async def websocket_endpoint(
 
 
             # =====================================
+            # RECONNECT WAITING
+            # =====================================
+
+            if (
+                is_reconnect_waiting(
+                    room
+                )
+            ):
+
+                await websocket.send_json({
+
+                    "type":
+                        "error",
+
+                    "message":
+                        (
+                            "相手が再接続中です。\n"
+                            "少し待ってください。"
+                        )
+                })
+
+
+                continue
+
+
+            # =====================================
             # CPUはHuman = Player 1
             # =====================================
 
@@ -4762,13 +5625,9 @@ async def websocket_endpoint(
 
     finally:
 
-        # leave_game / cancel などで既に削除済みなら、
-        # 追加の切断処理は行わない。
+        # leave_game / cancel などで
+        # すでに削除済みなら何もしない
         if rooms.get(room_id) is room:
-
-            # =========================================
-            # PLAYER REMOVE
-            # =========================================
 
             if (
                 websocket
@@ -4787,120 +5646,188 @@ async def websocket_endpoint(
                 )
 
 
-                room[
-                    "players"
-                ].pop(
-                    index
+                player_number = (
+                    index + 1
                 )
 
 
+                # =========================================
+                # 対戦開始後
+                #
+                # → プレイヤー情報を残して
+                #   再接続を30秒待つ
+                # =========================================
+
                 if (
-                    index
-                    <
-                    len(
+                    room[
+                        "game"
+                    ]
+                    is not None
+                ):
+
+                    player_name_for_reconnect = (
                         room[
                             "player_names"
+                        ][
+                            index
                         ]
                     )
-                ):
+
+
+                    user_id_for_reconnect = (
+                        room[
+                            "player_user_ids"
+                        ][
+                            index
+                        ]
+                    )
+
+
+                    # Socketだけ切断状態にする
+                    #
+                    # 名前とuser_idは残す
+                    room[
+                        "players"
+                    ][
+                        index
+                    ] = None
+
+
+                    start_reconnect_wait(
+                        room_id,
+                        room,
+                        player_number,
+                        user_id_for_reconnect,
+                        player_name_for_reconnect
+                    )
+
+
+                    # =========================================
+                    # 相手に再接続待ちを通知
+                    # =========================================
+
+                    if (
+                        room[
+                            "mode"
+                        ]
+                        ==
+                        "pvp"
+                    ):
+
+                        for other_socket in room[
+                            "players"
+                        ]:
+
+                            if (
+                                other_socket
+                                is None
+                            ):
+
+                                continue
+
+
+                            try:
+
+                                await other_socket.send_json({
+
+                                    "type":
+                                        "opponent_reconnecting",
+
+                                    "seconds":
+                                        RECONNECT_GRACE_SECONDS
+                                })
+
+                            except Exception:
+
+                                pass
+
+
+                    print(
+                        f"ルーム {room_id}: "
+                        f"Player {player_number} "
+                        "一時切断"
+                    )
+
+
+                # =========================================
+                # 対戦開始前
+                #
+                # → 今まで通りルーム終了
+                # =========================================
+
+                else:
+
+                    room[
+                        "players"
+                    ].pop(
+                        index
+                    )
+
+
+                    if (
+                        index
+                        <
+                        len(
+                            room[
+                                "player_names"
+                            ]
+                        )
+                    ):
+
+                        room[
+                            "player_names"
+                        ].pop(
+                            index
+                        )
+
+
+                    if (
+                        index
+                        <
+                        len(
+                            room[
+                                "player_user_ids"
+                            ]
+                        )
+                    ):
+
+                        room[
+                            "player_user_ids"
+                        ].pop(
+                            index
+                        )
+
+
+                    await (
+                        clear_waiting_room_if_needed(
+                            room_id
+                        )
+                    )
+
+
+                    rooms.pop(
+                        room_id,
+                        None
+                    )
+
+
+                    room[
+                        "players"
+                    ].clear()
+
 
                     room[
                         "player_names"
-                    ].pop(
-                        index
-                    )
+                    ].clear()
 
-
-                if (
-                    index
-                    <
-                    len(
-                        room[
-                            "player_user_ids"
-                        ]
-                    )
-                ):
 
                     room[
                         "player_user_ids"
-                    ].pop(
-                        index
+                    ].clear()
+
+
+                    print(
+                        f"ルーム {room_id}: "
+                        "対戦開始前に切断されたため"
+                        "ルームを削除しました"
                     )
-
-
-            # =========================================
-            # QUICK MATCH待機を解除
-            # =========================================
-
-            await (
-                clear_waiting_room_if_needed(
-                    room_id
-                )
-            )
-
-
-            # =========================================
-            # 残ったプレイヤー
-            # =========================================
-
-            remaining_sockets = list(
-                room[
-                    "players"
-                ]
-            )
-
-
-            # =========================================
-            # ROOM DELETE
-            # =========================================
-
-            rooms.pop(
-                room_id,
-                None
-            )
-
-
-            room[
-                "players"
-            ].clear()
-
-
-            room[
-                "player_names"
-            ].clear()
-
-
-            room[
-                "player_user_ids"
-            ].clear()
-
-
-            # =========================================
-            # 相手に切断通知
-            # =========================================
-
-            for player_socket in (
-                remaining_sockets
-            ):
-
-                try:
-
-                    await (
-                        player_socket
-                        .send_json({
-
-                            "type":
-                                "opponent_disconnected"
-                        })
-                    )
-
-                except Exception:
-
-                    pass
-
-
-            print(
-                f"ルーム "
-                f"{room_id} "
-                "を削除しました"
-            )

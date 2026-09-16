@@ -1891,3 +1891,61 @@ button:disabled {
         gap: 8px;
     }
 }
+
+/* =============================================
+   LOGIN ERROR
+============================================= */
+
+.login-error {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+
+    border: 1px solid rgba(255, 90, 90, 0.45);
+    border-left: 4px solid #ff5c5c;
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 70, 70, 0.12),
+            rgba(255, 70, 70, 0.04)
+        );
+
+    color: #ff9a9a;
+
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.6;
+
+    text-align: left;
+
+    box-shadow:
+        0 0 0 1px rgba(255, 80, 80, 0.03),
+        0 4px 16px rgba(0, 0, 0, 0.18);
+
+    animation: login-error-show 0.2s ease-out;
+}
+
+
+/* 非表示 */
+
+.login-error.hidden {
+    display: none;
+}
+
+
+/* 表示時に少しだけ動かす */
+
+@keyframes login-error-show {
+
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
