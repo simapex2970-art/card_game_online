@@ -1,8 +1,10 @@
 import asyncio
 import random
 import secrets
+import time
 from itertools import combinations
 from pathlib import Path
+
 
 from fastapi import (
     FastAPI,
@@ -490,6 +492,9 @@ def create_room(
             ranked,
 
         "current_match_id":
+            None,
+
+        "game_started_at":
             None,
 
         "cpu_level":
@@ -2475,6 +2480,11 @@ async def start_new_game(
     ] = Game()
 
 
+    room[
+        "game_started_at"
+    ] = time.monotonic()
+
+
     # =========================================
     # RANKED MATCH ID
     # =========================================
@@ -2940,6 +2950,29 @@ async def finish_game(
         return
 
 
+    game_started_at = (
+        room.get(
+            "game_started_at"
+        )
+    )
+
+
+    if (
+        game_started_at
+        is None
+    ):
+
+        duration_seconds = 0
+
+    else:
+
+        duration_seconds = int(
+            time.monotonic()
+            -
+            game_started_at
+        )
+
+
     room[
         "current_phase"
     ] = "finished"
@@ -3181,6 +3214,9 @@ async def finish_game(
 
         "ranked_result":
             ranked_result,
+
+        "duration_seconds":
+            duration_seconds,
 
         "cpu_level":
             room[
