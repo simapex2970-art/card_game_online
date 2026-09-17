@@ -2362,3 +2362,205 @@ button:disabled {
 
     background: rgba(255, 138, 138, 0.045);
 }
+
+/* =========================
+   QUESTION RESULT 演出
+========================= */
+
+.question-result-animate {
+    animation: questionResultPop 0.45s ease-out;
+}
+
+@keyframes questionResultPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.65);
+    }
+
+    65% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* =========================
+   TURN CHANGE 演出
+========================= */
+
+#game-status.turn-change-animation {
+    animation: turnChangePop 0.9s ease-out;
+}
+
+@keyframes turnChangePop {
+
+    0% {
+        opacity: 0;
+        transform: scale(0.7);
+        letter-spacing: 0;
+    }
+
+    45% {
+        opacity: 1;
+        transform: scale(1.18);
+        letter-spacing: 4px;
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        letter-spacing: 1px;
+    }
+}
+
+/* =========================
+   PREDICTION RESULT 演出
+========================= */
+
+.prediction-result-effect {
+    position: fixed;
+
+    top: 50%;
+    left: 50%;
+
+    z-index: 9999;
+
+    pointer-events: none;
+
+    font-size: clamp(32px, 6vw, 72px);
+    font-weight: 900;
+
+    letter-spacing: 4px;
+
+    white-space: nowrap;
+}
+
+
+/* -------------------------
+   SUCCESS
+------------------------- */
+
+.prediction-result-effect.success {
+    color: #ffffff;
+
+    text-shadow:
+        0 0 10px #ffffff,
+        0 0 25px #4cff9a,
+        0 0 50px #4cff9a;
+
+    animation:
+        predictionSuccess 1s ease-out forwards;
+}
+
+
+@keyframes predictionSuccess {
+
+    0% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            scale(0.4);
+    }
+
+    40% {
+        opacity: 1;
+        transform:
+            translate(-50%, -50%)
+            scale(1.2);
+    }
+
+    70% {
+        opacity: 1;
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            scale(1.05);
+    }
+}
+
+
+/* -------------------------
+   FAILED
+------------------------- */
+
+.prediction-result-effect.failed {
+    color: #ff5555;
+
+    text-shadow:
+        0 0 10px #ff5555,
+        0 0 25px rgba(255, 60, 60, 0.8);
+
+    animation:
+        predictionFailed 1s ease-out forwards;
+}
+
+
+@keyframes predictionFailed {
+
+    0% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            scale(0.8);
+    }
+
+    20% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% - 10px),
+                -50%
+            )
+            scale(1.05);
+    }
+
+    30% {
+        transform:
+            translate(
+                calc(-50% + 10px),
+                -50%
+            );
+    }
+
+    40% {
+        transform:
+            translate(
+                calc(-50% - 7px),
+                -50%
+            );
+    }
+
+    50% {
+        transform:
+            translate(
+                calc(-50% + 7px),
+                -50%
+            );
+    }
+
+    60% {
+        transform:
+            translate(-50%, -50%);
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translate(-50%, -50%)
+            scale(0.95);
+    }
+}

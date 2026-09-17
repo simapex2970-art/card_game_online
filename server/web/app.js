@@ -457,6 +457,9 @@ let opponentReconnecting =
 let reconnectTimerId =
     null;
 
+let turnChangeTimerId =
+    null;
+
 let reconnectStartedAt =
     null;
 
@@ -2107,6 +2110,21 @@ function getRankProgress(
 // TOP QUESTION RESULT
 // =============================================
 
+function animateQuestionResult(element) {
+
+    element.classList.remove(
+        "question-result-animate"
+    );
+
+    // 同じアニメーションを連続で再生できるようにする
+    void element.offsetWidth;
+
+    element.classList.add(
+        "question-result-animate"
+    );
+}
+
+
 function showQuestionResultTop(
     question,
     answer
@@ -2140,6 +2158,11 @@ function showQuestionResultTop(
             "yes"
             :
             "no"
+    );
+
+
+    animateQuestionResult(
+        questionResultTopAnswer
     );
 
 
@@ -4133,7 +4156,7 @@ function handleServerMessage(
         updateFoundCount();
 
 
-        updateGameStatus();
+        showTurnChangeAnimation();
 
 
         updateControls();
@@ -4431,6 +4454,10 @@ function handleServerMessage(
                 `${data.guess}\n\n🎉 当たり！`
                 :
                 `${data.guess}\n\nはずれ！`;
+
+        showPredictionResultAnimation(
+            data.correct
+        );
 
 
         guessResultCount.textContent =
@@ -4896,7 +4923,7 @@ function handleServerMessage(
         resetGuessInput();
 
 
-        updateGameStatus();
+        showTurnChangeAnimation();
 
 
         updateControls();
@@ -5621,6 +5648,151 @@ function showRoomScreen() {
 // =============================================
 // STATUS
 // =============================================
+
+function showTurnChangeAnimation() {
+
+    if (
+        turnChangeTimerId !==
+        null
+    ) {
+
+        clearTimeout(
+            turnChangeTimerId
+        );
+
+        turnChangeTimerId =
+            null;
+    }
+
+
+    gameStatus.classList.remove(
+        "turn-change-animation"
+    );
+
+
+    gameStatus.textContent =
+        myTurn
+            ?
+            "YOUR TURN"
+            :
+            "OPPONENT TURN";
+
+
+    // 同じアニメーションを何度でも再生できるようにする
+    void gameStatus.offsetWidth;
+
+
+    gameStatus.classList.add(
+        "turn-change-animation"
+    );
+
+
+    turnChangeTimerId =
+        setTimeout(
+            () => {
+
+                turnChangeTimerId =
+                    null;
+
+
+                gameStatus.classList.remove(
+                    "turn-change-animation"
+                );
+
+
+                // 切断待ちやゲーム終了中なら
+                // 通常表示に戻さない
+                if (
+                    opponentReconnecting
+                    ||
+                    currentPhase ===
+                    "finished"
+                ) {
+
+                    return;
+                }
+
+
+                updateGameStatus();
+            },
+            900
+        );
+}
+
+
+// =============================================
+// PREDICTION RESULT ANIMATION
+// =============================================
+
+function showPredictionResultAnimation(
+    correct
+) {
+
+    const oldEffect =
+        document.querySelector(
+            ".prediction-result-effect"
+        );
+
+
+    if (
+        oldEffect !==
+        null
+    ) {
+
+        oldEffect.remove();
+    }
+
+
+    const effect =
+        document.createElement(
+            "div"
+        );
+
+
+    effect.classList.add(
+        "prediction-result-effect"
+    );
+
+
+    if (
+        correct
+    ) {
+
+        effect.classList.add(
+            "success"
+        );
+
+
+        effect.textContent =
+            "PREDICTION SUCCESS!";
+    }
+
+    else {
+
+        effect.classList.add(
+            "failed"
+        );
+
+
+        effect.textContent =
+            "PREDICTION FAILED";
+    }
+
+
+    document.body.appendChild(
+        effect
+    );
+
+
+    setTimeout(
+        () => {
+
+            effect.remove();
+
+        },
+        1000
+    );
+}
 
 function updateGameStatus() {
 
