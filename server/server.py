@@ -28,7 +28,8 @@ from database import (
     get_user_by_name,
     get_user_by_session_token,
     delete_session,
-    record_ranked_match
+    record_ranked_match,
+    get_match_history
 )
 
 
@@ -213,6 +214,48 @@ async def get_current_user_api(
         )
 
     return user
+
+
+@app.get("/users/me/matches")
+async def get_current_user_matches_api(
+    authorization: str | None = Header(
+        default=None
+    )
+):
+
+    session_token = get_bearer_token(
+        authorization
+    )
+
+
+    user = get_user_by_session_token(
+        session_token
+    )
+
+
+    if user is None:
+
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                "セッションの有効期限が"
+                "切れているか、"
+                "認証情報が正しくありません"
+            )
+        )
+
+
+    history = await asyncio.to_thread(
+        get_match_history,
+        user["user_id"],
+        10
+    )
+
+
+    return {
+        "matches":
+            history
+    }
 
 
 @app.post("/users/logout")

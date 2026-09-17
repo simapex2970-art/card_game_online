@@ -1763,6 +1763,177 @@ def record_ranked_match(
 
 
 # =============================================
+# MATCH HISTORY
+# =============================================
+
+def get_match_history(
+    user_id,
+    limit=10
+):
+
+    if not user_id:
+
+        return []
+
+
+    limit = max(
+        1,
+        min(
+            int(limit),
+            50
+        )
+    )
+
+
+    with get_connection() as conn:
+
+        rows = conn.execute(
+            """
+            SELECT
+                m.match_id,
+
+                m.winner_user_id,
+                m.loser_user_id,
+
+                m.winner_rating_before,
+                m.winner_rating_after,
+
+                m.loser_rating_before,
+                m.loser_rating_after,
+
+                m.created_at,
+
+                winner.name
+                    AS winner_name,
+
+                loser.name
+                    AS loser_name
+
+            FROM matches AS m
+
+            JOIN users AS winner
+                ON winner.user_id
+                =
+                m.winner_user_id
+
+            JOIN users AS loser
+                ON loser.user_id
+                =
+                m.loser_user_id
+
+            WHERE
+                m.winner_user_id = ?
+                OR
+                m.loser_user_id = ?
+
+            ORDER BY
+                m.created_at DESC
+
+            LIMIT ?
+            """,
+            (
+                user_id,
+                user_id,
+                limit
+            )
+        ).fetchall()
+
+
+    history = []
+
+
+    for row in rows:
+
+        won = (
+            row[
+                "winner_user_id"
+            ]
+            ==
+            user_id
+        )
+
+
+        if won:
+
+            opponent_name = (
+                row[
+                    "loser_name"
+                ]
+            )
+
+            rating_before = int(
+                row[
+                    "winner_rating_before"
+                ]
+            )
+
+            rating_after = int(
+                row[
+                    "winner_rating_after"
+                ]
+            )
+
+        else:
+
+            opponent_name = (
+                row[
+                    "winner_name"
+                ]
+            )
+
+            rating_before = int(
+                row[
+                    "loser_rating_before"
+                ]
+            )
+
+            rating_after = int(
+                row[
+                    "loser_rating_after"
+                ]
+            )
+
+
+        history.append({
+            "match_id":
+                row[
+                    "match_id"
+                ],
+
+            "result":
+                (
+                    "WIN"
+                    if won
+                    else "LOSE"
+                ),
+
+            "opponent_name":
+                opponent_name,
+
+            "rating_before":
+                rating_before,
+
+            "rating_after":
+                rating_after,
+
+            "rating_change":
+                (
+                    rating_after
+                    -
+                    rating_before
+                ),
+
+            "created_at":
+                row[
+                    "created_at"
+                ]
+        })
+
+
+    return history
+
+
+# =============================================
 # OLD SINGLE USER MATCH RESULT
 # =============================================
 # 既存コードとの互換用。

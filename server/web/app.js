@@ -77,6 +77,17 @@ const profileWinRate =
         "profile-win-rate"
     );
 
+
+const matchHistory =
+    document.getElementById(
+        "match-history"
+    );
+
+const matchHistoryList =
+    document.getElementById(
+        "match-history-list"
+    );
+
 const userLogoutButton =
     document.getElementById(
         "user-logout-button"
@@ -365,6 +376,26 @@ const gameRatingResult =
 const gameRatingChange =
     document.getElementById(
         "game-rating-change"
+    );
+
+const rankProgressResult =
+    document.getElementById(
+        "rank-progress-result"
+    );
+
+const rankProgressName =
+    document.getElementById(
+        "rank-progress-name"
+    );
+
+const rankProgressRemaining =
+    document.getElementById(
+        "rank-progress-remaining"
+    );
+
+const rankProgressFill =
+    document.getElementById(
+        "rank-progress-fill"
     );
 
 const player1RevealedHand =
@@ -778,6 +809,316 @@ function getSessionToken() {
 }
 
 
+function renderMatchHistory(
+    matches
+) {
+
+    matchHistoryList.innerHTML =
+        "";
+
+
+    if (
+        !Array.isArray(matches)
+        ||
+        matches.length === 0
+    ) {
+
+        const empty =
+            document.createElement(
+                "p"
+            );
+
+        empty.className =
+            "match-history-empty";
+
+        empty.textContent =
+            "対戦履歴はまだありません。";
+
+
+        matchHistoryList.appendChild(
+            empty
+        );
+
+        return;
+    }
+
+
+    matches.forEach(
+        (match) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "match-history-item";
+
+            if (
+                match.result ===
+                "WIN"
+            ) {
+
+                item.classList.add(
+                    "win"
+                );
+            }
+
+            else {
+
+                item.classList.add(
+                    "lose"
+                );
+            }
+
+
+            // =====================================
+            // WIN / LOSE
+            // =====================================
+
+            const result =
+                document.createElement(
+                    "span"
+                );
+
+            result.className =
+                "match-history-result";
+
+            result.textContent =
+                match.result;
+
+
+            if (
+                match.result ===
+                "WIN"
+            ) {
+
+                result.classList.add(
+                    "win"
+                );
+            }
+
+            else {
+
+                result.classList.add(
+                    "lose"
+                );
+            }
+
+
+            // =====================================
+            // OPPONENT
+            // =====================================
+
+            const opponentInfo =
+                document.createElement(
+                    "div"
+                );
+
+            opponentInfo.className =
+                "match-history-opponent-info";
+
+
+            const opponent =
+                document.createElement(
+                    "span"
+                );
+
+            opponent.className =
+                "match-history-opponent";
+
+            opponent.textContent =
+                `vs ${match.opponent_name}`;
+
+
+            const date =
+                document.createElement(
+                    "span"
+                );
+
+            date.className =
+                "match-history-date";
+
+
+            if (match.created_at) {
+
+                const matchDate =
+                    new Date(
+                        match.created_at
+                    );
+
+
+                date.textContent =
+                    matchDate.toLocaleString(
+                        "ja-JP",
+                        {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    );
+            }
+
+            else {
+
+                date.textContent =
+                    "-";
+            }
+
+
+            opponentInfo.appendChild(
+                opponent
+            );
+
+            opponentInfo.appendChild(
+                date
+            );
+
+
+            // =====================================
+            // RATING CHANGE
+            // =====================================
+
+            const ratingChange =
+                document.createElement(
+                    "span"
+                );
+
+            ratingChange.className =
+                "match-history-rating-change";
+
+
+            ratingChange.textContent =
+                match.rating_change > 0
+                    ?
+                    `+${match.rating_change}`
+                    :
+                    `${match.rating_change}`;
+
+
+            if (
+                match.rating_change > 0
+            ) {
+
+                ratingChange.classList.add(
+                    "positive"
+                );
+            }
+
+            else if (
+                match.rating_change < 0
+            ) {
+
+                ratingChange.classList.add(
+                    "negative"
+                );
+            }
+
+
+            // =====================================
+            // CURRENT RATING
+            // =====================================
+
+            const rating =
+                document.createElement(
+                    "span"
+                );
+
+            rating.className =
+                "match-history-rating";
+
+            rating.textContent =
+                match.rating_after;
+
+
+            item.appendChild(
+                result
+            );
+
+            item.appendChild(
+                opponentInfo
+            );
+
+            item.appendChild(
+                ratingChange
+            );
+
+            item.appendChild(
+                rating
+            );
+
+
+            matchHistoryList.appendChild(
+                item
+            );
+        }
+    );
+}
+
+
+async function loadMatchHistory() {
+
+    const sessionToken =
+        getSessionToken();
+
+
+    if (!sessionToken) {
+
+        renderMatchHistory(
+            []
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/users/me/matches",
+                {
+                    headers: {
+                        "Authorization":
+                            `Bearer ${sessionToken}`
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "対戦履歴を取得できませんでした。"
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        renderMatchHistory(
+            data.matches
+        );
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        renderMatchHistory(
+            []
+        );
+    }
+}
+
+
 function showUserProfile(
     user
 ) {
@@ -801,6 +1142,11 @@ function showUserProfile(
 
     profileRank.textContent =
         user.rank;
+
+    setRankColor(
+        profileRank,
+        user.rank
+    );
 
     profileRating.textContent =
         formatNumber(
@@ -838,6 +1184,8 @@ function showUserProfile(
     userLoginButton.textContent =
         "ログイン";
 
+    loadMatchHistory();
+
 
     updateRoomControls();
 }
@@ -863,6 +1211,11 @@ function hideUserProfile() {
     profileRank.textContent =
         "-";
 
+    setRankColor(
+        profileRank,
+        null
+    );
+
     profileRating.textContent =
         "-";
 
@@ -874,6 +1227,10 @@ function hideUserProfile() {
 
     profileWinRate.textContent =
         "0.0%";
+
+    renderMatchHistory(
+        []
+    );
 
 
     userRegisterButton.textContent =
@@ -1620,6 +1977,129 @@ function formatDuration(
             "0"
         )
     );
+}
+
+
+function setRankColor(
+    element,
+    rank
+) {
+    const rankClasses = [
+        "rank-iron",
+        "rank-bronze",
+        "rank-silver",
+        "rank-gold",
+        "rank-platinum",
+        "rank-diamond"
+    ];
+
+    element.classList.remove(
+        ...rankClasses
+    );
+
+    if (!rank) {
+        return;
+    }
+
+    element.classList.add(
+        `rank-${rank.toLowerCase()}`
+    );
+}
+
+
+function getRankProgress(
+    rating
+) {
+    const currentRating =
+        Number(rating);
+
+
+    const rankRanges = [
+        {
+            min: 0,
+            nextRating: 900,
+            nextRank: "BRONZE"
+        },
+        {
+            min: 900,
+            nextRating: 1100,
+            nextRank: "SILVER"
+        },
+        {
+            min: 1100,
+            nextRating: 1300,
+            nextRank: "GOLD"
+        },
+        {
+            min: 1300,
+            nextRating: 1500,
+            nextRank: "PLATINUM"
+        },
+        {
+            min: 1500,
+            nextRating: 1700,
+            nextRank: "DIAMOND"
+        }
+    ];
+
+
+    if (
+        currentRating >= 1700
+    ) {
+
+        return {
+            nextRank: "MAX RANK",
+            remaining: 0,
+            progress: 100,
+            maxRank: true
+        };
+    }
+
+
+    const range =
+        rankRanges.find(
+            (item) =>
+                currentRating <
+                item.nextRating
+        );
+
+
+    const remaining =
+        range.nextRating
+        -
+        currentRating;
+
+
+    const progress =
+        (
+            (
+                currentRating
+                -
+                range.min
+            )
+            /
+            (
+                range.nextRating
+                -
+                range.min
+            )
+        )
+        *
+        100;
+
+
+    return {
+        nextRank: range.nextRank,
+        remaining: remaining,
+        progress: Math.max(
+            0,
+            Math.min(
+                100,
+                progress
+            )
+        ),
+        maxRank: false
+    };
 }
 
 
@@ -3600,11 +4080,48 @@ function handleServerMessage(
         gameDuration.textContent =
             "MATCH TIME 00:00";
 
+
         gameRank.textContent =
             "-";
 
+        setRankColor(
+            gameRank,
+            null
+        );
 
         gameRankResult.classList.add(
+            "hidden"
+        );
+
+
+        gameRatingChange.textContent =
+            "+0";
+
+        gameRatingChange.classList.remove(
+            "positive",
+            "negative"
+        );
+
+        gameRatingResult.classList.add(
+            "hidden"
+        );
+
+
+        rankProgressName.textContent =
+            "-";
+
+        setRankColor(
+            rankProgressName,
+            null
+        );
+
+        rankProgressRemaining.textContent =
+            "-";
+
+        rankProgressFill.style.width =
+            "0%";
+
+        rankProgressResult.classList.add(
             "hidden"
         );
 
@@ -4579,6 +5096,10 @@ function handleServerMessage(
                 gameRank.textContent =
                     rankedUser.rank;
 
+                setRankColor(
+                    gameRank,
+                    rankedUser.rank
+                );
 
                 gameRankResult.classList.remove(
                     "hidden"
@@ -4633,6 +5154,74 @@ function handleServerMessage(
             gameRatingResult.classList.remove(
                 "hidden"
             );
+
+
+            // =====================================
+            // RANK PROGRESS
+            // =====================================
+
+            if (
+                rankedUser
+                &&
+                rankedUser.rating !== undefined
+                &&
+                rankedUser.rating !== null
+            ) {
+
+                const rankProgress =
+                    getRankProgress(
+                        rankedUser.rating
+                    );
+
+
+                if (
+                    rankProgress.maxRank
+                ) {
+
+                    rankProgressName.textContent =
+                        "MAX RANK";
+
+                    rankProgressRemaining.textContent =
+                        "DIAMOND";
+
+                    rankProgressFill.style.width =
+                        "100%";
+
+                    setRankColor(
+                        rankProgressName,
+                        "DIAMOND"
+                    );
+                }
+
+                else {
+
+                    rankProgressName.textContent =
+                        rankProgress.nextRank;
+
+                    rankProgressRemaining.textContent =
+                        `あと ${rankProgress.remaining}`;
+
+                    rankProgressFill.style.width =
+                        `${rankProgress.progress}%`;
+
+                    setRankColor(
+                        rankProgressName,
+                        rankProgress.nextRank
+                    );
+                }
+
+
+                rankProgressResult.classList.remove(
+                    "hidden"
+                );
+            }
+
+            else {
+
+                rankProgressResult.classList.add(
+                    "hidden"
+                );
+            }
         }
 
         else {
@@ -4641,8 +5230,11 @@ function handleServerMessage(
                 "hidden"
             );
 
-
             gameRatingResult.classList.add(
+                "hidden"
+            );
+
+            rankProgressResult.classList.add(
                 "hidden"
             );
         }
@@ -5996,39 +6588,48 @@ function resetBattleState() {
     gameDuration.textContent =
         "MATCH TIME 00:00";
 
+
     gameRank.textContent =
         "-";
 
+    setRankColor(
+        gameRank,
+        null
+    );
 
     gameRankResult.classList.add(
         "hidden"
     );
 
-    gameRatingChange.textContent =
-    "+0";
 
+    gameRatingChange.textContent =
+        "+0";
 
     gameRatingChange.classList.remove(
         "positive",
         "negative"
     );
-
 
     gameRatingResult.classList.add(
         "hidden"
     );
 
-    gameRatingChange.textContent =
-        "+0";
 
+    rankProgressName.textContent =
+        "-";
 
-    gameRatingChange.classList.remove(
-        "positive",
-        "negative"
+    setRankColor(
+        rankProgressName,
+        null
     );
 
+    rankProgressRemaining.textContent =
+        "-";
 
-    gameRatingResult.classList.add(
+    rankProgressFill.style.width =
+        "0%";
+
+    rankProgressResult.classList.add(
         "hidden"
     );
 
